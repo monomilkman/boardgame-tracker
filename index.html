@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BoardGame QR Tracker</title>
-    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <script>
+        // Fallback if primary CDN fails
+        if (typeof Html5Qrcode === 'undefined') {
+            document.write('<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"><\/script>');
+        }
+    </script>
     <style>
         * {
             box-sizing: border-box;
@@ -237,6 +243,11 @@
                 <button class="btn btn-primary" onclick="startScanning()">Start Scanning</button>
                 <button class="btn btn-secondary" onclick="stopScanning()">Stop</button>
             </div>
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #ecf0f1;">
+                <p style="text-align: center; color: #7f8c8d; margin-bottom: 0.5rem;">Or enter QR code manually:</p>
+                <input type="text" id="manual-qr-input" placeholder="Enter QR code text (e.g., BIN:001)" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;" onkeypress="if(event.key==='Enter')processManualQR()">
+                <button class="btn btn-primary" onclick="processManualQR()" style="margin-top: 0.5rem; width: 100%;">Process Manual Entry</button>
+            </div>
         </div>
         
         <div id="workflow-state" class="workflow-state hidden"></div>
@@ -292,6 +303,14 @@
         // Initialize on load
         window.onload = function() {
             loadSettings();
+            
+            // Check if QR library loaded
+            if (typeof Html5Qrcode === 'undefined') {
+                console.error('Html5Qrcode library failed to load');
+                showStatus('Warning: QR scanner not available. Use manual entry.', 'error');
+            } else {
+                console.log('QR scanner library loaded successfully');
+            }
         };
         
         // Mode management
@@ -322,8 +341,34 @@
             }
         }
         
+        function processManualQR() {
+            const input = document.getElementById('manual-qr-input').value.trim();
+            if (!input) {
+                showStatus('Please enter a QR code value', 'error');
+                return;
+            }
+            
+            console.log('Processing manual QR entry:', input);
+            
+            // Process it as if it was scanned
+            onScanSuccess(input, null);
+            
+            // Clear the input
+            document.getElementById('manual-qr-input').value = '';
+        }
+        
         // QR Code Scanning
         function startScanning() {
+            // Check if library is loaded
+            if (typeof Html5Qrcode === 'undefined') {
+                showStatus('QR scanner library not loaded. Please refresh the page.', 'error');
+                console.error('Html5Qrcode library not found');
+                return;
+            }
+            
+            console.log('Starting camera scan...');
+            showStatus('Initializing camera...', 'success');
+            
             const config = { 
                 fps: 10, 
                 qrbox: { width: 250, height: 250 },
@@ -335,11 +380,27 @@
             html5QrcodeScanner.start(
                 { facingMode: "environment" },
                 config,
-                onScanSuccess,
-                onScanFailure
-            ).catch(err => {
-                console.error(`Unable to start scanning: ${err}`);
-                showStatus('Unable to access camera. Please check permissions.', 'error');
+                (decodedText, decodedResult) => {
+                    console.log('Scan successful:', decodedText);
+                    onScanSuccess(decodedText, decodedResult);
+                },
+                (errorMessage) => {
+                    // Silent fail during scanning
+                }
+            ).then(() => {
+                console.log('Camera started successfully');
+                showStatus('Camera ready - point at QR code', 'success');
+            }).catch(err => {
+                console.error('Camera error:', err);
+                let errorMsg = 'Unable to access camera. ';
+                if (err.name === 'NotAllowedError') {
+                    errorMsg += 'Please allow camera permissions and refresh the page.';
+                } else if (err.name === 'NotFoundError') {
+                    errorMsg += 'No camera found on this device.';
+                } else {
+                    errorMsg += err.message || 'Please check permissions.';
+                }
+                showStatus(errorMsg, 'error');
             });
         }
         
@@ -356,7 +417,7 @@
             const data = parseQRCode(decodedText);
             
             if (!data) {
-                showStatus('Invalid QR code format', 'error');
+                showStatus('Invalid QR code format: ' + decodedText, 'error');
                 return;
             }
             
@@ -377,20 +438,19 @@
             }
         }
         
-        function onScanFailure(error) {
-            // Silent fail - scanning
-        }
-        
         function parseQRCode(text) {
             // Handle multiple QR code formats
             text = text.trim();
+            console.log('Parsing QR code:', text);
             
             // Format 1: "TYPE:ID" (e.g., "BIN:001" or "GAME:BGG123")
             if (text.includes(':')) {
                 const parts = text.split(':');
+                const type = parts[0].toUpperCase();
+                // Keep the full text as ID to match what's in the spreadsheet
                 return {
-                    type: parts[0].toUpperCase(),
-                    id: parts[1]
+                    type: type,
+                    id: text.toUpperCase()
                 };
             }
             
@@ -399,7 +459,7 @@
             if (spaceMatch) {
                 return {
                     type: spaceMatch[1].toUpperCase(),
-                    id: spaceMatch[2]
+                    id: spaceMatch[1].toUpperCase() + ':' + spaceMatch[2]
                 };
             }
             
@@ -433,6 +493,7 @@
             }
             
             // If no format matches, return null
+            console.log('QR code format not recognized');
             return null;
         }
         
