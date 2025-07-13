@@ -920,10 +920,28 @@
                 return;
             }
             
-            showStatus(`Importing collection for ${username}...`, 'success');
+            showStatus(`Loading collection for ${username}...`, 'success');
             
             try {
-                const response = await fetch(`${CORS_PROXY}${BGG_API_BASE}/collection?username=${username}&own=1`);
+                // BGG API requires a retry mechanism as it returns 202 while processing
+                let response;
+                let attempts = 0;
+                const maxAttempts = 10;
+                
+                do {
+                    response = await fetch(`${CORS_PROXY}${BGG_API_BASE}/collection?username=${username}&own=1`);
+                    if (response.status === 202) {
+                        // BGG is still processing, wait and retry
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        attempts++;
+                    }
+                } while (response.status === 202 && attempts < maxAttempts);
+                
+                if (response.status === 202) {
+                    showStatus('BGG is taking too long to process. Please try again.', 'error');
+                    return;
+                }
+                
                 const text = await response.text();
                 
                 // Parse XML response
@@ -931,9 +949,139 @@
                 const xml = parser.parseFromString(text, 'text/xml');
                 const items = xml.querySelectorAll('item');
                 
-                showStatus(`Found ${items.length} games in collection. This would import them all.`, 'success');
+                if (items.length === 0) {
+                    showStatus('No games found in collection', 'error');
+                    return;
+                }
+                
+                showStatus(`Found ${items.length} games. Importing...`, 'success');
+                
+                // Display import options
+                const resultsDiv = document.getElementById('bgg-results');
+                resultsDiv.innerHTML = `
+                    <h4>Import ${items.length} Games from BGG</h4>
+                    <p>Select a bin for imported games:</p>
+                    <select id="import-bin-select" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+                        <option value="IMPORTED">Create new "IMPORTED" location</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="confirmBGGImport('${username}')" style="width: 100%;">Confirm Import</button>
+                `;
+                
+                // Load existing bins
+                const bins = await loadAllBins();
+                const binSelect = document.getElementById('import-bin-select');
+                bins.forEach(bin => {
+                    binSelect.innerHTML += `<option value="${bin.id}">${bin.description || bin.id}</option>`;
+                });
+                
+                resultsDiv.classList.remove('hidden');
+                
             } catch (error) {
-                showStatus('Error importing collection: ' + error.message, 'error');
+                showStatus('Error loading collection: ' + error.message, 'error');
+            }
+        }
+        
+        async function confirmBGGImport(username) {
+            const binId = document.getElementById('import-bin-select').value;
+            showStatus('Starting import...', 'success');
+            
+            try {
+                // Fetch collection again
+                let response;
+                let attempts = 0;
+                const maxAttempts = 10;
+                
+                do {
+                    response = await fetch(`${CORS_PROXY}${BGG_API_BASE}/collection?username=${username}&own=1`);
+                    if (response.status === 202) {
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        attempts++;
+                    }
+                } while (response.status === 202 && attempts < maxAttempts);
+                
+                const text = await response.text();
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(text, 'text/xml');
+                const items = xml.querySelectorAll('item');
+                
+                // Get existing games to check for duplicates
+                const existingGames = await loadAllGames();
+                const existingBGGIds = new Set(existingGames.map(g => g.bggId).filter(id => id));
+                
+                let imported = 0;
+                let skipped = 0;
+                const newGames = [];
+                
+                // Process each game
+                for (const item of items) {
+                    const bggId = item.getAttribute('objectid');
+                    const name = item.querySelector('name').textContent;
+                    const thumbnail = item.querySelector('thumbnail')?.textContent || '';
+                    
+                    // Check if already exists
+                    if (existingBGGIds.has(bggId)) {
+                        skipped++;
+                        continue;
+                    }
+                    
+                    // Create game data
+                    const gameData = [
+                        `GAME:BGG${bggId}`,  // Game ID
+                        name,                 // Title
+                        binId,               // Current Location
+                        bggId,               // BGG ID
+                        thumbnail            // Photo URL
+                    ];
+                    
+                    newGames.push(gameData);
+                    imported++;
+                }
+                
+                if (newGames.length > 0) {
+                    // Add games to sheet in batches
+                    const spreadsheetId = localStorage.getItem('spreadsheetId');
+                    const apiKey = localStorage.getItem('apiKey');
+                    
+                    // Process in batches of 50
+                    const batchSize = 50;
+                    for (let i = 0; i < newGames.length; i += batchSize) {
+                        const batch = newGames.slice(i, i + batchSize);
+                        
+                        const response = await fetch(
+                            `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:E:append?valueInputOption=USER_ENTERED&key=${apiKey}`,
+                            {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    values: batch
+                                })
+                            }
+                        );
+                        
+                        if (!response.ok) {
+                            throw new Error(`Failed to import batch: ${response.status}`);
+                        }
+                        
+                        // Update progress
+                        const progress = Math.min(i + batchSize, newGames.length);
+                        showStatus(`Imported ${progress} of ${newGames.length} games...`, 'success');
+                    }
+                }
+                
+                // Final status
+                let message = `Import complete! Added ${imported} games.`;
+                if (skipped > 0) {
+                    message += ` Skipped ${skipped} duplicates.`;
+                }
+                showStatus(message, 'success');
+                
+                // Hide results
+                document.getElementById('bgg-results').classList.add('hidden');
+                
+            } catch (error) {
+                showStatus('Error during import: ' + error.message, 'error');
             }
         }
         
