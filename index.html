@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BoardGame QR Tracker</title>
+    <title>BoardGame Collection Manager</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
     <script>
         // Fallback if primary CDN fails
@@ -42,28 +42,36 @@
         main {
             flex: 1;
             padding: 1rem;
-            max-width: 600px;
+            max-width: 800px;
             margin: 0 auto;
             width: 100%;
         }
         
         .mode-selector {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 0.5rem;
             margin-bottom: 1.5rem;
         }
         
         .mode-btn {
-            padding: 1rem;
+            padding: 0.75rem;
             border: none;
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
             background-color: #ecf0f1;
             color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .mode-btn .icon {
+            font-size: 1.2rem;
         }
         
         .mode-btn.active {
@@ -124,6 +132,15 @@
             background-color: #c0392b;
         }
         
+        .btn-info {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-info:hover {
+            background-color: #2980b9;
+        }
+        
         .results {
             background: white;
             border-radius: 12px;
@@ -135,10 +152,22 @@
         .result-item {
             padding: 0.75rem;
             border-bottom: 1px solid #ecf0f1;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         
         .result-item:last-child {
             border-bottom: none;
+        }
+        
+        .result-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .result-item-content {
+            flex: 1;
         }
         
         .game-title {
@@ -150,6 +179,13 @@
             font-size: 0.875rem;
             color: #7f8c8d;
             margin-top: 0.25rem;
+        }
+        
+        .game-thumbnail {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
         }
         
         .status-message {
@@ -195,7 +231,7 @@
             color: #2c3e50;
         }
         
-        .setup-section input {
+        .setup-section input, .setup-section select {
             width: 100%;
             padding: 0.75rem;
             border: 1px solid #ddd;
@@ -213,12 +249,113 @@
             line-height: 1.6;
         }
         
+        .search-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            margin-top: 0.5rem;
+        }
+        
+        .bulk-actions {
+            background: #ecf0f1;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
         .hidden {
             display: none;
         }
         
-        @media (max-width: 480px) {
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        .tab {
+            padding: 0.5rem 1rem;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #7f8c8d;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+        }
+        
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+        
+        .file-input-label {
+            padding: 0.5rem 1rem;
+            background-color: #3498db;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-block;
+            font-size: 0.875rem;
+        }
+        
+        @media (max-width: 600px) {
             .mode-selector {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .stats-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -226,17 +363,50 @@
 </head>
 <body>
     <header>
-        <h1>🎲 BoardGame QR Tracker</h1>
+        <h1>🎲 BoardGame Collection Manager</h1>
     </header>
     
     <main>
         <div class="mode-selector">
-            <button class="mode-btn active" onclick="setMode('view')">📦 View Bin</button>
-            <button class="mode-btn" onclick="setMode('play')">🎮 Log Play</button>
-            <button class="mode-btn" onclick="setMode('checkout')">📤 Check Out</button>
-            <button class="mode-btn" onclick="setMode('checkin')">📥 Check In</button>
+            <button class="mode-btn active" onclick="setMode('view')">
+                <span class="icon">📦</span>
+                <span>View Bin</span>
+            </button>
+            <button class="mode-btn" onclick="setMode('search')">
+                <span class="icon">🔍</span>
+                <span>Search</span>
+            </button>
+            <button class="mode-btn" onclick="setMode('play')">
+                <span class="icon">🎮</span>
+                <span>Log Play</span>
+            </button>
+            <button class="mode-btn" onclick="setMode('checkout')">
+                <span class="icon">📤</span>
+                <span>Check Out</span>
+            </button>
+            <button class="mode-btn" onclick="setMode('checkin')">
+                <span class="icon">📥</span>
+                <span>Check In</span>
+            </button>
+            <button class="mode-btn" onclick="setMode('stats')">
+                <span class="icon">📊</span>
+                <span>Stats</span>
+            </button>
+            <button class="mode-btn" onclick="setMode('bulk')">
+                <span class="icon">📋</span>
+                <span>Bulk Ops</span>
+            </button>
+            <button class="mode-btn" onclick="setMode('bgg')">
+                <span class="icon">🌐</span>
+                <span>BGG Import</span>
+            </button>
+            <button class="mode-btn" onclick="setMode('settings')">
+                <span class="icon">⚙️</span>
+                <span>Settings</span>
+            </button>
         </div>
         
+        <!-- Scan Section -->
         <div id="scan-section" class="scan-container">
             <div id="reader"></div>
             <div class="action-buttons">
@@ -250,6 +420,84 @@
             </div>
         </div>
         
+        <!-- Search Section -->
+        <div id="search-section" class="search-container hidden">
+            <input type="text" id="search-input" class="search-input" placeholder="Search games by title, ID, or BGG ID..." onkeyup="performSearch()">
+            <div class="tabs" style="margin-top: 1rem;">
+                <button class="tab active" onclick="setSearchTab('all')">All Games</button>
+                <button class="tab" onclick="setSearchTab('available')">Available</button>
+                <button class="tab" onclick="setSearchTab('checked-out')">Checked Out</button>
+            </div>
+        </div>
+        
+        <!-- Stats Section -->
+        <div id="stats-section" class="hidden">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-games">0</div>
+                    <div class="stat-label">Total Games</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-plays">0</div>
+                    <div class="stat-label">Total Plays</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="unique-played">0</div>
+                    <div class="stat-label">Games Played</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="checked-out">0</div>
+                    <div class="stat-label">Checked Out</div>
+                </div>
+            </div>
+            <div class="results">
+                <h3>Most Played Games</h3>
+                <div id="most-played-list"></div>
+            </div>
+            <div class="results" style="margin-top: 1rem;">
+                <h3>Never Played Games</h3>
+                <div id="never-played-list"></div>
+            </div>
+            <div style="margin-top: 1rem;">
+                <button class="btn btn-info" onclick="exportPlayHistory()">Export Play History (CSV)</button>
+                <button class="btn btn-info" onclick="exportInventory()">Export Inventory (CSV)</button>
+            </div>
+        </div>
+        
+        <!-- Bulk Operations Section -->
+        <div id="bulk-section" class="hidden">
+            <div class="search-container">
+                <h3>Select Games for Bulk Operations</h3>
+                <div style="margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="selectAllGames()">Select All</button>
+                    <button class="btn btn-secondary" onclick="deselectAllGames()">Deselect All</button>
+                </div>
+            </div>
+            <div id="bulk-actions" class="bulk-actions hidden">
+                <span id="selected-count">0 games selected</span>
+                <select id="bulk-bin-select" style="flex: 1;">
+                    <option value="">Select destination bin...</option>
+                </select>
+                <button class="btn btn-primary" onclick="bulkMove()">Move to Bin</button>
+                <button class="btn btn-secondary" onclick="bulkCheckout()">Check Out All</button>
+            </div>
+        </div>
+        
+        <!-- BGG Import Section -->
+        <div id="bgg-section" class="setup-section hidden">
+            <h3>🌐 BoardGameGeek Import</h3>
+            <input type="text" id="bgg-search" placeholder="Search BoardGameGeek for a game..." onkeypress="if(event.key==='Enter')searchBGG()">
+            <button class="btn btn-primary" onclick="searchBGG()" style="margin-top: 0.5rem;">Search BGG</button>
+            
+            <div style="margin-top: 1rem;">
+                <h4>Or Import from BGG Collection</h4>
+                <input type="text" id="bgg-username" placeholder="BGG Username">
+                <button class="btn btn-primary" onclick="importBGGCollection()" style="margin-top: 0.5rem;">Import Collection</button>
+            </div>
+            
+            <div id="bgg-results" class="results hidden" style="margin-top: 1rem;"></div>
+        </div>
+        
         <div id="workflow-state" class="workflow-state hidden"></div>
         
         <div id="status-message" class="hidden"></div>
@@ -259,27 +507,34 @@
             <div id="results-content"></div>
         </div>
         
-        <div id="setup-section" class="setup-section">
+        <!-- Settings Section -->
+        <div id="settings-section" class="setup-section hidden">
             <h3>⚙️ Google Sheets Setup</h3>
             <input type="text" id="spreadsheet-id" placeholder="Google Spreadsheet ID" />
             <input type="text" id="api-key" placeholder="Google API Key" />
             <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
             
+            <div style="margin-top: 1rem;">
+                <h4>📸 Photo Storage Settings</h4>
+                <input type="text" id="photo-folder-id" placeholder="Google Drive Folder ID for Photos" />
+                <button class="btn btn-primary" onclick="savePhotoSettings()">Save Photo Settings</button>
+            </div>
+            
             <div class="setup-instructions">
                 <strong>Quick Setup:</strong><br>
                 1. Create a new Google Sheet<br>
                 2. Set up 3 sheets: "Games", "Bins", "PlayLog"<br>
-                3. In Games sheet: Columns A-D: Game ID, Title, Current Location, BGG ID<br>
+                3. In Games sheet: Columns A-E: Game ID, Title, Current Location, BGG ID, Photo URL<br>
                 4. In Bins sheet: Columns A-B: Bin ID, Description<br>
                 5. In PlayLog sheet: Columns A-D: Timestamp, Game ID, Players, Notes<br>
                 6. Share the sheet publicly or use API key<br>
                 7. Copy the Spreadsheet ID from the URL<br><br>
                 
                 <strong>📁 Using Google Drive QR Codes:</strong><br>
-                Your existing QR codes link to Google Drive folders. The system will automatically extract the folder ID and use it as the bin identifier. In your Bins sheet, use the folder ID (e.g., "1Uv_XcvlWoah-4NXvenhZcBurjYVREtqj") as the Bin ID.<br><br>
+                Your existing QR codes link to Google Drive folders. The system will automatically extract the folder ID and use it as the bin identifier.<br><br>
                 
-                <strong>⚠️ Security Note:</strong><br>
-                Your API key is restricted to Google Sheets API only. For production use, consider hosting this on a secure server and keeping the API key server-side.
+                <strong>📸 Photo Storage:</strong><br>
+                Create a Google Drive folder for game photos and share it publicly. Add the folder ID above to enable photo uploads.
             </div>
             
             <div class="status-success" style="margin-top: 1rem; display: none;" id="first-time-notice">
@@ -293,6 +548,11 @@
         // Global variables
         let html5QrcodeScanner = null;
         let currentMode = 'view';
+        let searchTab = 'all';
+        let selectedGames = new Set();
+        let allGames = [];
+        let allBins = [];
+        let playHistory = [];
         let checkoutWorkflow = {
             gameId: null,
             gameTitle: null,
@@ -302,6 +562,10 @@
         
         // Google Sheets API base URL
         const SHEETS_API_BASE = 'https://sheets.googleapis.com/v4/spreadsheets';
+        
+        // BoardGameGeek API (via CORS proxy)
+        const BGG_API_BASE = 'https://api.geekdo.com/xmlapi2';
+        const CORS_PROXY = 'https://corsproxy.io/?';
         
         // Initialize on load
         window.onload = function() {
@@ -330,13 +594,41 @@
             hideStatus();
             hideResults();
             
-            // Update UI based on mode
-            updateUIForMode();
+            // Hide all sections
+            document.getElementById('scan-section').classList.add('hidden');
+            document.getElementById('search-section').classList.add('hidden');
+            document.getElementById('stats-section').classList.add('hidden');
+            document.getElementById('bulk-section').classList.add('hidden');
+            document.getElementById('bgg-section').classList.add('hidden');
+            document.getElementById('settings-section').classList.add('hidden');
+            
+            // Show relevant sections
+            switch(mode) {
+                case 'search':
+                    document.getElementById('search-section').classList.remove('hidden');
+                    loadAllGames();
+                    break;
+                case 'stats':
+                    document.getElementById('stats-section').classList.remove('hidden');
+                    loadStatistics();
+                    break;
+                case 'bulk':
+                    document.getElementById('bulk-section').classList.remove('hidden');
+                    loadBulkOperations();
+                    break;
+                case 'bgg':
+                    document.getElementById('bgg-section').classList.remove('hidden');
+                    break;
+                case 'settings':
+                    document.getElementById('settings-section').classList.remove('hidden');
+                    break;
+                default:
+                    document.getElementById('scan-section').classList.remove('hidden');
+                    updateUIForMode();
+            }
         }
         
         function updateUIForMode() {
-            const stateDiv = document.getElementById('workflow-state');
-            
             if (currentMode === 'checkout') {
                 showWorkflowState('Step 1: Scan the game QR code');
             } else if (currentMode === 'checkin') {
@@ -344,6 +636,446 @@
             }
         }
         
+        // Search functionality
+        function setSearchTab(tab) {
+            searchTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            performSearch();
+        }
+        
+        async function performSearch() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const games = await loadAllGames();
+            
+            let filtered = games;
+            
+            // Filter by tab
+            if (searchTab === 'available') {
+                filtered = games.filter(g => g.location !== 'CHECKED_OUT');
+            } else if (searchTab === 'checked-out') {
+                filtered = games.filter(g => g.location === 'CHECKED_OUT');
+            }
+            
+            // Filter by search query
+            if (query) {
+                filtered = filtered.filter(g => 
+                    g.title.toLowerCase().includes(query) ||
+                    g.id.toLowerCase().includes(query) ||
+                    (g.bggId && g.bggId.toLowerCase().includes(query))
+                );
+            }
+            
+            displaySearchResults(filtered);
+        }
+        
+        function displaySearchResults(games) {
+            const resultsDiv = document.getElementById('results');
+            const contentDiv = document.getElementById('results-content');
+            
+            contentDiv.innerHTML = `<h4>Found ${games.length} games</h4>`;
+            
+            games.forEach(game => {
+                const locationText = game.location === 'CHECKED_OUT' ? 'Checked Out' : `Bin: ${game.location}`;
+                contentDiv.innerHTML += `
+                    <div class="result-item">
+                        ${game.photoUrl ? `<img src="${game.photoUrl}" class="game-thumbnail" alt="${game.title}">` : ''}
+                        <div class="result-item-content">
+                            <div class="game-title">${game.title}</div>
+                            <div class="game-location">ID: ${game.id} • Location: ${locationText}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            resultsDiv.classList.remove('hidden');
+        }
+        
+        // Statistics functionality
+        async function loadStatistics() {
+            const games = await loadAllGames();
+            const plays = await loadPlayHistory();
+            
+            // Calculate stats
+            const totalGames = games.length;
+            const totalPlays = plays.length;
+            const checkedOut = games.filter(g => g.location === 'CHECKED_OUT').length;
+            
+            // Count plays per game
+            const playCounts = {};
+            plays.forEach(play => {
+                playCounts[play.gameId] = (playCounts[play.gameId] || 0) + 1;
+            });
+            
+            const uniquePlayed = Object.keys(playCounts).length;
+            
+            // Update stats display
+            document.getElementById('total-games').textContent = totalGames;
+            document.getElementById('total-plays').textContent = totalPlays;
+            document.getElementById('unique-played').textContent = uniquePlayed;
+            document.getElementById('checked-out').textContent = checkedOut;
+            
+            // Most played games
+            const mostPlayed = Object.entries(playCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            const mostPlayedDiv = document.getElementById('most-played-list');
+            mostPlayedDiv.innerHTML = '';
+            
+            for (const [gameId, count] of mostPlayed) {
+                const game = games.find(g => g.id === gameId);
+                if (game) {
+                    mostPlayedDiv.innerHTML += `
+                        <div class="result-item">
+                            <div class="result-item-content">
+                                <div class="game-title">${game.title}</div>
+                                <div class="game-location">${count} plays</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Never played games
+            const neverPlayed = games.filter(g => !playCounts[g.id]);
+            const neverPlayedDiv = document.getElementById('never-played-list');
+            neverPlayedDiv.innerHTML = '';
+            
+            neverPlayed.slice(0, 10).forEach(game => {
+                neverPlayedDiv.innerHTML += `
+                    <div class="result-item">
+                        <div class="result-item-content">
+                            <div class="game-title">${game.title}</div>
+                            <div class="game-location">ID: ${game.id}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        // Bulk operations
+        async function loadBulkOperations() {
+            const games = await loadAllGames();
+            const bins = await loadAllBins();
+            
+            // Populate bin selector
+            const binSelect = document.getElementById('bulk-bin-select');
+            binSelect.innerHTML = '<option value="">Select destination bin...</option>';
+            bins.forEach(bin => {
+                binSelect.innerHTML += `<option value="${bin.id}">${bin.description || bin.id}</option>`;
+            });
+            
+            // Display games with checkboxes
+            displayBulkGames(games);
+        }
+        
+        function displayBulkGames(games) {
+            const resultsDiv = document.getElementById('results');
+            const contentDiv = document.getElementById('results-content');
+            
+            contentDiv.innerHTML = '<h4>Select games for bulk operations</h4>';
+            
+            games.forEach(game => {
+                const checked = selectedGames.has(game.id) ? 'checked' : '';
+                contentDiv.innerHTML += `
+                    <div class="result-item">
+                        <input type="checkbox" id="bulk-${game.id}" ${checked} onchange="toggleGameSelection('${game.id}')">
+                        <div class="result-item-content">
+                            <div class="game-title">${game.title}</div>
+                            <div class="game-location">Current: ${game.location}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            resultsDiv.classList.remove('hidden');
+            updateBulkActions();
+        }
+        
+        function toggleGameSelection(gameId) {
+            if (selectedGames.has(gameId)) {
+                selectedGames.delete(gameId);
+            } else {
+                selectedGames.add(gameId);
+            }
+            updateBulkActions();
+        }
+        
+        function updateBulkActions() {
+            const count = selectedGames.size;
+            document.getElementById('selected-count').textContent = `${count} games selected`;
+            
+            if (count > 0) {
+                document.getElementById('bulk-actions').classList.remove('hidden');
+            } else {
+                document.getElementById('bulk-actions').classList.add('hidden');
+            }
+        }
+        
+        function selectAllGames() {
+            allGames.forEach(game => selectedGames.add(game.id));
+            displayBulkGames(allGames);
+        }
+        
+        function deselectAllGames() {
+            selectedGames.clear();
+            displayBulkGames(allGames);
+        }
+        
+        async function bulkMove() {
+            const binId = document.getElementById('bulk-bin-select').value;
+            if (!binId) {
+                showStatus('Please select a destination bin', 'error');
+                return;
+            }
+            
+            showStatus(`Moving ${selectedGames.size} games...`, 'success');
+            
+            for (const gameId of selectedGames) {
+                await updateGameLocation(gameId, binId);
+            }
+            
+            showStatus(`Successfully moved ${selectedGames.size} games!`, 'success');
+            selectedGames.clear();
+            loadBulkOperations();
+        }
+        
+        async function bulkCheckout() {
+            showStatus(`Checking out ${selectedGames.size} games...`, 'success');
+            
+            for (const gameId of selectedGames) {
+                await updateGameLocation(gameId, 'CHECKED_OUT');
+                await logGamePlay(gameId);
+            }
+            
+            showStatus(`Successfully checked out ${selectedGames.size} games!`, 'success');
+            selectedGames.clear();
+            loadBulkOperations();
+        }
+        
+        // BGG Integration
+        async function searchBGG() {
+            const query = document.getElementById('bgg-search').value;
+            if (!query) {
+                showStatus('Please enter a game name to search', 'error');
+                return;
+            }
+            
+            showStatus('Searching BoardGameGeek...', 'success');
+            
+            try {
+                const response = await fetch(`${CORS_PROXY}${BGG_API_BASE}/search?query=${encodeURIComponent(query)}&type=boardgame`);
+                const text = await response.text();
+                
+                // Parse XML response
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(text, 'text/xml');
+                const items = xml.querySelectorAll('item');
+                
+                const results = Array.from(items).slice(0, 10).map(item => ({
+                    id: item.getAttribute('id'),
+                    name: item.querySelector('name[type="primary"]')?.getAttribute('value') || '',
+                    year: item.querySelector('yearpublished')?.getAttribute('value') || ''
+                }));
+                
+                displayBGGResults(results);
+            } catch (error) {
+                showStatus('Error searching BGG: ' + error.message, 'error');
+            }
+        }
+        
+        function displayBGGResults(results) {
+            const resultsDiv = document.getElementById('bgg-results');
+            resultsDiv.innerHTML = '<h4>BoardGameGeek Search Results</h4>';
+            
+            results.forEach(game => {
+                resultsDiv.innerHTML += `
+                    <div class="result-item">
+                        <div class="result-item-content">
+                            <div class="game-title">${game.name} ${game.year ? `(${game.year})` : ''}</div>
+                            <div class="game-location">BGG ID: ${game.id}</div>
+                        </div>
+                        <button class="btn btn-primary" onclick="importBGGGame('${game.id}', '${game.name.replace(/'/g, "\\'")}')">Import</button>
+                    </div>
+                `;
+            });
+            
+            resultsDiv.classList.remove('hidden');
+        }
+        
+        async function importBGGGame(bggId, name) {
+            const gameId = `GAME:BGG${bggId}`;
+            showStatus(`Importing ${name}...`, 'success');
+            
+            // Here you would add the game to your Google Sheet
+            // For now, we'll show a success message
+            showStatus(`Would import: ${name} with ID ${gameId}`, 'success');
+        }
+        
+        async function importBGGCollection() {
+            const username = document.getElementById('bgg-username').value;
+            if (!username) {
+                showStatus('Please enter a BGG username', 'error');
+                return;
+            }
+            
+            showStatus(`Importing collection for ${username}...`, 'success');
+            
+            try {
+                const response = await fetch(`${CORS_PROXY}${BGG_API_BASE}/collection?username=${username}&own=1`);
+                const text = await response.text();
+                
+                // Parse XML response
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(text, 'text/xml');
+                const items = xml.querySelectorAll('item');
+                
+                showStatus(`Found ${items.length} games in collection. This would import them all.`, 'success');
+            } catch (error) {
+                showStatus('Error importing collection: ' + error.message, 'error');
+            }
+        }
+        
+        // Export functions
+        function exportPlayHistory() {
+            const plays = playHistory;
+            let csv = 'Timestamp,Game ID,Game Title,Players,Notes\n';
+            
+            plays.forEach(play => {
+                const game = allGames.find(g => g.id === play.gameId);
+                csv += `"${play.timestamp}","${play.gameId}","${game?.title || ''}","${play.players || ''}","${play.notes || ''}"\n`;
+            });
+            
+            downloadCSV(csv, 'play_history.csv');
+        }
+        
+        function exportInventory() {
+            const games = allGames;
+            let csv = 'Game ID,Title,Current Location,BGG ID,Photo URL\n';
+            
+            games.forEach(game => {
+                csv += `"${game.id}","${game.title}","${game.location}","${game.bggId || ''}","${game.photoUrl || ''}"\n`;
+            });
+            
+            downloadCSV(csv, 'game_inventory.csv');
+        }
+        
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', filename);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+        
+        // Data loading functions
+        async function loadAllGames() {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            
+            if (!spreadsheetId || !apiKey) {
+                return [];
+            }
+            
+            try {
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:E?key=${apiKey}`
+                );
+                
+                const data = await response.json();
+                const rows = data.values || [];
+                
+                allGames = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const [gameId, title, location, bggId, photoUrl] = rows[i];
+                    allGames.push({
+                        id: gameId,
+                        title: title || 'Unknown Game',
+                        location: location || 'Unknown',
+                        bggId: bggId || '',
+                        photoUrl: photoUrl || ''
+                    });
+                }
+                
+                return allGames;
+            } catch (error) {
+                console.error('Error loading games:', error);
+                return [];
+            }
+        }
+        
+        async function loadAllBins() {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            
+            if (!spreadsheetId || !apiKey) {
+                return [];
+            }
+            
+            try {
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Bins!A:B?key=${apiKey}`
+                );
+                
+                const data = await response.json();
+                const rows = data.values || [];
+                
+                allBins = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const [binId, description] = rows[i];
+                    allBins.push({
+                        id: binId,
+                        description: description || ''
+                    });
+                }
+                
+                return allBins;
+            } catch (error) {
+                console.error('Error loading bins:', error);
+                return [];
+            }
+        }
+        
+        async function loadPlayHistory() {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            
+            if (!spreadsheetId || !apiKey) {
+                return [];
+            }
+            
+            try {
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/PlayLog!A:D?key=${apiKey}`
+                );
+                
+                const data = await response.json();
+                const rows = data.values || [];
+                
+                playHistory = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const [timestamp, gameId, players, notes] = rows[i];
+                    playHistory.push({
+                        timestamp,
+                        gameId,
+                        players: players || '',
+                        notes: notes || ''
+                    });
+                }
+                
+                return playHistory;
+            } catch (error) {
+                console.error('Error loading play history:', error);
+                return [];
+            }
+        }
+        
+        // QR Code processing
         function processManualQR() {
             const input = document.getElementById('manual-qr-input').value.trim();
             if (!input) {
@@ -681,7 +1413,7 @@
             try {
                 // Fetch all games from the Games sheet
                 const response = await fetch(
-                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:D?key=${apiKey}`
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:E?key=${apiKey}`
                 );
                 
                 if (!response.ok) {
@@ -694,13 +1426,14 @@
                 // Skip header row and filter games in this bin
                 const gamesInBin = [];
                 for (let i = 1; i < rows.length; i++) {
-                    const [gameId, title, location, bggId] = rows[i];
+                    const [gameId, title, location, bggId, photoUrl] = rows[i];
                     if (location === binId) {
                         gamesInBin.push({
                             id: gameId,
                             title: title || 'Unknown Game',
                             location: location,
-                            bggId: bggId || ''
+                            bggId: bggId || '',
+                            photoUrl: photoUrl || ''
                         });
                     }
                 }
@@ -718,7 +1451,7 @@
             
             try {
                 const response = await fetch(
-                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:D?key=${apiKey}`
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:E?key=${apiKey}`
                 );
                 
                 const data = await response.json();
@@ -731,7 +1464,8 @@
                             id: rows[i][0],
                             title: rows[i][1] || 'Unknown Game',
                             location: rows[i][2] || 'Unknown',
-                            bggId: rows[i][3] || ''
+                            bggId: rows[i][3] || '',
+                            photoUrl: rows[i][4] || ''
                         };
                     }
                 }
@@ -913,8 +1647,11 @@
                 games.forEach(game => {
                     contentDiv.innerHTML += `
                         <div class="result-item">
-                            <div class="game-title">🎲 ${game.title}</div>
-                            <div class="game-location">ID: ${game.id}${game.bggId ? ' • BGG: ' + game.bggId : ''}</div>
+                            ${game.photoUrl ? `<img src="${game.photoUrl}" class="game-thumbnail" alt="${game.title}">` : ''}
+                            <div class="result-item-content">
+                                <div class="game-title">🎲 ${game.title}</div>
+                                <div class="game-location">ID: ${game.id}${game.bggId ? ' • BGG: ' + game.bggId : ''}</div>
+                            </div>
                         </div>
                     `;
                 });
@@ -930,9 +1667,12 @@
             contentDiv.innerHTML = `
                 <h4>🎮 Game Played</h4>
                 <div class="result-item">
-                    <div class="game-title">${gameInfo.title}</div>
-                    <div class="game-location">Current Location: ${gameInfo.location}</div>
-                    ${gameInfo.bggId ? '<div class="game-location">BGG ID: ' + gameInfo.bggId + '</div>' : ''}
+                    ${gameInfo.photoUrl ? `<img src="${gameInfo.photoUrl}" class="game-thumbnail" alt="${gameInfo.title}">` : ''}
+                    <div class="result-item-content">
+                        <div class="game-title">${gameInfo.title}</div>
+                        <div class="game-location">Current Location: ${gameInfo.location}</div>
+                        ${gameInfo.bggId ? '<div class="game-location">BGG ID: ' + gameInfo.bggId + '</div>' : ''}
+                    </div>
                 </div>
             `;
             
@@ -953,6 +1693,17 @@
                 testConnection();
             } else {
                 showStatus('Please fill in all settings', 'error');
+            }
+        }
+        
+        function savePhotoSettings() {
+            const photoFolderId = document.getElementById('photo-folder-id').value;
+            
+            if (photoFolderId) {
+                localStorage.setItem('photoFolderId', photoFolderId);
+                showStatus('Photo settings saved successfully!', 'success');
+            } else {
+                showStatus('Please enter a folder ID', 'error');
             }
         }
         
@@ -979,10 +1730,12 @@
             // Pre-fill with user's credentials
             const savedSpreadsheetId = localStorage.getItem('spreadsheetId');
             const savedApiKey = localStorage.getItem('apiKey');
+            const savedPhotoFolderId = localStorage.getItem('photoFolderId');
             
             // Always show the credentials in the fields
             document.getElementById('spreadsheet-id').value = savedSpreadsheetId || '1jf1ub1x0y6oal1So5rUHVANip5WeoAaoQgDyEOPS3fM';
             document.getElementById('api-key').value = savedApiKey || 'AIzaSyDMvS1WL5kEjfSgq2V1uKmlfvJIwSPfpqo';
+            document.getElementById('photo-folder-id').value = savedPhotoFolderId || '';
             
             // Show first-time notice if credentials are not yet saved
             if (!savedSpreadsheetId || !savedApiKey) {
