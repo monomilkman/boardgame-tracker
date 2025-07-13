@@ -870,25 +870,13 @@
             const savedSpreadsheetId = localStorage.getItem('spreadsheetId');
             const savedApiKey = localStorage.getItem('apiKey');
             
-            if (!savedSpreadsheetId) {
-                document.getElementById('spreadsheet-id').value = '1jf1ub1x0y6oal1So5rUHVANip5WeoAaoQgDyEOPS3fM';
-            } else {
-                document.getElementById('spreadsheet-id').value = savedSpreadsheetId;
-            }
+            // Always show the credentials in the fields
+            document.getElementById('spreadsheet-id').value = savedSpreadsheetId || '1jf1ub1x0y6oal1So5rUHVANip5WeoAaoQgDyEOPS3fM';
+            document.getElementById('api-key').value = savedApiKey || 'AIzaSyDMvS1WL5kEjfSgq2V1uKmlfvJIwSPfpqo';
             
-            if (!savedApiKey) {
-                document.getElementById('api-key').value = 'AIzaSyDMvS1WL5kEjfSgq2V1uKmlfvJIwSPfpqo';
-            } else {
-                document.getElementById('api-key').value = savedApiKey;
-            }
-            
-            // Show first-time notice if credentials are pre-filled
-            if (!savedSpreadsheetId && !savedApiKey) {
+            // Show first-time notice if credentials are not yet saved
+            if (!savedSpreadsheetId || !savedApiKey) {
                 document.getElementById('first-time-notice').style.display = 'block';
-                // Auto-save after a short delay
-                setTimeout(() => {
-                    saveSettings();
-                }, 2000);
             }
         }
     </script>
