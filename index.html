@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BoardGame QR Tracker</title>
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        
+        main {
+            flex: 1;
+            padding: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .mode-selector {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .mode-btn {
+            padding: 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            background-color: #ecf0f1;
+            color: #2c3e50;
+        }
+        
+        .mode-btn.active {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .mode-btn:hover:not(.active) {
+            background-color: #bdc3c7;
+        }
+        
+        .scan-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        #reader {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #229954;
+        }
+        
+        .btn-secondary {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #c0392b;
+        }
+        
+        .results {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 1rem;
+        }
+        
+        .result-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .game-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .game-location {
+            font-size: 0.875rem;
+            color: #7f8c8d;
+            margin-top: 0.25rem;
+        }
+        
+        .status-message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .workflow-state {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+        }
+        
+        .setup-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 1rem;
+        }
+        
+        .setup-section h3 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+        
+        .setup-section input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .setup-instructions {
+            background: #e8f4f8;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        @media (max-width: 480px) {
+            .mode-selector {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🎲 BoardGame QR Tracker</h1>
+    </header>
+    
+    <main>
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="setMode('view')">📦 View Bin</button>
+            <button class="mode-btn" onclick="setMode('play')">🎮 Log Play</button>
+            <button class="mode-btn" onclick="setMode('checkout')">📤 Check Out</button>
+            <button class="mode-btn" onclick="setMode('checkin')">📥 Check In</button>
+        </div>
+        
+        <div id="scan-section" class="scan-container">
+            <div id="reader"></div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="startScanning()">Start Scanning</button>
+                <button class="btn btn-secondary" onclick="stopScanning()">Stop</button>
+            </div>
+        </div>
+        
+        <div id="workflow-state" class="workflow-state hidden"></div>
+        
+        <div id="status-message" class="hidden"></div>
+        
+        <div id="results" class="results hidden">
+            <h3>Results</h3>
+            <div id="results-content"></div>
+        </div>
+        
+        <div id="setup-section" class="setup-section">
+            <h3>⚙️ Google Sheets Setup</h3>
+            <input type="text" id="spreadsheet-id" placeholder="Google Spreadsheet ID" />
+            <input type="text" id="api-key" placeholder="Google API Key" />
+            <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+            
+            <div class="setup-instructions">
+                <strong>Quick Setup:</strong><br>
+                1. Create a new Google Sheet<br>
+                2. Set up 3 sheets: "Games", "Bins", "PlayLog"<br>
+                3. In Games sheet: Columns A-D: Game ID, Title, Current Location, BGG ID<br>
+                4. In Bins sheet: Columns A-B: Bin ID, Description<br>
+                5. In PlayLog sheet: Columns A-D: Timestamp, Game ID, Players, Notes<br>
+                6. Share the sheet publicly or use API key<br>
+                7. Copy the Spreadsheet ID from the URL<br><br>
+                
+                <strong>⚠️ Security Note:</strong><br>
+                Your API key is restricted to Google Sheets API only. For production use, consider hosting this on a secure server and keeping the API key server-side.
+            </div>
+            
+            <div class="status-success" style="margin-top: 1rem; display: none;" id="first-time-notice">
+                <strong>🎉 First Time Setup Detected!</strong><br>
+                Your credentials have been pre-filled. Click "Save Settings" to connect to your Google Sheet.
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        // Global variables
+        let html5QrcodeScanner = null;
+        let currentMode = 'view';
+        let checkoutWorkflow = {
+            gameId: null,
+            gameTitle: null,
+            binId: null,
+            step: 'game' // 'game' or 'bin'
+        };
+        
+        // Google Sheets API base URL
+        const SHEETS_API_BASE = 'https://sheets.googleapis.com/v4/spreadsheets';
+        
+        // Initialize on load
+        window.onload = function() {
+            loadSettings();
+        };
+        
+        // Mode management
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Reset workflow state
+            checkoutWorkflow = { gameId: null, gameTitle: null, binId: null, step: 'game' };
+            hideWorkflowState();
+            hideStatus();
+            hideResults();
+            
+            // Update UI based on mode
+            updateUIForMode();
+        }
+        
+        function updateUIForMode() {
+            const stateDiv = document.getElementById('workflow-state');
+            
+            if (currentMode === 'checkout') {
+                showWorkflowState('Step 1: Scan the game QR code');
+            } else if (currentMode === 'checkin') {
+                showWorkflowState('Step 1: Scan the game QR code');
+            }
+        }
+        
+        // QR Code Scanning
+        function startScanning() {
+            const config = { 
+                fps: 10, 
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1.0
+            };
+            
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            
+            html5QrcodeScanner.start(
+                { facingMode: "environment" },
+                config,
+                onScanSuccess,
+                onScanFailure
+            ).catch(err => {
+                console.error(`Unable to start scanning: ${err}`);
+                showStatus('Unable to access camera. Please check permissions.', 'error');
+            });
+        }
+        
+        function stopScanning() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    html5QrcodeScanner.clear();
+                }).catch(err => console.error(err));
+            }
+        }
+        
+        function onScanSuccess(decodedText, decodedResult) {
+            // Parse QR code data
+            const data = parseQRCode(decodedText);
+            
+            if (!data) {
+                showStatus('Invalid QR code format', 'error');
+                return;
+            }
+            
+            // Handle based on current mode
+            switch (currentMode) {
+                case 'view':
+                    handleViewBin(data);
+                    break;
+                case 'play':
+                    handleLogPlay(data);
+                    break;
+                case 'checkout':
+                    handleCheckout(data);
+                    break;
+                case 'checkin':
+                    handleCheckin(data);
+                    break;
+            }
+        }
+        
+        function onScanFailure(error) {
+            // Silent fail - scanning
+        }
+        
+        function parseQRCode(text) {
+            // Handle multiple QR code formats
+            text = text.trim();
+            
+            // Format 1: "TYPE:ID" (e.g., "BIN:001" or "GAME:BGG123")
+            if (text.includes(':')) {
+                const parts = text.split(':');
+                return {
+                    type: parts[0].toUpperCase(),
+                    id: parts[1]
+                };
+            }
+            
+            // Format 2: "Bin 001" or "bin 001" (space-separated)
+            const spaceMatch = text.match(/^(bin|game)\s+(.+)$/i);
+            if (spaceMatch) {
+                return {
+                    type: spaceMatch[1].toUpperCase(),
+                    id: spaceMatch[2]
+                };
+            }
+            
+            // Format 3: Just numbers like "001" - assume it's a bin
+            if (/^\d+$/.test(text)) {
+                return {
+                    type: 'BIN',
+                    id: 'BIN:' + text.padStart(3, '0')
+                };
+            }
+            
+            // Format 4: "Bin001" or "Game001" (no space or separator)
+            const noSpaceMatch = text.match(/^(bin|game)(\d+)$/i);
+            if (noSpaceMatch) {
+                return {
+                    type: noSpaceMatch[1].toUpperCase(),
+                    id: noSpaceMatch[1].toUpperCase() + ':' + noSpaceMatch[2].padStart(3, '0')
+                };
+            }
+            
+            // Format 5: URL format (some QR generators add URLs)
+            if (text.includes('http')) {
+                // Extract any numbers or identifiers from URL
+                const urlMatch = text.match(/(?:bin|game)[:\s-]?(\d+)/i);
+                if (urlMatch) {
+                    return {
+                        type: text.toLowerCase().includes('game') ? 'GAME' : 'BIN',
+                        id: (text.toLowerCase().includes('game') ? 'GAME:' : 'BIN:') + urlMatch[1].padStart(3, '0')
+                    };
+                }
+            }
+            
+            // If no format matches, return null
+            return null;
+        }
+        
+        // Mode Handlers
+        async function handleViewBin(data) {
+            if (data.type !== 'BIN') {
+                showStatus('Please scan a bin QR code', 'error');
+                return;
+            }
+            
+            showStatus('Loading bin contents...', 'success');
+            
+            try {
+                const [games, binInfo] = await Promise.all([
+                    getGamesInBin(data.id),
+                    getBinInfo(data.id)
+                ]);
+                
+                displayBinContents(data.id, games, binInfo);
+            } catch (error) {
+                showStatus('Error loading bin contents: ' + error.message, 'error');
+            }
+        }
+        
+        async function handleLogPlay(data) {
+            if (data.type !== 'GAME') {
+                showStatus('Please scan a game QR code', 'error');
+                return;
+            }
+            
+            try {
+                const gameInfo = await getGameInfo(data.id);
+                if (!gameInfo) {
+                    showStatus('Game not found in inventory', 'error');
+                    return;
+                }
+                
+                await logGamePlay(data.id);
+                showStatus(`Play logged for ${gameInfo.title}!`, 'success');
+                
+                // Show play count if available
+                displayGamePlayInfo(gameInfo);
+            } catch (error) {
+                showStatus('Error logging play: ' + error.message, 'error');
+            }
+        }
+        
+        async function handleCheckout(data) {
+            if (checkoutWorkflow.step === 'game') {
+                if (data.type !== 'GAME') {
+                    showStatus('Please scan a game QR code', 'error');
+                    return;
+                }
+                
+                // Verify game exists
+                const gameInfo = await getGameInfo(data.id);
+                if (!gameInfo) {
+                    showStatus('Game not found in inventory', 'error');
+                    return;
+                }
+                
+                checkoutWorkflow.gameId = data.id;
+                checkoutWorkflow.gameTitle = gameInfo.title;
+                checkoutWorkflow.step = 'bin';
+                showWorkflowState(`Step 2: Now scan the bin QR code you're taking "${gameInfo.title}" FROM`);
+                
+            } else if (checkoutWorkflow.step === 'bin') {
+                if (data.type !== 'BIN') {
+                    showStatus('Please scan a bin QR code', 'error');
+                    return;
+                }
+                
+                checkoutWorkflow.binId = data.id;
+                
+                try {
+                    await updateGameLocation(checkoutWorkflow.gameId, 'CHECKED_OUT');
+                    showStatus(`✅ ${checkoutWorkflow.gameTitle} checked out from bin ${checkoutWorkflow.binId}!`, 'success');
+                    
+                    // Log this as a play event too
+                    await logGamePlay(checkoutWorkflow.gameId);
+                    
+                    // Reset workflow
+                    checkoutWorkflow = { gameId: null, gameTitle: null, binId: null, step: 'game' };
+                    hideWorkflowState();
+                } catch (error) {
+                    showStatus('Error checking out game: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        async function handleCheckin(data) {
+            if (checkoutWorkflow.step === 'game') {
+                if (data.type !== 'GAME') {
+                    showStatus('Please scan a game QR code', 'error');
+                    return;
+                }
+                
+                // Verify game exists
+                const gameInfo = await getGameInfo(data.id);
+                if (!gameInfo) {
+                    showStatus('Game not found in inventory', 'error');
+                    return;
+                }
+                
+                checkoutWorkflow.gameId = data.id;
+                checkoutWorkflow.gameTitle = gameInfo.title;
+                checkoutWorkflow.step = 'bin';
+                showWorkflowState(`Step 2: Now scan the bin QR code you're putting "${gameInfo.title}" INTO`);
+                
+            } else if (checkoutWorkflow.step === 'bin') {
+                if (data.type !== 'BIN') {
+                    showStatus('Please scan a bin QR code', 'error');
+                    return;
+                }
+                
+                checkoutWorkflow.binId = data.id;
+                
+                try {
+                    await updateGameLocation(checkoutWorkflow.gameId, checkoutWorkflow.binId);
+                    showStatus(`✅ ${checkoutWorkflow.gameTitle} checked into bin ${checkoutWorkflow.binId}!`, 'success');
+                    
+                    // Reset workflow
+                    checkoutWorkflow = { gameId: null, gameTitle: null, binId: null, step: 'game' };
+                    hideWorkflowState();
+                } catch (error) {
+                    showStatus('Error checking in game: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        // Google Sheets Integration
+        const SHEETS_API_BASE = 'https://sheets.googleapis.com/v4/spreadsheets';
+        
+        async function getGamesInBin(binId) {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            
+            if (!spreadsheetId || !apiKey) {
+                throw new Error('Please configure Google Sheets settings');
+            }
+            
+            try {
+                // Fetch all games from the Games sheet
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:D?key=${apiKey}`
+                );
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const rows = data.values || [];
+                
+                // Skip header row and filter games in this bin
+                const gamesInBin = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const [gameId, title, location, bggId] = rows[i];
+                    if (location === binId) {
+                        gamesInBin.push({
+                            id: gameId,
+                            title: title || 'Unknown Game',
+                            location: location,
+                            bggId: bggId || ''
+                        });
+                    }
+                }
+                
+                return gamesInBin;
+            } catch (error) {
+                console.error('Error fetching games:', error);
+                throw error;
+            }
+        }
+        
+        async function getGameInfo(gameId) {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            
+            try {
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:D?key=${apiKey}`
+                );
+                
+                const data = await response.json();
+                const rows = data.values || [];
+                
+                // Find the game
+                for (let i = 1; i < rows.length; i++) {
+                    if (rows[i][0] === gameId) {
+                        return {
+                            id: rows[i][0],
+                            title: rows[i][1] || 'Unknown Game',
+                            location: rows[i][2] || 'Unknown',
+                            bggId: rows[i][3] || ''
+                        };
+                    }
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Error fetching game info:', error);
+                throw error;
+            }
+        }
+        
+        async function updateGameLocation(gameId, newLocation) {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            
+            try {
+                // First, find which row contains this game
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:A?key=${apiKey}`
+                );
+                
+                const data = await response.json();
+                const gameIds = data.values || [];
+                
+                let rowIndex = -1;
+                for (let i = 1; i < gameIds.length; i++) {
+                    if (gameIds[i][0] === gameId) {
+                        rowIndex = i + 1; // +1 because sheets are 1-indexed
+                        break;
+                    }
+                }
+                
+                if (rowIndex === -1) {
+                    throw new Error(`Game ${gameId} not found`);
+                }
+                
+                // Update the location using the batchUpdate method
+                const updateResponse = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!C${rowIndex}?valueInputOption=USER_ENTERED&key=${apiKey}`,
+                    {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            values: [[newLocation]]
+                        })
+                    }
+                );
+                
+                if (!updateResponse.ok) {
+                    throw new Error(`Failed to update location: ${updateResponse.status}`);
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Error updating game location:', error);
+                throw error;
+            }
+        }
+        
+        async function logGamePlay(gameId) {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            
+            try {
+                // Get game info first
+                const gameInfo = await getGameInfo(gameId);
+                if (!gameInfo) {
+                    throw new Error('Game not found');
+                }
+                
+                const timestamp = new Date().toLocaleString();
+                const playData = [
+                    [timestamp, gameId, '', `Played ${gameInfo.title}`]
+                ];
+                
+                // Append to PlayLog sheet
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/PlayLog!A:D:append?valueInputOption=USER_ENTERED&key=${apiKey}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            values: playData
+                        })
+                    }
+                );
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to log play: ${response.status}`);
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Error logging play:', error);
+                throw error;
+            }
+        }
+        
+        async function getBinInfo(binId) {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            
+            try {
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Bins!A:B?key=${apiKey}`
+                );
+                
+                const data = await response.json();
+                const rows = data.values || [];
+                
+                // Find the bin
+                for (let i = 1; i < rows.length; i++) {
+                    if (rows[i][0] === binId) {
+                        return {
+                            id: rows[i][0],
+                            description: rows[i][1] || 'No description'
+                        };
+                    }
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Error fetching bin info:', error);
+                throw error;
+            }
+        }
+        
+        // UI Helper Functions
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message status-${type}`;
+            statusDiv.classList.remove('hidden');
+            
+            setTimeout(() => {
+                statusDiv.classList.add('hidden');
+            }, 5000);
+        }
+        
+        function showWorkflowState(message) {
+            const stateDiv = document.getElementById('workflow-state');
+            stateDiv.textContent = message;
+            stateDiv.classList.remove('hidden');
+        }
+        
+        function hideWorkflowState() {
+            document.getElementById('workflow-state').classList.add('hidden');
+        }
+        
+        function hideStatus() {
+            document.getElementById('status-message').classList.add('hidden');
+        }
+        
+        function hideResults() {
+            document.getElementById('results').classList.add('hidden');
+        }
+        
+        function displayBinContents(binId, games, binInfo) {
+            const resultsDiv = document.getElementById('results');
+            const contentDiv = document.getElementById('results-content');
+            
+            const binDesc = binInfo ? binInfo.description : 'No description';
+            contentDiv.innerHTML = `<h4>📦 Bin ${binId}</h4><p style="color: #7f8c8d; margin-bottom: 1rem;">${binDesc}</p>`;
+            
+            if (games.length === 0) {
+                contentDiv.innerHTML += '<p style="text-align: center; color: #95a5a6; padding: 2rem;">No games currently in this bin</p>';
+            } else {
+                contentDiv.innerHTML += `<p style="margin-bottom: 1rem;">Found ${games.length} game${games.length !== 1 ? 's' : ''}:</p>`;
+                games.forEach(game => {
+                    contentDiv.innerHTML += `
+                        <div class="result-item">
+                            <div class="game-title">🎲 ${game.title}</div>
+                            <div class="game-location">ID: ${game.id}${game.bggId ? ' • BGG: ' + game.bggId : ''}</div>
+                        </div>
+                    `;
+                });
+            }
+            
+            resultsDiv.classList.remove('hidden');
+        }
+        
+        function displayGamePlayInfo(gameInfo) {
+            const resultsDiv = document.getElementById('results');
+            const contentDiv = document.getElementById('results-content');
+            
+            contentDiv.innerHTML = `
+                <h4>🎮 Game Played</h4>
+                <div class="result-item">
+                    <div class="game-title">${gameInfo.title}</div>
+                    <div class="game-location">Current Location: ${gameInfo.location}</div>
+                    ${gameInfo.bggId ? '<div class="game-location">BGG ID: ' + gameInfo.bggId + '</div>' : ''}
+                </div>
+            `;
+            
+            resultsDiv.classList.remove('hidden');
+        }
+        
+        // Settings Management
+        function saveSettings() {
+            const spreadsheetId = document.getElementById('spreadsheet-id').value;
+            const apiKey = document.getElementById('api-key').value;
+            
+            if (spreadsheetId && apiKey) {
+                localStorage.setItem('spreadsheetId', spreadsheetId);
+                localStorage.setItem('apiKey', apiKey);
+                showStatus('Settings saved successfully!', 'success');
+                
+                // Test the connection
+                testConnection();
+            } else {
+                showStatus('Please fill in all settings', 'error');
+            }
+        }
+        
+        async function testConnection() {
+            try {
+                const spreadsheetId = localStorage.getItem('spreadsheetId');
+                const apiKey = localStorage.getItem('apiKey');
+                
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}?key=${apiKey}`
+                );
+                
+                if (response.ok) {
+                    showStatus('✅ Successfully connected to Google Sheets!', 'success');
+                } else {
+                    showStatus('❌ Connection failed. Please check your settings.', 'error');
+                }
+            } catch (error) {
+                showStatus('❌ Connection error: ' + error.message, 'error');
+            }
+        }
+        
+        function loadSettings() {
+            // Pre-fill with user's credentials
+            const savedSpreadsheetId = localStorage.getItem('spreadsheetId');
+            const savedApiKey = localStorage.getItem('apiKey');
+            
+            if (!savedSpreadsheetId) {
+                document.getElementById('spreadsheet-id').value = '1jf1ub1x0y6oal1So5rUHVANip5WeoAaoQgDyEOPS3fM';
+            } else {
+                document.getElementById('spreadsheet-id').value = savedSpreadsheetId;
+            }
+            
+            if (!savedApiKey) {
+                document.getElementById('api-key').value = 'AIzaSyDMvS1WL5kEjfSgq2V1uKmlfvJIwSPfpqo';
+            } else {
+                document.getElementById('api-key').value = savedApiKey;
+            }
+            
+            // Show first-time notice if credentials are pre-filled
+            if (!savedSpreadsheetId && !savedApiKey) {
+                document.getElementById('first-time-notice').style.display = 'block';
+                // Auto-save after a short delay
+                setTimeout(() => {
+                    saveSettings();
+                }, 2000);
+            }
+        }
+    </script>
+</body>
+</html>
