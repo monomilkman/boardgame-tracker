@@ -488,11 +488,17 @@
             <h3>🌐 BoardGameGeek Import</h3>
             <input type="text" id="bgg-search" placeholder="Search BoardGameGeek for a game..." onkeypress="if(event.key==='Enter')searchBGG()">
             <button class="btn btn-primary" onclick="searchBGG()" style="margin-top: 0.5rem;">Search BGG</button>
+            <p style="font-size: 0.875rem; color: #7f8c8d; margin-top: 0.5rem;">
+                Note: Without Apps Script setup, imports will generate data for copy/paste
+            </p>
             
             <div style="margin-top: 1rem;">
                 <h4>Or Import from BGG Collection</h4>
                 <input type="text" id="bgg-username" placeholder="BGG Username">
                 <button class="btn btn-primary" onclick="importBGGCollection()" style="margin-top: 0.5rem;">Import Collection</button>
+                <p style="font-size: 0.875rem; color: #7f8c8d; margin-top: 0.5rem;">
+                    Note: Due to Google API limitations, imports will generate data for you to copy/paste into your sheet
+                </p>
             </div>
             
             <div id="bgg-results" class="results hidden" style="margin-top: 1rem;"></div>
@@ -534,12 +540,60 @@
                 Your existing QR codes link to Google Drive folders. The system will automatically extract the folder ID and use it as the bin identifier.<br><br>
                 
                 <strong>📸 Photo Storage:</strong><br>
-                Create a Google Drive folder for game photos and share it publicly. Add the folder ID above to enable photo uploads.
+                Create a Google Drive folder for game photos and share it publicly. Add the folder ID above to enable photo uploads.<br><br>
+                
+                <strong>⚠️ API Limitations:</strong><br>
+                Google Sheets API with an API key only allows reading data. Writing data (like adding games or logging plays) requires manual copy/paste or a more complex authentication setup. The system will generate the data for you to easily paste into your sheet.<br><br>
+                
+                <strong>💡 Want Automatic Writing?</strong><br>
+                For fully automatic imports and updates, you would need to set up Google Apps Script or use OAuth authentication. See the optional setup section below!
             </div>
             
             <div class="status-success" style="margin-top: 1rem; display: none;" id="first-time-notice">
                 <strong>🎉 First Time Setup Detected!</strong><br>
                 Your credentials have been pre-filled. Click "Save Settings" to connect to your Google Sheet.
+            </div>
+            
+            <div class="setup-section" style="margin-top: 1rem;">
+                <h4>🚀 Enable Automatic Updates (Optional)</h4>
+                <p>Want to skip the copy/paste? Set up a Google Apps Script:</p>
+                <details style="margin-top: 0.5rem;">
+                    <summary style="cursor: pointer; color: #3498db;">Click for instructions</summary>
+                    <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
+                        <ol style="text-align: left;">
+                            <li>Open your Google Sheet</li>
+                            <li>Go to Extensions → Apps Script</li>
+                            <li>Replace the code with this:
+                                <pre style="background: #2c3e50; color: white; padding: 1rem; border-radius: 4px; overflow-x: auto; font-size: 0.8rem; margin: 0.5rem 0;">
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet();
+  var data = JSON.parse(e.postData.contents);
+  
+  if (data.action === 'append') {
+    var targetSheet = sheet.getSheetByName(data.sheet);
+    targetSheet.appendRow(data.row);
+  } else if (data.action === 'update') {
+    var targetSheet = sheet.getSheetByName(data.sheet);
+    targetSheet.getRange(data.row, data.col).setValue(data.value);
+  }
+  
+  return ContentService.createTextOutput('Success');
+}
+
+function doGet() {
+  return ContentService.createTextOutput('BoardGame Tracker API Active');
+}</pre>
+                            </li>
+                            <li>Click Deploy → New Deployment</li>
+                            <li>Choose "Web app" as type</li>
+                            <li>Set "Execute as: Me" and "Who has access: Anyone"</li>
+                            <li>Copy the Web App URL</li>
+                            <li>Paste it below</li>
+                        </ol>
+                    </div>
+                </details>
+                <input type="text" id="apps-script-url" placeholder="Google Apps Script Web App URL (optional)" style="margin-top: 1rem;" />
+                <button class="btn btn-info" onclick="saveAppsScriptUrl()">Save Script URL</button>
             </div>
         </div>
     </main>
@@ -830,26 +884,65 @@
                 return;
             }
             
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            
             showStatus(`Moving ${selectedGames.size} games...`, 'success');
             
+            let moved = 0;
+            let failed = 0;
+            
             for (const gameId of selectedGames) {
-                await updateGameLocation(gameId, binId);
+                try {
+                    const result = await updateGameLocation(gameId, binId);
+                    if (result) {
+                        moved++;
+                    } else {
+                        failed++;
+                    }
+                } catch (error) {
+                    failed++;
+                }
             }
             
-            showStatus(`Successfully moved ${selectedGames.size} games!`, 'success');
+            if (failed > 0 && !appsScriptUrl) {
+                showStatus(`Moved ${moved} games. ${failed} require manual update due to API limits.`, 'error');
+            } else {
+                showStatus(`Successfully moved ${selectedGames.size} games!`, 'success');
+            }
+            
             selectedGames.clear();
             loadBulkOperations();
         }
         
         async function bulkCheckout() {
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            
             showStatus(`Checking out ${selectedGames.size} games...`, 'success');
             
+            let checkedOut = 0;
+            let failed = 0;
+            
             for (const gameId of selectedGames) {
-                await updateGameLocation(gameId, 'CHECKED_OUT');
-                await logGamePlay(gameId);
+                try {
+                    const locationResult = await updateGameLocation(gameId, 'CHECKED_OUT');
+                    const playResult = await logGamePlay(gameId);
+                    
+                    if (locationResult && playResult) {
+                        checkedOut++;
+                    } else {
+                        failed++;
+                    }
+                } catch (error) {
+                    failed++;
+                }
             }
             
-            showStatus(`Successfully checked out ${selectedGames.size} games!`, 'success');
+            if (failed > 0 && !appsScriptUrl) {
+                showStatus(`Checked out ${checkedOut} games. ${failed} require manual update due to API limits.`, 'error');
+            } else {
+                showStatus(`Successfully checked out ${selectedGames.size} games!`, 'success');
+            }
+            
             selectedGames.clear();
             loadBulkOperations();
         }
@@ -896,7 +989,7 @@
                             <div class="game-title">${game.name} ${game.year ? `(${game.year})` : ''}</div>
                             <div class="game-location">BGG ID: ${game.id}</div>
                         </div>
-                        <button class="btn btn-primary" onclick="importBGGGame('${game.id}', '${game.name.replace(/'/g, "\\'")}')">Import</button>
+                        <button class="btn btn-primary" onclick="importBGGGame('${game.id}', '${game.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')">Import</button>
                     </div>
                 `;
             });
@@ -908,9 +1001,126 @@
             const gameId = `GAME:BGG${bggId}`;
             showStatus(`Importing ${name}...`, 'success');
             
-            // Here you would add the game to your Google Sheet
-            // For now, we'll show a success message
-            showStatus(`Would import: ${name} with ID ${gameId}`, 'success');
+            try {
+                // Fetch detailed game info from BGG
+                const response = await fetch(`${CORS_PROXY}${BGG_API_BASE}/thing?id=${bggId}`);
+                const text = await response.text();
+                
+                // Parse XML response
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(text, 'text/xml');
+                const item = xml.querySelector('item');
+                
+                const thumbnail = item.querySelector('thumbnail')?.textContent || '';
+                
+                // Check if game already exists
+                const existingGames = await loadAllGames();
+                const exists = existingGames.some(g => g.bggId === bggId || g.id === gameId);
+                
+                if (exists) {
+                    showStatus('Game already exists in your collection', 'error');
+                    return;
+                }
+                
+                // Ask for bin location
+                const bins = await loadAllBins();
+                let binOptions = '<option value="NEW">Add to inventory (no bin)</option>';
+                bins.forEach(bin => {
+                    binOptions += `<option value="${bin.id}">${bin.description || bin.id}</option>`;
+                });
+                
+                const resultsDiv = document.getElementById('bgg-results');
+                resultsDiv.innerHTML = `
+                    <h4>Import Game Details</h4>
+                    <div class="result-item">
+                        ${thumbnail ? `<img src="${thumbnail}" class="game-thumbnail" alt="${name}">` : ''}
+                        <div class="result-item-content">
+                            <div class="game-title">${name}</div>
+                            <div class="game-location">BGG ID: ${bggId}</div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 1rem;">Select location:</p>
+                    <select id="import-game-bin" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+                        ${binOptions}
+                    </select>
+                    <button class="btn btn-primary" onclick="confirmSingleGameImport('${gameId}', '${name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}', '${bggId}', '${thumbnail}')" style="width: 100%;">Add to Collection</button>
+                `;
+                
+            } catch (error) {
+                showStatus('Error fetching game details: ' + error.message, 'error');
+            }
+        }
+        
+        async function confirmSingleGameImport(gameId, name, bggId, thumbnail) {
+            const binId = document.getElementById('import-game-bin').value;
+            const location = binId === 'NEW' ? 'NEW' : binId;
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            
+            try {
+                // Create game data
+                const gameData = [
+                    gameId,      // Game ID
+                    name,        // Title
+                    location,    // Current Location
+                    bggId,       // BGG ID
+                    thumbnail    // Photo URL
+                ];
+                
+                // If Apps Script is available, use it
+                if (appsScriptUrl) {
+                    showStatus('Adding game to collection...', 'success');
+                    
+                    await fetch(appsScriptUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'append',
+                            sheet: 'Games',
+                            row: gameData
+                        })
+                    });
+                    
+                    showStatus(`Successfully added ${name} to your collection!`, 'success');
+                    document.getElementById('bgg-results').innerHTML = '';
+                    document.getElementById('bgg-search').value = '';
+                    return;
+                }
+                
+                // Otherwise, show copy instructions
+                const csvRow = gameData.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',');
+                
+                // Display copy instructions
+                const resultsDiv = document.getElementById('bgg-results');
+                resultsDiv.innerHTML = `
+                    <h4>Add Game to Collection</h4>
+                    <div class="result-item">
+                        ${thumbnail ? `<img src="${thumbnail}" class="game-thumbnail" alt="${name}">` : ''}
+                        <div class="result-item-content">
+                            <div class="game-title">${name}</div>
+                            <div class="game-location">Location: ${location}</div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 1rem;">Copy this row and paste it into your Games sheet:</p>
+                    <textarea style="width: 100%; height: 60px; margin: 0.5rem 0; font-family: monospace; font-size: 0.8rem;" readonly>${csvRow}</textarea>
+                    <button class="btn btn-primary" onclick="copySingleGameData()" style="width: 100%;">Copy to Clipboard</button>
+                `;
+                
+                // Store for copy function
+                window.singleGameCSV = csvRow;
+                
+            } catch (error) {
+                showStatus('Error preparing game data: ' + error.message, 'error');
+            }
+        }
+        
+        function copySingleGameData() {
+            const textarea = document.querySelector('#bgg-results textarea');
+            textarea.select();
+            document.execCommand('copy');
+            showStatus('Game data copied! Paste it into the first empty row of your Games sheet.', 'success');
         }
         
         async function importBGGCollection() {
@@ -964,7 +1174,7 @@
                     <select id="import-bin-select" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
                         <option value="IMPORTED">Create new "IMPORTED" location</option>
                     </select>
-                    <button class="btn btn-primary" onclick="confirmBGGImport('${username}')" style="width: 100%;">Confirm Import</button>
+                    <button class="btn btn-primary" onclick="confirmBGGImport('${username.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')" style="width: 100%;">Confirm Import</button>
                 `;
                 
                 // Load existing bins
@@ -983,7 +1193,9 @@
         
         async function confirmBGGImport(username) {
             const binId = document.getElementById('import-bin-select').value;
-            showStatus('Starting import...', 'success');
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            
+            showStatus('Preparing import data...', 'success');
             
             try {
                 // Fetch collection again
@@ -1010,7 +1222,7 @@
                 
                 let imported = 0;
                 let skipped = 0;
-                const newGames = [];
+                const importData = [];
                 
                 // Process each game
                 for (const item of items) {
@@ -1024,65 +1236,105 @@
                         continue;
                     }
                     
-                    // Create game data
-                    const gameData = [
+                    // Create row data for spreadsheet
+                    importData.push([
                         `GAME:BGG${bggId}`,  // Game ID
                         name,                 // Title
                         binId,               // Current Location
                         bggId,               // BGG ID
                         thumbnail            // Photo URL
-                    ];
-                    
-                    newGames.push(gameData);
+                    ]);
                     imported++;
                 }
                 
-                if (newGames.length > 0) {
-                    // Add games to sheet in batches
-                    const spreadsheetId = localStorage.getItem('spreadsheetId');
-                    const apiKey = localStorage.getItem('apiKey');
+                if (importData.length === 0) {
+                    showStatus('No new games to import (all games already in collection)', 'error');
+                    return;
+                }
+                
+                // If Apps Script is available, use it for automatic import
+                if (appsScriptUrl) {
+                    showStatus(`Importing ${importData.length} games automatically...`, 'success');
                     
-                    // Process in batches of 50
-                    const batchSize = 50;
-                    for (let i = 0; i < newGames.length; i += batchSize) {
-                        const batch = newGames.slice(i, i + batchSize);
+                    // Import in batches to avoid timeout
+                    const batchSize = 10;
+                    for (let i = 0; i < importData.length; i += batchSize) {
+                        const batch = importData.slice(i, i + batchSize);
                         
-                        const response = await fetch(
-                            `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:E:append?valueInputOption=USER_ENTERED&key=${apiKey}`,
-                            {
+                        for (const gameData of batch) {
+                            await fetch(appsScriptUrl, {
                                 method: 'POST',
+                                mode: 'no-cors',
                                 headers: {
                                     'Content-Type': 'application/json',
                                 },
                                 body: JSON.stringify({
-                                    values: batch
+                                    action: 'append',
+                                    sheet: 'Games',
+                                    row: gameData
                                 })
-                            }
-                        );
-                        
-                        if (!response.ok) {
-                            throw new Error(`Failed to import batch: ${response.status}`);
+                            });
                         }
                         
-                        // Update progress
-                        const progress = Math.min(i + batchSize, newGames.length);
-                        showStatus(`Imported ${progress} of ${newGames.length} games...`, 'success');
+                        const progress = Math.min(i + batchSize, importData.length);
+                        showStatus(`Imported ${progress} of ${importData.length} games...`, 'success');
                     }
+                    
+                    showStatus(`Import complete! Added ${imported} games. ${skipped} duplicates skipped.`, 'success');
+                    document.getElementById('bgg-results').classList.add('hidden');
+                    return;
                 }
                 
-                // Final status
-                let message = `Import complete! Added ${imported} games.`;
-                if (skipped > 0) {
-                    message += ` Skipped ${skipped} duplicates.`;
-                }
-                showStatus(message, 'success');
+                // Otherwise, generate CSV for manual import
+                let csvContent = importData.map(row => 
+                    row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')
+                ).join('\n');
                 
-                // Hide results
-                document.getElementById('bgg-results').classList.add('hidden');
+                // Display import instructions
+                const resultsDiv = document.getElementById('bgg-results');
+                resultsDiv.innerHTML = `
+                    <h4>Import Instructions</h4>
+                    <p>Due to Google Sheets API limitations, you'll need to paste this data manually:</p>
+                    <ol style="text-align: left; margin: 1rem 0;">
+                        <li>Click "Copy Data" below</li>
+                        <li>Open your Google Sheet</li>
+                        <li>Go to the Games sheet</li>
+                        <li>Click on the first empty row</li>
+                        <li>Paste (Ctrl+V or Cmd+V)</li>
+                    </ol>
+                    <p><strong>${imported} games ready to import</strong> (${skipped} skipped as duplicates)</p>
+                    <textarea id="import-data" style="width: 100%; height: 200px; margin: 1rem 0; font-family: monospace; font-size: 0.8rem;" readonly>${csvContent}</textarea>
+                    <button class="btn btn-primary" onclick="copyImportData()" style="width: 100%;">Copy Data to Clipboard</button>
+                    <button class="btn btn-secondary" onclick="downloadImportCSV('${username}_games.csv')" style="width: 100%; margin-top: 0.5rem;">Download as CSV</button>
+                `;
+                
+                // Store data for download function
+                window.importCSVContent = csvContent;
                 
             } catch (error) {
-                showStatus('Error during import: ' + error.message, 'error');
+                showStatus('Error preparing import: ' + error.message, 'error');
             }
+        }
+        
+        function copyImportData() {
+            const textarea = document.getElementById('import-data');
+            textarea.select();
+            document.execCommand('copy');
+            showStatus('Data copied to clipboard! Now paste it into your Google Sheet.', 'success');
+        }
+        
+        function downloadImportCSV(filename) {
+            const csvContent = window.importCSVContent;
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', filename);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showStatus('CSV file downloaded!', 'success');
         }
         
         // Export functions
@@ -1628,6 +1880,7 @@
         async function updateGameLocation(gameId, newLocation) {
             const spreadsheetId = localStorage.getItem('spreadsheetId');
             const apiKey = localStorage.getItem('apiKey');
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
             
             try {
                 // First, find which row contains this game
@@ -1650,7 +1903,27 @@
                     throw new Error(`Game ${gameId} not found`);
                 }
                 
-                // Update the location using the batchUpdate method
+                // If Apps Script URL is available, use it
+                if (appsScriptUrl) {
+                    const scriptResponse = await fetch(appsScriptUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'update',
+                            sheet: 'Games',
+                            row: rowIndex,
+                            col: 3, // Column C
+                            value: newLocation
+                        })
+                    });
+                    
+                    return true;
+                }
+                
+                // Otherwise try direct API update
                 const updateResponse = await fetch(
                     `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!C${rowIndex}?valueInputOption=USER_ENTERED&key=${apiKey}`,
                     {
@@ -1665,6 +1938,12 @@
                 );
                 
                 if (!updateResponse.ok) {
+                    // If write fails, provide manual instruction
+                    if (updateResponse.status === 401) {
+                        const gameInfo = await getGameInfo(gameId);
+                        showStatus(`Please update row ${rowIndex} in your Games sheet: Change location of "${gameInfo.title}" to "${newLocation}"`, 'error');
+                        return false;
+                    }
                     throw new Error(`Failed to update location: ${updateResponse.status}`);
                 }
                 
@@ -1678,6 +1957,7 @@
         async function logGamePlay(gameId) {
             const spreadsheetId = localStorage.getItem('spreadsheetId');
             const apiKey = localStorage.getItem('apiKey');
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
             
             try {
                 // Get game info first
@@ -1687,11 +1967,27 @@
                 }
                 
                 const timestamp = new Date().toLocaleString();
-                const playData = [
-                    [timestamp, gameId, '', `Played ${gameInfo.title}`]
-                ];
+                const playData = [timestamp, gameId, '', `Played ${gameInfo.title}`];
                 
-                // Append to PlayLog sheet
+                // If Apps Script URL is available, use it
+                if (appsScriptUrl) {
+                    const scriptResponse = await fetch(appsScriptUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'append',
+                            sheet: 'PlayLog',
+                            row: playData
+                        })
+                    });
+                    
+                    return true;
+                }
+                
+                // Otherwise try direct API append
                 const response = await fetch(
                     `${SHEETS_API_BASE}/${spreadsheetId}/values/PlayLog!A:D:append?valueInputOption=USER_ENTERED&key=${apiKey}`,
                     {
@@ -1700,12 +1996,19 @@
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            values: playData
+                            values: [playData]
                         })
                     }
                 );
                 
                 if (!response.ok) {
+                    // If write fails, provide manual instruction
+                    if (response.status === 401) {
+                        const csvRow = playData.map(cell => `"${cell}"`).join(',');
+                        showStatus(`Copy this play log entry: ${csvRow}`, 'error');
+                        console.log('Add this to PlayLog sheet:', csvRow);
+                        return false;
+                    }
                     throw new Error(`Failed to log play: ${response.status}`);
                 }
                 
@@ -1874,20 +2177,48 @@
             }
         }
         
+        function saveAppsScriptUrl() {
+            const scriptUrl = document.getElementById('apps-script-url').value;
+            
+            if (scriptUrl) {
+                localStorage.setItem('appsScriptUrl', scriptUrl);
+                showStatus('Apps Script URL saved! Automatic updates are now enabled.', 'success');
+                
+                // Update header to show auto-update is enabled
+                const header = document.querySelector('h1');
+                header.innerHTML = '🎲 BoardGame Collection Manager <span style="font-size: 0.7rem; background: #27ae60; padding: 0.2rem 0.5rem; border-radius: 4px; margin-left: 0.5rem;">Auto-Update Enabled</span>';
+            } else {
+                localStorage.removeItem('appsScriptUrl');
+                showStatus('Apps Script URL removed', 'success');
+                
+                // Remove auto-update indicator
+                const header = document.querySelector('h1');
+                header.innerHTML = '🎲 BoardGame Collection Manager';
+            }
+        }
+        
         function loadSettings() {
             // Pre-fill with user's credentials
             const savedSpreadsheetId = localStorage.getItem('spreadsheetId');
             const savedApiKey = localStorage.getItem('apiKey');
             const savedPhotoFolderId = localStorage.getItem('photoFolderId');
+            const savedAppsScriptUrl = localStorage.getItem('appsScriptUrl');
             
             // Always show the credentials in the fields
             document.getElementById('spreadsheet-id').value = savedSpreadsheetId || '1jf1ub1x0y6oal1So5rUHVANip5WeoAaoQgDyEOPS3fM';
             document.getElementById('api-key').value = savedApiKey || 'AIzaSyDMvS1WL5kEjfSgq2V1uKmlfvJIwSPfpqo';
             document.getElementById('photo-folder-id').value = savedPhotoFolderId || '';
+            document.getElementById('apps-script-url').value = savedAppsScriptUrl || '';
             
             // Show first-time notice if credentials are not yet saved
             if (!savedSpreadsheetId || !savedApiKey) {
                 document.getElementById('first-time-notice').style.display = 'block';
+            }
+            
+            // Update header to show if automatic updates are enabled
+            if (savedAppsScriptUrl) {
+                const header = document.querySelector('h1');
+                header.innerHTML = '🎲 BoardGame Collection Manager <span style="font-size: 0.7rem; background: #27ae60; padding: 0.2rem 0.5rem; border-radius: 4px; margin-left: 0.5rem;">Auto-Update Enabled</span>';
             }
         }
     </script>
