@@ -564,8 +564,6 @@
         }
         
         // Google Sheets Integration
-        const SHEETS_API_BASE = 'https://sheets.googleapis.com/v4/spreadsheets';
-        
         async function getGamesInBin(binId) {
             const spreadsheetId = localStorage.getItem('spreadsheetId');
             const apiKey = localStorage.getItem('apiKey');
