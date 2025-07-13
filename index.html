@@ -275,6 +275,9 @@
                 6. Share the sheet publicly or use API key<br>
                 7. Copy the Spreadsheet ID from the URL<br><br>
                 
+                <strong>📁 Using Google Drive QR Codes:</strong><br>
+                Your existing QR codes link to Google Drive folders. The system will automatically extract the folder ID and use it as the bin identifier. In your Bins sheet, use the folder ID (e.g., "1Uv_XcvlWoah-4NXvenhZcBurjYVREtqj") as the Bin ID.<br><br>
+                
                 <strong>⚠️ Security Note:</strong><br>
                 Your API key is restricted to Google Sheets API only. For production use, consider hosting this on a secure server and keeping the API key server-side.
             </div>
@@ -443,6 +446,34 @@
             text = text.trim();
             console.log('Parsing QR code:', text);
             
+            // Format 0: Google Drive URLs - Extract folder ID
+            if (text.includes('drive.google.com')) {
+                // Extract folder ID from various Google Drive URL formats
+                let folderId = null;
+                
+                // Format: https://drive.google.com/drive/folders/FOLDER_ID
+                const folderMatch = text.match(/\/folders\/([a-zA-Z0-9-_]+)/);
+                if (folderMatch) {
+                    folderId = folderMatch[1];
+                }
+                
+                // Format: https://drive.google.com/open?id=FOLDER_ID
+                if (!folderId) {
+                    const openMatch = text.match(/[?&]id=([a-zA-Z0-9-_]+)/);
+                    if (openMatch) {
+                        folderId = openMatch[1];
+                    }
+                }
+                
+                if (folderId) {
+                    return {
+                        type: 'BIN',
+                        id: folderId,
+                        isGoogleDrive: true
+                    };
+                }
+            }
+            
             // Format 1: "TYPE:ID" (e.g., "BIN:001" or "GAME:BGG123")
             if (text.includes(':')) {
                 const parts = text.split(':');
@@ -480,7 +511,7 @@
                 };
             }
             
-            // Format 5: URL format (some QR generators add URLs)
+            // Format 5: Other URL formats
             if (text.includes('http')) {
                 // Extract any numbers or identifiers from URL
                 const urlMatch = text.match(/(?:bin|game)[:\s-]?(\d+)/i);
@@ -570,7 +601,14 @@
                 
                 try {
                     await updateGameLocation(checkoutWorkflow.gameId, 'CHECKED_OUT');
-                    showStatus(`✅ ${checkoutWorkflow.gameTitle} checked out from bin ${checkoutWorkflow.binId}!`, 'success');
+                    
+                    // Show friendly bin identifier
+                    let binDisplay = checkoutWorkflow.binId;
+                    if (checkoutWorkflow.binId.length > 20 && !checkoutWorkflow.binId.includes(':')) {
+                        binDisplay = 'bin ' + checkoutWorkflow.binId.substring(0, 8) + '...';
+                    }
+                    
+                    showStatus(`✅ ${checkoutWorkflow.gameTitle} checked out from ${binDisplay}!`, 'success');
                     
                     // Log this as a play event too
                     await logGamePlay(checkoutWorkflow.gameId);
@@ -613,7 +651,14 @@
                 
                 try {
                     await updateGameLocation(checkoutWorkflow.gameId, checkoutWorkflow.binId);
-                    showStatus(`✅ ${checkoutWorkflow.gameTitle} checked into bin ${checkoutWorkflow.binId}!`, 'success');
+                    
+                    // Show friendly bin identifier
+                    let binDisplay = checkoutWorkflow.binId;
+                    if (checkoutWorkflow.binId.length > 20 && !checkoutWorkflow.binId.includes(':')) {
+                        binDisplay = 'bin ' + checkoutWorkflow.binId.substring(0, 8) + '...';
+                    }
+                    
+                    showStatus(`✅ ${checkoutWorkflow.gameTitle} checked into ${binDisplay}!`, 'success');
                     
                     // Reset workflow
                     checkoutWorkflow = { gameId: null, gameTitle: null, binId: null, step: 'game' };
@@ -852,8 +897,14 @@
             const resultsDiv = document.getElementById('results');
             const contentDiv = document.getElementById('results-content');
             
+            // For Google Drive IDs, show a shortened version
+            let displayId = binId;
+            if (binId.length > 20 && !binId.includes(':')) {
+                displayId = 'Bin ' + binId.substring(0, 8) + '...';
+            }
+            
             const binDesc = binInfo ? binInfo.description : 'No description';
-            contentDiv.innerHTML = `<h4>📦 Bin ${binId}</h4><p style="color: #7f8c8d; margin-bottom: 1rem;">${binDesc}</p>`;
+            contentDiv.innerHTML = `<h4>📦 ${displayId}</h4><p style="color: #7f8c8d; margin-bottom: 1rem;">${binDesc}</p>`;
             
             if (games.length === 0) {
                 contentDiv.innerHTML += '<p style="text-align: center; color: #95a5a6; padding: 2rem;">No games currently in this bin</p>';
