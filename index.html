@@ -12,7 +12,6 @@
         }
     </script>
     <style>
-        /* [Previous styles remain the same - I'll add new ones] */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -84,184 +83,6 @@
             background-color: #bdc3c7;
         }
         
-        /* New styles for enhanced play logging */
-        .play-form {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 1rem;
-        }
-        
-        .form-group {
-            margin-bottom: 1rem;
-        }
-        
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #2c3e50;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 1rem;
-        }
-        
-        .form-group textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-        
-        .player-select {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-        
-        .player-chip {
-            background: #ecf0f1;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-        
-        .player-chip.selected {
-            background: #3498db;
-            color: white;
-            border-color: #2980b9;
-        }
-        
-        .player-chip.winner {
-            background: #f39c12;
-            color: white;
-        }
-        
-        .add-player-btn {
-            background: #27ae60;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            cursor: pointer;
-            border: none;
-            font-size: 0.875rem;
-        }
-        
-        .duration-input {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-        
-        .duration-input input {
-            width: 80px;
-        }
-        
-        .rating-stars {
-            display: flex;
-            gap: 0.25rem;
-            font-size: 1.5rem;
-            margin-top: 0.5rem;
-        }
-        
-        .rating-stars span {
-            cursor: pointer;
-            color: #ddd;
-            transition: color 0.2s;
-        }
-        
-        .rating-stars span:hover,
-        .rating-stars span.active {
-            color: #f39c12;
-        }
-        
-        .player-stats-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 1rem;
-        }
-        
-        .player-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: #3498db;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
-        }
-        
-        .stats-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #ecf0f1;
-        }
-        
-        .stats-row:last-child {
-            border-bottom: none;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            animation: fadeIn 0.3s;
-        }
-        
-        .modal-content {
-            background-color: white;
-            margin: 10% auto;
-            padding: 2rem;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
-            animation: slideIn 0.3s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .close-modal {
-            float: right;
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            color: #7f8c8d;
-        }
-        
-        .close-modal:hover {
-            color: #2c3e50;
-        }
-        
-        /* Keep all other existing styles */
         .scan-container {
             background: white;
             border-radius: 12px;
@@ -397,8 +218,287 @@
             text-align: center;
         }
         
+        .setup-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 1rem;
+        }
+        
+        .setup-section h3 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+        
+        .setup-section input, .setup-section select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .setup-instructions {
+            background: #e8f4f8;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        
+        .search-container {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .stat-label {
+            color: #7f8c8d;
+            margin-top: 0.5rem;
+        }
+        
+        .bulk-actions {
+            background: #ecf0f1;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
         .hidden {
             display: none;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #ecf0f1;
+        }
+        
+        .tab {
+            padding: 0.5rem 1rem;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #7f8c8d;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: #3498db;
+            border-bottom-color: #3498db;
+        }
+        
+        /* New styles for enhanced play logging */
+        .play-form {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .player-select {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .player-chip {
+            background: #ecf0f1;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .player-chip.selected {
+            background: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+        
+        .add-player-btn {
+            background: #27ae60;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            border: none;
+            font-size: 0.875rem;
+        }
+        
+        .duration-input {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .duration-input input {
+            width: 80px;
+        }
+        
+        .rating-stars {
+            display: flex;
+            gap: 0.25rem;
+            font-size: 1.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .rating-stars span {
+            cursor: pointer;
+            color: #ddd;
+            transition: color 0.2s;
+        }
+        
+        .rating-stars span:hover,
+        .rating-stars span.active {
+            color: #f39c12;
+        }
+        
+        .player-stats-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .player-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #3498db;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        .stats-row:last-child {
+            border-bottom: none;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            animation: slideIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .close-modal {
+            float: right;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+        
+        .close-modal:hover {
+            color: #2c3e50;
         }
         
         @media (max-width: 600px) {
@@ -461,18 +561,32 @@
             </button>
         </div>
         
+        <!-- Scan Section -->
+        <div id="scan-section" class="scan-container">
+            <div id="reader"></div>
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="startScanning()">Start Scanning</button>
+                <button class="btn btn-secondary" onclick="stopScanning()">Stop</button>
+            </div>
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #ecf0f1;">
+                <p style="text-align: center; color: #7f8c8d; margin-bottom: 0.5rem;">Or enter QR code manually:</p>
+                <input type="text" id="manual-qr-input" placeholder="Enter QR code text (e.g., BIN:001)" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;" onkeypress="if(event.key==='Enter')processManualQR()">
+                <button class="btn btn-primary" onclick="processManualQR()" style="margin-top: 0.5rem; width: 100%;">Process Manual Entry</button>
+            </div>
+        </div>
+        
         <!-- Enhanced Play Section -->
         <div id="play-section" class="hidden">
             <div class="scan-container">
-                <div id="reader"></div>
+                <div id="play-reader"></div>
                 <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="startScanning()">Start Scanning</button>
-                    <button class="btn btn-secondary" onclick="stopScanning()">Stop</button>
+                    <button class="btn btn-primary" onclick="startPlayScanning()">Start Scanning</button>
+                    <button class="btn btn-secondary" onclick="stopPlayScanning()">Stop</button>
                 </div>
                 <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #ecf0f1;">
-                    <p style="text-align: center; color: #7f8c8d; margin-bottom: 0.5rem;">Or enter QR code manually:</p>
-                    <input type="text" id="manual-qr-input" placeholder="Enter QR code text (e.g., GAME:001)" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;" onkeypress="if(event.key==='Enter')processManualQR()">
-                    <button class="btn btn-primary" onclick="processManualQR()" style="margin-top: 0.5rem; width: 100%;">Process Manual Entry</button>
+                    <p style="text-align: center; color: #7f8c8d; margin-bottom: 0.5rem;">Or enter game code manually:</p>
+                    <input type="text" id="play-manual-input" placeholder="Enter game code (e.g., GAME:001)" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;" onkeypress="if(event.key==='Enter')processPlayManualQR()">
+                    <button class="btn btn-primary" onclick="processPlayManualQR()" style="margin-top: 0.5rem; width: 100%;">Process Manual Entry</button>
                 </div>
             </div>
             
@@ -528,6 +642,16 @@
             </div>
         </div>
         
+        <!-- Search Section -->
+        <div id="search-section" class="search-container hidden">
+            <input type="text" id="search-input" class="search-input" placeholder="Search games by title, ID, or BGG ID..." onkeyup="performSearch()">
+            <div class="tabs" style="margin-top: 1rem;">
+                <button class="tab active" onclick="setSearchTab('all')">All Games</button>
+                <button class="tab" onclick="setSearchTab('available')">Available</button>
+                <button class="tab" onclick="setSearchTab('checked-out')">Checked Out</button>
+            </div>
+        </div>
+        
         <!-- Players Section -->
         <div id="players-section" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
@@ -537,6 +661,162 @@
             
             <div id="players-list">
                 <!-- Player cards will be added here dynamically -->
+            </div>
+        </div>
+        
+        <!-- Stats Section -->
+        <div id="stats-section" class="hidden">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-games">0</div>
+                    <div class="stat-label">Total Games</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="total-plays">0</div>
+                    <div class="stat-label">Total Plays</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="unique-played">0</div>
+                    <div class="stat-label">Games Played</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="checked-out">0</div>
+                    <div class="stat-label">Checked Out</div>
+                </div>
+            </div>
+            <div class="results">
+                <h3>Most Played Games</h3>
+                <div id="most-played-list"></div>
+            </div>
+            <div class="results" style="margin-top: 1rem;">
+                <h3>Never Played Games</h3>
+                <div id="never-played-list"></div>
+            </div>
+            <div style="margin-top: 1rem;">
+                <button class="btn btn-info" onclick="exportPlayHistory()">Export Play History (CSV)</button>
+                <button class="btn btn-info" onclick="exportInventory()">Export Inventory (CSV)</button>
+            </div>
+        </div>
+        
+        <!-- Bulk Operations Section -->
+        <div id="bulk-section" class="hidden">
+            <div class="search-container">
+                <h3>Select Games for Bulk Operations</h3>
+                <div style="margin-top: 1rem;">
+                    <button class="btn btn-primary" onclick="selectAllGames()">Select All</button>
+                    <button class="btn btn-secondary" onclick="deselectAllGames()">Deselect All</button>
+                </div>
+            </div>
+            <div id="bulk-actions" class="bulk-actions hidden">
+                <span id="selected-count">0 games selected</span>
+                <select id="bulk-bin-select" style="flex: 1;">
+                    <option value="">Select destination bin...</option>
+                </select>
+                <button class="btn btn-primary" onclick="bulkMove()">Move to Bin</button>
+                <button class="btn btn-secondary" onclick="bulkCheckout()">Check Out All</button>
+            </div>
+        </div>
+        
+        <!-- BGG Import Section -->
+        <div id="bgg-section" class="setup-section hidden">
+            <h3>🌐 BoardGameGeek Import</h3>
+            <input type="text" id="bgg-search" placeholder="Search BoardGameGeek for a game..." onkeypress="if(event.key==='Enter')searchBGG()">
+            <button class="btn btn-primary" onclick="searchBGG()" style="margin-top: 0.5rem;">Search BGG</button>
+            <p style="font-size: 0.875rem; color: #7f8c8d; margin-top: 0.5rem;">
+                Note: Without Apps Script setup, imports will generate data for copy/paste
+            </p>
+            
+            <div style="margin-top: 1rem;">
+                <h4>Or Import from BGG Collection</h4>
+                <input type="text" id="bgg-username" placeholder="BGG Username">
+                <button class="btn btn-primary" onclick="importBGGCollection()" style="margin-top: 0.5rem;">Import Collection</button>
+                <p style="font-size: 0.875rem; color: #7f8c8d; margin-top: 0.5rem;">
+                    Note: Due to Google API limitations, imports will generate data for you to copy/paste into your sheet
+                </p>
+            </div>
+            
+            <div id="bgg-results" class="results hidden" style="margin-top: 1rem;"></div>
+        </div>
+        
+        <!-- Settings Section -->
+        <div id="settings-section" class="setup-section hidden">
+            <h3>⚙️ Google Sheets Setup</h3>
+            <input type="text" id="spreadsheet-id" placeholder="Google Spreadsheet ID" />
+            <input type="text" id="api-key" placeholder="Google API Key" />
+            <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+            
+            <div style="margin-top: 1rem;">
+                <h4>📸 Photo Storage Settings</h4>
+                <input type="text" id="photo-folder-id" placeholder="Google Drive Folder ID for Photos" />
+                <button class="btn btn-primary" onclick="savePhotoSettings()">Save Photo Settings</button>
+            </div>
+            
+            <div class="setup-instructions">
+                <strong>Quick Setup:</strong><br>
+                1. Create a new Google Sheet<br>
+                2. Set up 4 sheets: "Games", "Bins", "PlayLog", "Players"<br>
+                3. In Games sheet: Columns A-E: Game ID, Title, Current Location, BGG ID, Photo URL<br>
+                4. In Bins sheet: Columns A-B: Bin ID, Description<br>
+                5. In PlayLog sheet: Columns A-G: Timestamp, Game ID, Players, Notes, Winner, Duration (minutes), Rating<br>
+                6. In Players sheet: Columns A-C: Name, Email, Color<br>
+                7. Share the sheet publicly or use API key<br>
+                8. Copy the Spreadsheet ID from the URL<br><br>
+                
+                <strong>📁 Using Google Drive QR Codes:</strong><br>
+                Your existing QR codes link to Google Drive folders. The system will automatically extract the folder ID and use it as the bin identifier.<br><br>
+                
+                <strong>📸 Photo Storage:</strong><br>
+                Create a Google Drive folder for game photos and share it publicly. Add the folder ID above to enable photo uploads.<br><br>
+                
+                <strong>⚠️ API Limitations:</strong><br>
+                Google Sheets API with an API key only allows reading data. Writing data (like adding games or logging plays) requires manual copy/paste or a more complex authentication setup. The system will generate the data for you to easily paste into your sheet.
+            </div>
+            
+            <div class="status-success" style="margin-top: 1rem; display: none;" id="first-time-notice">
+                <strong>🎉 First Time Setup Detected!</strong><br>
+                Your credentials have been pre-filled. Click "Save Settings" to connect to your Google Sheet.
+            </div>
+            
+            <div class="setup-section" style="margin-top: 1rem;">
+                <h4>🚀 Enable Automatic Updates (Optional)</h4>
+                <p>Want to skip the copy/paste? Set up a Google Apps Script:</p>
+                <details style="margin-top: 0.5rem;">
+                    <summary style="cursor: pointer; color: #3498db;">Click for instructions</summary>
+                    <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
+                        <ol style="text-align: left;">
+                            <li>Open your Google Sheet</li>
+                            <li>Go to Extensions → Apps Script</li>
+                            <li>Replace the code with this:
+                                <pre style="background: #2c3e50; color: white; padding: 1rem; border-radius: 4px; overflow-x: auto; font-size: 0.8rem; margin: 0.5rem 0;">
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet();
+  var data = JSON.parse(e.postData.contents);
+  
+  if (data.action === 'append') {
+    var targetSheet = sheet.getSheetByName(data.sheet);
+    targetSheet.appendRow(data.row);
+  } else if (data.action === 'update') {
+    var targetSheet = sheet.getSheetByName(data.sheet);
+    targetSheet.getRange(data.row, data.col).setValue(data.value);
+  }
+  
+  return ContentService.createTextOutput('Success');
+}
+
+function doGet() {
+  return ContentService.createTextOutput('BoardGame Tracker API Active');
+}</pre>
+                            </li>
+                            <li>Click Deploy → New Deployment</li>
+                            <li>Choose "Web app" as type</li>
+                            <li>Set "Execute as: Me" and "Who has access: Anyone"</li>
+                            <li>Copy the Web App URL</li>
+                            <li>Paste it below</li>
+                        </ol>
+                    </div>
+                </details>
+                <input type="text" id="apps-script-url" placeholder="Google Apps Script Web App URL (optional)" style="margin-top: 1rem;" />
+                <button class="btn btn-info" onclick="saveAppsScriptUrl()">Save Script URL</button>
             </div>
         </div>
         
@@ -573,20 +853,6 @@
             </div>
         </div>
         
-        <!-- Keep all other existing sections -->
-        <div id="scan-section" class="scan-container">
-            <div id="reader"></div>
-            <div class="action-buttons">
-                <button class="btn btn-primary" onclick="startScanning()">Start Scanning</button>
-                <button class="btn btn-secondary" onclick="stopScanning()">Stop</button>
-            </div>
-            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #ecf0f1;">
-                <p style="text-align: center; color: #7f8c8d; margin-bottom: 0.5rem;">Or enter QR code manually:</p>
-                <input type="text" id="manual-qr-input" placeholder="Enter QR code text (e.g., BIN:001)" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;" onkeypress="if(event.key==='Enter')processManualQR()">
-                <button class="btn btn-primary" onclick="processManualQR()" style="margin-top: 0.5rem; width: 100%;">Process Manual Entry</button>
-            </div>
-        </div>
-        
         <div id="workflow-state" class="workflow-state hidden"></div>
         
         <div id="status-message" class="hidden"></div>
@@ -595,21 +861,13 @@
             <h3>Results</h3>
             <div id="results-content"></div>
         </div>
-        
-        <!-- All other sections remain the same -->
     </main>
     
     <script>
         // Global variables
         let html5QrcodeScanner = null;
+        let playScanner = null;
         let currentMode = 'view';
-        let allPlayers = [];
-        let selectedPlayers = new Set();
-        let currentGameId = null;
-        let currentGameTitle = null;
-        let selectedRating = 0;
-        
-        // All other existing variables remain
         let searchTab = 'all';
         let selectedGames = new Set();
         let allGames = [];
@@ -619,11 +877,22 @@
             gameId: null,
             gameTitle: null,
             binId: null,
-            step: 'game'
+            step: 'game' // 'game' or 'bin'
         };
+        
+        // Enhanced play logging variables
+        let allPlayers = [];
+        let selectedPlayers = new Set();
+        let currentGameId = null;
+        let currentGameTitle = null;
+        let selectedRating = 0;
         
         // Google Sheets API base URL
         const SHEETS_API_BASE = 'https://sheets.googleapis.com/v4/spreadsheets';
+        
+        // BoardGameGeek API (via CORS proxy)
+        const BGG_API_BASE = 'https://api.geekdo.com/xmlapi2';
+        const CORS_PROXY = 'https://corsproxy.io/?';
         
         // Initialize on load
         window.onload = function() {
@@ -657,14 +926,18 @@
             document.getElementById('scan-section').classList.add('hidden');
             document.getElementById('play-section').classList.add('hidden');
             document.getElementById('players-section').classList.add('hidden');
-            document.getElementById('search-section')?.classList.add('hidden');
-            document.getElementById('stats-section')?.classList.add('hidden');
-            document.getElementById('bulk-section')?.classList.add('hidden');
-            document.getElementById('bgg-section')?.classList.add('hidden');
-            document.getElementById('settings-section')?.classList.add('hidden');
+            document.getElementById('search-section').classList.add('hidden');
+            document.getElementById('stats-section').classList.add('hidden');
+            document.getElementById('bulk-section').classList.add('hidden');
+            document.getElementById('bgg-section').classList.add('hidden');
+            document.getElementById('settings-section').classList.add('hidden');
             
             // Show relevant sections
             switch(mode) {
+                case 'search':
+                    document.getElementById('search-section').classList.remove('hidden');
+                    loadAllGames();
+                    break;
                 case 'play':
                     document.getElementById('play-section').classList.remove('hidden');
                     break;
@@ -672,9 +945,819 @@
                     document.getElementById('players-section').classList.remove('hidden');
                     displayPlayers();
                     break;
+                case 'stats':
+                    document.getElementById('stats-section').classList.remove('hidden');
+                    loadStatistics();
+                    break;
+                case 'bulk':
+                    document.getElementById('bulk-section').classList.remove('hidden');
+                    loadBulkOperations();
+                    break;
+                case 'bgg':
+                    document.getElementById('bgg-section').classList.remove('hidden');
+                    break;
+                case 'settings':
+                    document.getElementById('settings-section').classList.remove('hidden');
+                    break;
                 default:
                     document.getElementById('scan-section').classList.remove('hidden');
                     updateUIForMode();
+            }
+        }
+        
+        function updateUIForMode() {
+            if (currentMode === 'checkout') {
+                showWorkflowState('Step 1: Scan the game QR code');
+            } else if (currentMode === 'checkin') {
+                showWorkflowState('Step 1: Scan the game QR code');
+            }
+        }
+        
+        // Search functionality
+        function setSearchTab(tab) {
+            searchTab = tab;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            performSearch();
+        }
+        
+        async function performSearch() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const games = await loadAllGames();
+            
+            let filtered = games;
+            
+            // Filter by tab
+            if (searchTab === 'available') {
+                filtered = games.filter(g => g.location !== 'CHECKED_OUT');
+            } else if (searchTab === 'checked-out') {
+                filtered = games.filter(g => g.location === 'CHECKED_OUT');
+            }
+            
+            // Filter by search query
+            if (query) {
+                filtered = filtered.filter(g => 
+                    g.title.toLowerCase().includes(query) ||
+                    g.id.toLowerCase().includes(query) ||
+                    (g.bggId && g.bggId.toLowerCase().includes(query))
+                );
+            }
+            
+            displaySearchResults(filtered);
+        }
+        
+        function displaySearchResults(games) {
+            const resultsDiv = document.getElementById('results');
+            const contentDiv = document.getElementById('results-content');
+            
+            contentDiv.innerHTML = `<h4>Found ${games.length} games</h4>`;
+            
+            games.forEach(game => {
+                const locationText = game.location === 'CHECKED_OUT' ? 'Checked Out' : `Bin: ${game.location}`;
+                contentDiv.innerHTML += `
+                    <div class="result-item">
+                        ${game.photoUrl ? `<img src="${game.photoUrl}" class="game-thumbnail" alt="${game.title}">` : ''}
+                        <div class="result-item-content">
+                            <div class="game-title">${game.title}</div>
+                            <div class="game-location">ID: ${game.id} • Location: ${locationText}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            resultsDiv.classList.remove('hidden');
+        }
+        
+        // Statistics functionality
+        async function loadStatistics() {
+            const games = await loadAllGames();
+            const plays = await loadPlayHistory();
+            
+            // Calculate stats
+            const totalGames = games.length;
+            const totalPlays = plays.length;
+            const checkedOut = games.filter(g => g.location === 'CHECKED_OUT').length;
+            
+            // Count plays per game
+            const playCounts = {};
+            plays.forEach(play => {
+                playCounts[play.gameId] = (playCounts[play.gameId] || 0) + 1;
+            });
+            
+            const uniquePlayed = Object.keys(playCounts).length;
+            
+            // Update stats display
+            document.getElementById('total-games').textContent = totalGames;
+            document.getElementById('total-plays').textContent = totalPlays;
+            document.getElementById('unique-played').textContent = uniquePlayed;
+            document.getElementById('checked-out').textContent = checkedOut;
+            
+            // Most played games
+            const mostPlayed = Object.entries(playCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+            
+            const mostPlayedDiv = document.getElementById('most-played-list');
+            mostPlayedDiv.innerHTML = '';
+            
+            for (const [gameId, count] of mostPlayed) {
+                const game = games.find(g => g.id === gameId);
+                if (game) {
+                    mostPlayedDiv.innerHTML += `
+                        <div class="result-item">
+                            <div class="result-item-content">
+                                <div class="game-title">${game.title}</div>
+                                <div class="game-location">${count} plays</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            // Never played games
+            const neverPlayed = games.filter(g => !playCounts[g.id]);
+            const neverPlayedDiv = document.getElementById('never-played-list');
+            neverPlayedDiv.innerHTML = '';
+            
+            neverPlayed.slice(0, 10).forEach(game => {
+                neverPlayedDiv.innerHTML += `
+                    <div class="result-item">
+                        <div class="result-item-content">
+                            <div class="game-title">${game.title}</div>
+                            <div class="game-location">ID: ${game.id}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        // Bulk operations
+        async function loadBulkOperations() {
+            const games = await loadAllGames();
+            const bins = await loadAllBins();
+            
+            // Populate bin selector
+            const binSelect = document.getElementById('bulk-bin-select');
+            binSelect.innerHTML = '<option value="">Select destination bin...</option>';
+            bins.forEach(bin => {
+                binSelect.innerHTML += `<option value="${bin.id}">${bin.description || bin.id}</option>`;
+            });
+            
+            // Display games with checkboxes
+            displayBulkGames(games);
+        }
+        
+        function displayBulkGames(games) {
+            const resultsDiv = document.getElementById('results');
+            const contentDiv = document.getElementById('results-content');
+            
+            contentDiv.innerHTML = '<h4>Select games for bulk operations</h4>';
+            
+            games.forEach(game => {
+                const checked = selectedGames.has(game.id) ? 'checked' : '';
+                contentDiv.innerHTML += `
+                    <div class="result-item">
+                        <input type="checkbox" id="bulk-${game.id}" ${checked} onchange="toggleGameSelection('${game.id}')">
+                        <div class="result-item-content">
+                            <div class="game-title">${game.title}</div>
+                            <div class="game-location">Current: ${game.location}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            resultsDiv.classList.remove('hidden');
+            updateBulkActions();
+        }
+        
+        function toggleGameSelection(gameId) {
+            if (selectedGames.has(gameId)) {
+                selectedGames.delete(gameId);
+            } else {
+                selectedGames.add(gameId);
+            }
+            updateBulkActions();
+        }
+        
+        function updateBulkActions() {
+            const count = selectedGames.size;
+            document.getElementById('selected-count').textContent = `${count} games selected`;
+            
+            if (count > 0) {
+                document.getElementById('bulk-actions').classList.remove('hidden');
+            } else {
+                document.getElementById('bulk-actions').classList.add('hidden');
+            }
+        }
+        
+        function selectAllGames() {
+            allGames.forEach(game => selectedGames.add(game.id));
+            displayBulkGames(allGames);
+        }
+        
+        function deselectAllGames() {
+            selectedGames.clear();
+            displayBulkGames(allGames);
+        }
+        
+        async function bulkMove() {
+            const binId = document.getElementById('bulk-bin-select').value;
+            if (!binId) {
+                showStatus('Please select a destination bin', 'error');
+                return;
+            }
+            
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            
+            showStatus(`Moving ${selectedGames.size} games...`, 'success');
+            
+            let moved = 0;
+            let failed = 0;
+            
+            for (const gameId of selectedGames) {
+                try {
+                    const result = await updateGameLocation(gameId, binId);
+                    if (result) {
+                        moved++;
+                    } else {
+                        failed++;
+                    }
+                } catch (error) {
+                    failed++;
+                }
+            }
+            
+            if (failed > 0 && !appsScriptUrl) {
+                showStatus(`Moved ${moved} games. ${failed} require manual update due to API limits.`, 'error');
+            } else {
+                showStatus(`Successfully moved ${selectedGames.size} games!`, 'success');
+            }
+            
+            selectedGames.clear();
+            loadBulkOperations();
+        }
+        
+        async function bulkCheckout() {
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            
+            showStatus(`Checking out ${selectedGames.size} games...`, 'success');
+            
+            let checkedOut = 0;
+            let failed = 0;
+            
+            for (const gameId of selectedGames) {
+                try {
+                    const locationResult = await updateGameLocation(gameId, 'CHECKED_OUT');
+                    const playResult = await logGamePlay(gameId);
+                    
+                    if (locationResult && playResult) {
+                        checkedOut++;
+                    } else {
+                        failed++;
+                    }
+                } catch (error) {
+                    failed++;
+                }
+            }
+            
+            if (failed > 0 && !appsScriptUrl) {
+                showStatus(`Checked out ${checkedOut} games. ${failed} require manual update due to API limits.`, 'error');
+            } else {
+                showStatus(`Successfully checked out ${selectedGames.size} games!`, 'success');
+            }
+            
+            selectedGames.clear();
+            loadBulkOperations();
+        }
+        
+        // BGG Integration
+        async function searchBGG() {
+            const query = document.getElementById('bgg-search').value;
+            if (!query) {
+                showStatus('Please enter a game name to search', 'error');
+                return;
+            }
+            
+            showStatus('Searching BoardGameGeek...', 'success');
+            
+            try {
+                const response = await fetch(`${CORS_PROXY}${BGG_API_BASE}/search?query=${encodeURIComponent(query)}&type=boardgame`);
+                const text = await response.text();
+                
+                // Parse XML response
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(text, 'text/xml');
+                const items = xml.querySelectorAll('item');
+                
+                const results = Array.from(items).slice(0, 10).map(item => ({
+                    id: item.getAttribute('id'),
+                    name: item.querySelector('name[type="primary"]')?.getAttribute('value') || '',
+                    year: item.querySelector('yearpublished')?.getAttribute('value') || ''
+                }));
+                
+                displayBGGResults(results);
+            } catch (error) {
+                showStatus('Error searching BGG: ' + error.message, 'error');
+            }
+        }
+        
+        function displayBGGResults(results) {
+            const resultsDiv = document.getElementById('bgg-results');
+            resultsDiv.innerHTML = '<h4>BoardGameGeek Search Results</h4>';
+            
+            results.forEach(game => {
+                resultsDiv.innerHTML += `
+                    <div class="result-item">
+                        <div class="result-item-content">
+                            <div class="game-title">${game.name} ${game.year ? `(${game.year})` : ''}</div>
+                            <div class="game-location">BGG ID: ${game.id}</div>
+                        </div>
+                        <button class="btn btn-primary" onclick="importBGGGame('${game.id}', '${game.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')">Import</button>
+                    </div>
+                `;
+            });
+            
+            resultsDiv.classList.remove('hidden');
+        }
+        
+        async function importBGGGame(bggId, name) {
+            const gameId = `GAME:BGG${bggId}`;
+            showStatus(`Importing ${name}...`, 'success');
+            
+            try {
+                // Fetch detailed game info from BGG
+                const response = await fetch(`${CORS_PROXY}${BGG_API_BASE}/thing?id=${bggId}`);
+                const text = await response.text();
+                
+                // Parse XML response
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(text, 'text/xml');
+                const item = xml.querySelector('item');
+                
+                const thumbnail = item.querySelector('thumbnail')?.textContent || '';
+                
+                // Check if game already exists
+                const existingGames = await loadAllGames();
+                const exists = existingGames.some(g => g.bggId === bggId || g.id === gameId);
+                
+                if (exists) {
+                    showStatus('Game already exists in your collection', 'error');
+                    return;
+                }
+                
+                // Ask for bin location
+                const bins = await loadAllBins();
+                let binOptions = '<option value="NEW">Add to inventory (no bin)</option>';
+                bins.forEach(bin => {
+                    binOptions += `<option value="${bin.id}">${bin.description || bin.id}</option>`;
+                });
+                
+                const resultsDiv = document.getElementById('bgg-results');
+                resultsDiv.innerHTML = `
+                    <h4>Import Game Details</h4>
+                    <div class="result-item">
+                        ${thumbnail ? `<img src="${thumbnail}" class="game-thumbnail" alt="${name}">` : ''}
+                        <div class="result-item-content">
+                            <div class="game-title">${name}</div>
+                            <div class="game-location">BGG ID: ${bggId}</div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 1rem;">Select location:</p>
+                    <select id="import-game-bin" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+                        ${binOptions}
+                    </select>
+                    <button class="btn btn-primary" onclick="confirmSingleGameImport('${gameId}', '${name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}', '${bggId}', '${thumbnail}')" style="width: 100%;">Add to Collection</button>
+                `;
+                
+            } catch (error) {
+                showStatus('Error fetching game details: ' + error.message, 'error');
+            }
+        }
+        
+        async function confirmSingleGameImport(gameId, name, bggId, thumbnail) {
+            const binId = document.getElementById('import-game-bin').value;
+            const location = binId === 'NEW' ? 'NEW' : binId;
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            
+            try {
+                // Create game data
+                const gameData = [
+                    gameId,      // Game ID
+                    name,        // Title
+                    location,    // Current Location
+                    bggId,       // BGG ID
+                    thumbnail    // Photo URL
+                ];
+                
+                // If Apps Script is available, use it
+                if (appsScriptUrl) {
+                    showStatus('Adding game to collection...', 'success');
+                    
+                    await fetch(appsScriptUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'append',
+                            sheet: 'Games',
+                            row: gameData
+                        })
+                    });
+                    
+                    showStatus(`Successfully added ${name} to your collection!`, 'success');
+                    document.getElementById('bgg-results').innerHTML = '';
+                    document.getElementById('bgg-search').value = '';
+                    return;
+                }
+                
+                // Otherwise, show copy instructions
+                const csvRow = gameData.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',');
+                
+                // Display copy instructions
+                const resultsDiv = document.getElementById('bgg-results');
+                resultsDiv.innerHTML = `
+                    <h4>Add Game to Collection</h4>
+                    <div class="result-item">
+                        ${thumbnail ? `<img src="${thumbnail}" class="game-thumbnail" alt="${name}">` : ''}
+                        <div class="result-item-content">
+                            <div class="game-title">${name}</div>
+                            <div class="game-location">Location: ${location}</div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 1rem;">Copy this row and paste it into your Games sheet:</p>
+                    <textarea style="width: 100%; height: 60px; margin: 0.5rem 0; font-family: monospace; font-size: 0.8rem;" readonly>${csvRow}</textarea>
+                    <button class="btn btn-primary" onclick="copySingleGameData()" style="width: 100%;">Copy to Clipboard</button>
+                `;
+                
+                // Store for copy function
+                window.singleGameCSV = csvRow;
+                
+            } catch (error) {
+                showStatus('Error preparing game data: ' + error.message, 'error');
+            }
+        }
+        
+        function copySingleGameData() {
+            const textarea = document.querySelector('#bgg-results textarea');
+            textarea.select();
+            document.execCommand('copy');
+            showStatus('Game data copied! Paste it into the first empty row of your Games sheet.', 'success');
+        }
+        
+        async function importBGGCollection() {
+            const username = document.getElementById('bgg-username').value;
+            if (!username) {
+                showStatus('Please enter a BGG username', 'error');
+                return;
+            }
+            
+            showStatus(`Loading collection for ${username}...`, 'success');
+            
+            try {
+                // BGG API requires a retry mechanism as it returns 202 while processing
+                let response;
+                let attempts = 0;
+                const maxAttempts = 10;
+                
+                do {
+                    response = await fetch(`${CORS_PROXY}${BGG_API_BASE}/collection?username=${username}&own=1`);
+                    if (response.status === 202) {
+                        // BGG is still processing, wait and retry
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        attempts++;
+                    }
+                } while (response.status === 202 && attempts < maxAttempts);
+                
+                if (response.status === 202) {
+                    showStatus('BGG is taking too long to process. Please try again.', 'error');
+                    return;
+                }
+                
+                const text = await response.text();
+                
+                // Parse XML response
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(text, 'text/xml');
+                const items = xml.querySelectorAll('item');
+                
+                if (items.length === 0) {
+                    showStatus('No games found in collection', 'error');
+                    return;
+                }
+                
+                showStatus(`Found ${items.length} games. Importing...`, 'success');
+                
+                // Display import options
+                const resultsDiv = document.getElementById('bgg-results');
+                resultsDiv.innerHTML = `
+                    <h4>Import ${items.length} Games from BGG</h4>
+                    <p>Select a bin for imported games:</p>
+                    <select id="import-bin-select" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
+                        <option value="IMPORTED">Create new "IMPORTED" location</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="confirmBGGImport('${username.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')" style="width: 100%;">Confirm Import</button>
+                `;
+                
+                // Load existing bins
+                const bins = await loadAllBins();
+                const binSelect = document.getElementById('import-bin-select');
+                bins.forEach(bin => {
+                    binSelect.innerHTML += `<option value="${bin.id}">${bin.description || bin.id}</option>`;
+                });
+                
+                resultsDiv.classList.remove('hidden');
+                
+            } catch (error) {
+                showStatus('Error loading collection: ' + error.message, 'error');
+            }
+        }
+        
+        async function confirmBGGImport(username) {
+            const binId = document.getElementById('import-bin-select').value;
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            
+            showStatus('Preparing import data...', 'success');
+            
+            try {
+                // Fetch collection again
+                let response;
+                let attempts = 0;
+                const maxAttempts = 10;
+                
+                do {
+                    response = await fetch(`${CORS_PROXY}${BGG_API_BASE}/collection?username=${username}&own=1`);
+                    if (response.status === 202) {
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        attempts++;
+                    }
+                } while (response.status === 202 && attempts < maxAttempts);
+                
+                const text = await response.text();
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(text, 'text/xml');
+                const items = xml.querySelectorAll('item');
+                
+                // Get existing games to check for duplicates
+                const existingGames = await loadAllGames();
+                const existingBGGIds = new Set(existingGames.map(g => g.bggId).filter(id => id));
+                
+                let imported = 0;
+                let skipped = 0;
+                const importData = [];
+                
+                // Process each game
+                for (const item of items) {
+                    const bggId = item.getAttribute('objectid');
+                    const name = item.querySelector('name').textContent;
+                    const thumbnail = item.querySelector('thumbnail')?.textContent || '';
+                    
+                    // Check if already exists
+                    if (existingBGGIds.has(bggId)) {
+                        skipped++;
+                        continue;
+                    }
+                    
+                    // Create row data for spreadsheet
+                    importData.push([
+                        `GAME:BGG${bggId}`,  // Game ID
+                        name,                 // Title
+                        binId,               // Current Location
+                        bggId,               // BGG ID
+                        thumbnail            // Photo URL
+                    ]);
+                    imported++;
+                }
+                
+                if (importData.length === 0) {
+                    showStatus('No new games to import (all games already in collection)', 'error');
+                    return;
+                }
+                
+                // If Apps Script is available, use it for automatic import
+                if (appsScriptUrl) {
+                    showStatus(`Importing ${importData.length} games automatically...`, 'success');
+                    
+                    // Import in batches to avoid timeout
+                    const batchSize = 10;
+                    for (let i = 0; i < importData.length; i += batchSize) {
+                        const batch = importData.slice(i, i + batchSize);
+                        
+                        for (const gameData of batch) {
+                            await fetch(appsScriptUrl, {
+                                method: 'POST',
+                                mode: 'no-cors',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    action: 'append',
+                                    sheet: 'Games',
+                                    row: gameData
+                                })
+                            });
+                        }
+                        
+                        const progress = Math.min(i + batchSize, importData.length);
+                        showStatus(`Imported ${progress} of ${importData.length} games...`, 'success');
+                    }
+                    
+                    showStatus(`Import complete! Added ${imported} games. ${skipped} duplicates skipped.`, 'success');
+                    document.getElementById('bgg-results').classList.add('hidden');
+                    return;
+                }
+                
+                // Otherwise, generate CSV for manual import
+                let csvContent = importData.map(row => 
+                    row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')
+                ).join('\n');
+                
+                // Display import instructions
+                const resultsDiv = document.getElementById('bgg-results');
+                resultsDiv.innerHTML = `
+                    <h4>Import Instructions</h4>
+                    <p>Due to Google Sheets API limitations, you'll need to paste this data manually:</p>
+                    <ol style="text-align: left; margin: 1rem 0;">
+                        <li>Click "Copy Data" below</li>
+                        <li>Open your Google Sheet</li>
+                        <li>Go to the Games sheet</li>
+                        <li>Click on the first empty row</li>
+                        <li>Paste (Ctrl+V or Cmd+V)</li>
+                    </ol>
+                    <p><strong>${imported} games ready to import</strong> (${skipped} skipped as duplicates)</p>
+                    <textarea id="import-data" style="width: 100%; height: 200px; margin: 1rem 0; font-family: monospace; font-size: 0.8rem;" readonly>${csvContent}</textarea>
+                    <button class="btn btn-primary" onclick="copyImportData()" style="width: 100%;">Copy Data to Clipboard</button>
+                    <button class="btn btn-secondary" onclick="downloadImportCSV('${username}_games.csv')" style="width: 100%; margin-top: 0.5rem;">Download as CSV</button>
+                `;
+                
+                // Store data for download function
+                window.importCSVContent = csvContent;
+                
+            } catch (error) {
+                showStatus('Error preparing import: ' + error.message, 'error');
+            }
+        }
+        
+        function copyImportData() {
+            const textarea = document.getElementById('import-data');
+            textarea.select();
+            document.execCommand('copy');
+            showStatus('Data copied to clipboard! Now paste it into your Google Sheet.', 'success');
+        }
+        
+        function downloadImportCSV(filename) {
+            const csvContent = window.importCSVContent;
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', filename);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            showStatus('CSV file downloaded!', 'success');
+        }
+        
+        // Export functions
+        function exportPlayHistory() {
+            const plays = playHistory;
+            let csv = 'Timestamp,Game ID,Game Title,Players,Notes,Winner,Duration,Rating\n';
+            
+            plays.forEach(play => {
+                const game = allGames.find(g => g.id === play.gameId);
+                csv += `"${play.timestamp}","${play.gameId}","${game?.title || ''}","${play.players || ''}","${play.notes || ''}","${play.winner || ''}","${play.duration || ''}","${play.rating || ''}"\n`;
+            });
+            
+            downloadCSV(csv, 'play_history.csv');
+        }
+        
+        function exportInventory() {
+            const games = allGames;
+            let csv = 'Game ID,Title,Current Location,BGG ID,Photo URL\n';
+            
+            games.forEach(game => {
+                csv += `"${game.id}","${game.title}","${game.location}","${game.bggId || ''}","${game.photoUrl || ''}"\n`;
+            });
+            
+            downloadCSV(csv, 'game_inventory.csv');
+        }
+        
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', filename);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+        
+        // Data loading functions
+        async function loadAllGames() {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            
+            if (!spreadsheetId || !apiKey) {
+                return [];
+            }
+            
+            try {
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:E?key=${apiKey}`
+                );
+                
+                const data = await response.json();
+                const rows = data.values || [];
+                
+                allGames = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const [gameId, title, location, bggId, photoUrl] = rows[i];
+                    allGames.push({
+                        id: gameId,
+                        title: title || 'Unknown Game',
+                        location: location || 'Unknown',
+                        bggId: bggId || '',
+                        photoUrl: photoUrl || ''
+                    });
+                }
+                
+                return allGames;
+            } catch (error) {
+                console.error('Error loading games:', error);
+                return [];
+            }
+        }
+        
+        async function loadAllBins() {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            
+            if (!spreadsheetId || !apiKey) {
+                return [];
+            }
+            
+            try {
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Bins!A:B?key=${apiKey}`
+                );
+                
+                const data = await response.json();
+                const rows = data.values || [];
+                
+                allBins = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const [binId, description] = rows[i];
+                    allBins.push({
+                        id: binId,
+                        description: description || ''
+                    });
+                }
+                
+                return allBins;
+            } catch (error) {
+                console.error('Error loading bins:', error);
+                return [];
+            }
+        }
+        
+        async function loadPlayHistory() {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            
+            if (!spreadsheetId || !apiKey) {
+                return [];
+            }
+            
+            try {
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/PlayLog!A:G?key=${apiKey}`
+                );
+                
+                const data = await response.json();
+                const rows = data.values || [];
+                
+                playHistory = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const [timestamp, gameId, players, notes, winner, duration, rating] = rows[i];
+                    playHistory.push({
+                        timestamp,
+                        gameId,
+                        players: players || '',
+                        notes: notes || '',
+                        winner: winner || '',
+                        duration: parseInt(duration) || 0,
+                        rating: parseInt(rating) || 0
+                    });
+                }
+                
+                return playHistory;
+            } catch (error) {
+                console.error('Error loading play history:', error);
+                return [];
             }
         }
         
@@ -931,44 +2014,6 @@
             });
         }
         
-        async function handleLogPlay(data) {
-            if (data.type !== 'GAME') {
-                showStatus('Please scan a game QR code', 'error');
-                return;
-            }
-            
-            try {
-                const gameInfo = await getGameInfo(data.id);
-                if (!gameInfo) {
-                    showStatus('Game not found in inventory', 'error');
-                    return;
-                }
-                
-                currentGameId = data.id;
-                currentGameTitle = gameInfo.title;
-                
-                // Show the enhanced play form
-                document.getElementById('play-form-title').textContent = `Log Play: ${gameInfo.title}`;
-                document.getElementById('play-form-container').classList.remove('hidden');
-                
-                // Initialize form
-                selectedPlayers.clear();
-                selectedRating = 0;
-                updatePlayerSelect();
-                updateRatingDisplay();
-                initRatingStars();
-                
-                // Clear form fields
-                document.getElementById('winner-select').value = '';
-                document.getElementById('duration-hours').value = '';
-                document.getElementById('duration-minutes').value = '';
-                document.getElementById('play-notes').value = '';
-                
-            } catch (error) {
-                showStatus('Error loading game: ' + error.message, 'error');
-            }
-        }
-        
         async function submitPlayLog() {
             if (selectedPlayers.size === 0) {
                 showStatus('Please select at least one player', 'error');
@@ -1042,46 +2087,145 @@
             selectedRating = 0;
         }
         
-        // Updated loadPlayHistory to include new fields
-        async function loadPlayHistory() {
-            const spreadsheetId = localStorage.getItem('spreadsheetId');
-            const apiKey = localStorage.getItem('apiKey');
-            
-            if (!spreadsheetId || !apiKey) {
-                return [];
+        // QR Code processing
+        function processManualQR() {
+            const input = document.getElementById('manual-qr-input').value.trim();
+            if (!input) {
+                showStatus('Please enter a QR code value', 'error');
+                return;
             }
             
-            try {
-                const response = await fetch(
-                    `${SHEETS_API_BASE}/${spreadsheetId}/values/PlayLog!A:G?key=${apiKey}`
-                );
-                
-                const data = await response.json();
-                const rows = data.values || [];
-                
-                playHistory = [];
-                for (let i = 1; i < rows.length; i++) {
-                    const [timestamp, gameId, players, notes, winner, duration, rating] = rows[i];
-                    playHistory.push({
-                        timestamp,
-                        gameId,
-                        players: players || '',
-                        notes: notes || '',
-                        winner: winner || '',
-                        duration: parseInt(duration) || 0,
-                        rating: parseInt(rating) || 0
-                    });
+            console.log('Processing manual QR entry:', input);
+            
+            // Process it as if it was scanned
+            onScanSuccess(input, null);
+            
+            // Clear the input
+            document.getElementById('manual-qr-input').value = '';
+        }
+        
+        function processPlayManualQR() {
+            const input = document.getElementById('play-manual-input').value.trim();
+            if (!input) {
+                showStatus('Please enter a game code', 'error');
+                return;
+            }
+            
+            console.log('Processing manual game entry:', input);
+            
+            // Process it as if it was scanned
+            onScanSuccess(input, null);
+            
+            // Clear the input
+            document.getElementById('play-manual-input').value = '';
+        }
+        
+        // QR Code Scanning
+        function startScanning() {
+            // Check if library is loaded
+            if (typeof Html5Qrcode === 'undefined') {
+                showStatus('QR scanner library not loaded. Please refresh the page.', 'error');
+                console.error('Html5Qrcode library not found');
+                return;
+            }
+            
+            console.log('Starting camera scan...');
+            showStatus('Initializing camera...', 'success');
+            
+            const config = { 
+                fps: 10, 
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1.0
+            };
+            
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            
+            html5QrcodeScanner.start(
+                { facingMode: "environment" },
+                config,
+                (decodedText, decodedResult) => {
+                    console.log('Scan successful:', decodedText);
+                    onScanSuccess(decodedText, decodedResult);
+                },
+                (errorMessage) => {
+                    // Silent fail during scanning
                 }
-                
-                return playHistory;
-            } catch (error) {
-                console.error('Error loading play history:', error);
-                return [];
+            ).then(() => {
+                console.log('Camera started successfully');
+                showStatus('Camera ready - point at QR code', 'success');
+            }).catch(err => {
+                console.error('Camera error:', err);
+                let errorMsg = 'Unable to access camera. ';
+                if (err.name === 'NotAllowedError') {
+                    errorMsg += 'Please allow camera permissions and refresh the page.';
+                } else if (err.name === 'NotFoundError') {
+                    errorMsg += 'No camera found on this device.';
+                } else {
+                    errorMsg += err.message || 'Please check permissions.';
+                }
+                showStatus(errorMsg, 'error');
+            });
+        }
+        
+        function stopScanning() {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    html5QrcodeScanner.clear();
+                }).catch(err => console.error(err));
             }
         }
         
-        // QR Code processing - Update to handle play mode
+        function startPlayScanning() {
+            if (typeof Html5Qrcode === 'undefined') {
+                showStatus('QR scanner library not loaded. Please refresh the page.', 'error');
+                return;
+            }
+            
+            showStatus('Initializing camera...', 'success');
+            
+            const config = { 
+                fps: 10, 
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1.0
+            };
+            
+            playScanner = new Html5Qrcode("play-reader");
+            
+            playScanner.start(
+                { facingMode: "environment" },
+                config,
+                (decodedText, decodedResult) => {
+                    console.log('Play scan successful:', decodedText);
+                    onScanSuccess(decodedText, decodedResult);
+                },
+                (errorMessage) => {
+                    // Silent fail during scanning
+                }
+            ).then(() => {
+                showStatus('Camera ready - point at game QR code', 'success');
+            }).catch(err => {
+                let errorMsg = 'Unable to access camera. ';
+                if (err.name === 'NotAllowedError') {
+                    errorMsg += 'Please allow camera permissions and refresh the page.';
+                } else if (err.name === 'NotFoundError') {
+                    errorMsg += 'No camera found on this device.';
+                } else {
+                    errorMsg += err.message || 'Please check permissions.';
+                }
+                showStatus(errorMsg, 'error');
+            });
+        }
+        
+        function stopPlayScanning() {
+            if (playScanner) {
+                playScanner.stop().then(() => {
+                    playScanner.clear();
+                }).catch(err => console.error(err));
+            }
+        }
+        
         function onScanSuccess(decodedText, decodedResult) {
+            // Parse QR code data
             const data = parseQRCode(decodedText);
             
             if (!data) {
@@ -1106,10 +2250,579 @@
             }
         }
         
-        // Keep all other existing functions...
-        // [Include all the remaining functions from the original code]
+        function parseQRCode(text) {
+            // Handle multiple QR code formats
+            text = text.trim();
+            console.log('Parsing QR code:', text);
+            
+            // Format 0: Google Drive URLs - Extract folder ID
+            if (text.includes('drive.google.com')) {
+                // Extract folder ID from various Google Drive URL formats
+                let folderId = null;
+                
+                // Format: https://drive.google.com/drive/folders/FOLDER_ID
+                const folderMatch = text.match(/\/folders\/([a-zA-Z0-9-_]+)/);
+                if (folderMatch) {
+                    folderId = folderMatch[1];
+                }
+                
+                // Format: https://drive.google.com/open?id=FOLDER_ID
+                if (!folderId) {
+                    const openMatch = text.match(/[?&]id=([a-zA-Z0-9-_]+)/);
+                    if (openMatch) {
+                        folderId = openMatch[1];
+                    }
+                }
+                
+                if (folderId) {
+                    return {
+                        type: 'BIN',
+                        id: folderId,
+                        isGoogleDrive: true
+                    };
+                }
+            }
+            
+            // Format 1: "TYPE:ID" (e.g., "BIN:001" or "GAME:BGG123")
+            if (text.includes(':')) {
+                const parts = text.split(':');
+                const type = parts[0].toUpperCase();
+                // Keep the full text as ID to match what's in the spreadsheet
+                return {
+                    type: type,
+                    id: text.toUpperCase()
+                };
+            }
+            
+            // Format 2: "Bin 001" or "bin 001" (space-separated)
+            const spaceMatch = text.match(/^(bin|game)\s+(.+)$/i);
+            if (spaceMatch) {
+                return {
+                    type: spaceMatch[1].toUpperCase(),
+                    id: spaceMatch[1].toUpperCase() + ':' + spaceMatch[2]
+                };
+            }
+            
+            // Format 3: Just numbers like "001" - assume it's a bin
+            if (/^\d+$/.test(text)) {
+                return {
+                    type: 'BIN',
+                    id: 'BIN:' + text.padStart(3, '0')
+                };
+            }
+            
+            // Format 4: "Bin001" or "Game001" (no space or separator)
+            const noSpaceMatch = text.match(/^(bin|game)(\d+)$/i);
+            if (noSpaceMatch) {
+                return {
+                    type: noSpaceMatch[1].toUpperCase(),
+                    id: noSpaceMatch[1].toUpperCase() + ':' + noSpaceMatch[2].padStart(3, '0')
+                };
+            }
+            
+            // Format 5: Other URL formats
+            if (text.includes('http')) {
+                // Extract any numbers or identifiers from URL
+                const urlMatch = text.match(/(?:bin|game)[:\s-]?(\d+)/i);
+                if (urlMatch) {
+                    return {
+                        type: text.toLowerCase().includes('game') ? 'GAME' : 'BIN',
+                        id: (text.toLowerCase().includes('game') ? 'GAME:' : 'BIN:') + urlMatch[1].padStart(3, '0')
+                    };
+                }
+            }
+            
+            // If no format matches, return null
+            console.log('QR code format not recognized');
+            return null;
+        }
         
-        // Settings Management - Update to show Players sheet setup
+        // Mode Handlers
+        async function handleViewBin(data) {
+            if (data.type !== 'BIN') {
+                showStatus('Please scan a bin QR code', 'error');
+                return;
+            }
+            
+            showStatus('Loading bin contents...', 'success');
+            
+            try {
+                const [games, binInfo] = await Promise.all([
+                    getGamesInBin(data.id),
+                    getBinInfo(data.id)
+                ]);
+                
+                displayBinContents(data.id, games, binInfo);
+            } catch (error) {
+                showStatus('Error loading bin contents: ' + error.message, 'error');
+            }
+        }
+        
+        async function handleLogPlay(data) {
+            if (data.type !== 'GAME') {
+                showStatus('Please scan a game QR code', 'error');
+                return;
+            }
+            
+            try {
+                const gameInfo = await getGameInfo(data.id);
+                if (!gameInfo) {
+                    showStatus('Game not found in inventory', 'error');
+                    return;
+                }
+                
+                currentGameId = data.id;
+                currentGameTitle = gameInfo.title;
+                
+                // Show the enhanced play form
+                document.getElementById('play-form-title').textContent = `Log Play: ${gameInfo.title}`;
+                document.getElementById('play-form-container').classList.remove('hidden');
+                
+                // Initialize form
+                selectedPlayers.clear();
+                selectedRating = 0;
+                updatePlayerSelect();
+                updateRatingDisplay();
+                initRatingStars();
+                
+                // Clear form fields
+                document.getElementById('winner-select').value = '';
+                document.getElementById('duration-hours').value = '';
+                document.getElementById('duration-minutes').value = '';
+                document.getElementById('play-notes').value = '';
+                
+            } catch (error) {
+                showStatus('Error loading game: ' + error.message, 'error');
+            }
+        }
+        
+        async function handleCheckout(data) {
+            if (checkoutWorkflow.step === 'game') {
+                if (data.type !== 'GAME') {
+                    showStatus('Please scan a game QR code', 'error');
+                    return;
+                }
+                
+                // Verify game exists
+                const gameInfo = await getGameInfo(data.id);
+                if (!gameInfo) {
+                    showStatus('Game not found in inventory', 'error');
+                    return;
+                }
+                
+                checkoutWorkflow.gameId = data.id;
+                checkoutWorkflow.gameTitle = gameInfo.title;
+                checkoutWorkflow.step = 'bin';
+                showWorkflowState(`Step 2: Now scan the bin QR code you're taking "${gameInfo.title}" FROM`);
+                
+            } else if (checkoutWorkflow.step === 'bin') {
+                if (data.type !== 'BIN') {
+                    showStatus('Please scan a bin QR code', 'error');
+                    return;
+                }
+                
+                checkoutWorkflow.binId = data.id;
+                
+                try {
+                    await updateGameLocation(checkoutWorkflow.gameId, 'CHECKED_OUT');
+                    
+                    // Show friendly bin identifier
+                    let binDisplay = checkoutWorkflow.binId;
+                    if (checkoutWorkflow.binId.length > 20 && !checkoutWorkflow.binId.includes(':')) {
+                        binDisplay = 'bin ' + checkoutWorkflow.binId.substring(0, 8) + '...';
+                    }
+                    
+                    showStatus(`✅ ${checkoutWorkflow.gameTitle} checked out from ${binDisplay}!`, 'success');
+                    
+                    // Log this as a play event too
+                    await logGamePlay(checkoutWorkflow.gameId);
+                    
+                    // Reset workflow
+                    checkoutWorkflow = { gameId: null, gameTitle: null, binId: null, step: 'game' };
+                    hideWorkflowState();
+                } catch (error) {
+                    showStatus('Error checking out game: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        async function handleCheckin(data) {
+            if (checkoutWorkflow.step === 'game') {
+                if (data.type !== 'GAME') {
+                    showStatus('Please scan a game QR code', 'error');
+                    return;
+                }
+                
+                // Verify game exists
+                const gameInfo = await getGameInfo(data.id);
+                if (!gameInfo) {
+                    showStatus('Game not found in inventory', 'error');
+                    return;
+                }
+                
+                checkoutWorkflow.gameId = data.id;
+                checkoutWorkflow.gameTitle = gameInfo.title;
+                checkoutWorkflow.step = 'bin';
+                showWorkflowState(`Step 2: Now scan the bin QR code you're putting "${gameInfo.title}" INTO`);
+                
+            } else if (checkoutWorkflow.step === 'bin') {
+                if (data.type !== 'BIN') {
+                    showStatus('Please scan a bin QR code', 'error');
+                    return;
+                }
+                
+                checkoutWorkflow.binId = data.id;
+                
+                try {
+                    await updateGameLocation(checkoutWorkflow.gameId, checkoutWorkflow.binId);
+                    
+                    // Show friendly bin identifier
+                    let binDisplay = checkoutWorkflow.binId;
+                    if (checkoutWorkflow.binId.length > 20 && !checkoutWorkflow.binId.includes(':')) {
+                        binDisplay = 'bin ' + checkoutWorkflow.binId.substring(0, 8) + '...';
+                    }
+                    
+                    showStatus(`✅ ${checkoutWorkflow.gameTitle} checked into ${binDisplay}!`, 'success');
+                    
+                    // Reset workflow
+                    checkoutWorkflow = { gameId: null, gameTitle: null, binId: null, step: 'game' };
+                    hideWorkflowState();
+                } catch (error) {
+                    showStatus('Error checking in game: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        // Google Sheets Integration
+        async function getGamesInBin(binId) {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            
+            if (!spreadsheetId || !apiKey) {
+                throw new Error('Please configure Google Sheets settings');
+            }
+            
+            try {
+                // Fetch all games from the Games sheet
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:E?key=${apiKey}`
+                );
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                const rows = data.values || [];
+                
+                // Skip header row and filter games in this bin
+                const gamesInBin = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const [gameId, title, location, bggId, photoUrl] = rows[i];
+                    if (location === binId) {
+                        gamesInBin.push({
+                            id: gameId,
+                            title: title || 'Unknown Game',
+                            location: location,
+                            bggId: bggId || '',
+                            photoUrl: photoUrl || ''
+                        });
+                    }
+                }
+                
+                return gamesInBin;
+            } catch (error) {
+                console.error('Error fetching games:', error);
+                throw error;
+            }
+        }
+        
+        async function getGameInfo(gameId) {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            
+            try {
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:E?key=${apiKey}`
+                );
+                
+                const data = await response.json();
+                const rows = data.values || [];
+                
+                // Find the game
+                for (let i = 1; i < rows.length; i++) {
+                    if (rows[i][0] === gameId) {
+                        return {
+                            id: rows[i][0],
+                            title: rows[i][1] || 'Unknown Game',
+                            location: rows[i][2] || 'Unknown',
+                            bggId: rows[i][3] || '',
+                            photoUrl: rows[i][4] || ''
+                        };
+                    }
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Error fetching game info:', error);
+                throw error;
+            }
+        }
+        
+        async function updateGameLocation(gameId, newLocation) {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            
+            try {
+                // First, find which row contains this game
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:A?key=${apiKey}`
+                );
+                
+                const data = await response.json();
+                const gameIds = data.values || [];
+                
+                let rowIndex = -1;
+                for (let i = 1; i < gameIds.length; i++) {
+                    if (gameIds[i][0] === gameId) {
+                        rowIndex = i + 1; // +1 because sheets are 1-indexed
+                        break;
+                    }
+                }
+                
+                if (rowIndex === -1) {
+                    throw new Error(`Game ${gameId} not found`);
+                }
+                
+                // If Apps Script URL is available, use it
+                if (appsScriptUrl) {
+                    const scriptResponse = await fetch(appsScriptUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'update',
+                            sheet: 'Games',
+                            row: rowIndex,
+                            col: 3, // Column C
+                            value: newLocation
+                        })
+                    });
+                    
+                    return true;
+                }
+                
+                // Otherwise try direct API update
+                const updateResponse = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!C${rowIndex}?valueInputOption=USER_ENTERED&key=${apiKey}`,
+                    {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            values: [[newLocation]]
+                        })
+                    }
+                );
+                
+                if (!updateResponse.ok) {
+                    // If write fails, provide manual instruction
+                    if (updateResponse.status === 401) {
+                        const gameInfo = await getGameInfo(gameId);
+                        showStatus(`Please update row ${rowIndex} in your Games sheet: Change location of "${gameInfo.title}" to "${newLocation}"`, 'error');
+                        return false;
+                    }
+                    throw new Error(`Failed to update location: ${updateResponse.status}`);
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Error updating game location:', error);
+                throw error;
+            }
+        }
+        
+        async function logGamePlay(gameId) {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            
+            try {
+                // Get game info first
+                const gameInfo = await getGameInfo(gameId);
+                if (!gameInfo) {
+                    throw new Error('Game not found');
+                }
+                
+                const timestamp = new Date().toLocaleString();
+                const playData = [timestamp, gameId, '', `Played ${gameInfo.title}`, '', '', ''];
+                
+                // If Apps Script URL is available, use it
+                if (appsScriptUrl) {
+                    const scriptResponse = await fetch(appsScriptUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'append',
+                            sheet: 'PlayLog',
+                            row: playData
+                        })
+                    });
+                    
+                    return true;
+                }
+                
+                // Otherwise try direct API append
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/PlayLog!A:G:append?valueInputOption=USER_ENTERED&key=${apiKey}`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            values: [playData]
+                        })
+                    }
+                );
+                
+                if (!response.ok) {
+                    // If write fails, provide manual instruction
+                    if (response.status === 401) {
+                        const csvRow = playData.map(cell => `"${cell}"`).join(',');
+                        showStatus(`Copy this play log entry: ${csvRow}`, 'error');
+                        console.log('Add this to PlayLog sheet:', csvRow);
+                        return false;
+                    }
+                    throw new Error(`Failed to log play: ${response.status}`);
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Error logging play:', error);
+                throw error;
+            }
+        }
+        
+        async function getBinInfo(binId) {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            
+            try {
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Bins!A:B?key=${apiKey}`
+                );
+                
+                const data = await response.json();
+                const rows = data.values || [];
+                
+                // Find the bin
+                for (let i = 1; i < rows.length; i++) {
+                    if (rows[i][0] === binId) {
+                        return {
+                            id: rows[i][0],
+                            description: rows[i][1] || 'No description'
+                        };
+                    }
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Error fetching bin info:', error);
+                throw error;
+            }
+        }
+        
+        // UI Helper Functions
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status-message');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message status-${type}`;
+            statusDiv.classList.remove('hidden');
+            
+            setTimeout(() => {
+                statusDiv.classList.add('hidden');
+            }, 5000);
+        }
+        
+        function showWorkflowState(message) {
+            const stateDiv = document.getElementById('workflow-state');
+            stateDiv.textContent = message;
+            stateDiv.classList.remove('hidden');
+        }
+        
+        function hideWorkflowState() {
+            document.getElementById('workflow-state').classList.add('hidden');
+        }
+        
+        function hideStatus() {
+            document.getElementById('status-message').classList.add('hidden');
+        }
+        
+        function hideResults() {
+            document.getElementById('results').classList.add('hidden');
+        }
+        
+        function displayBinContents(binId, games, binInfo) {
+            const resultsDiv = document.getElementById('results');
+            const contentDiv = document.getElementById('results-content');
+            
+            // For Google Drive IDs, show a shortened version
+            let displayId = binId;
+            if (binId.length > 20 && !binId.includes(':')) {
+                displayId = 'Bin ' + binId.substring(0, 8) + '...';
+            }
+            
+            const binDesc = binInfo ? binInfo.description : 'No description';
+            contentDiv.innerHTML = `<h4>📦 ${displayId}</h4><p style="color: #7f8c8d; margin-bottom: 1rem;">${binDesc}</p>`;
+            
+            if (games.length === 0) {
+                contentDiv.innerHTML += '<p style="text-align: center; color: #95a5a6; padding: 2rem;">No games currently in this bin</p>';
+            } else {
+                contentDiv.innerHTML += `<p style="margin-bottom: 1rem;">Found ${games.length} game${games.length !== 1 ? 's' : ''}:</p>`;
+                games.forEach(game => {
+                    contentDiv.innerHTML += `
+                        <div class="result-item">
+                            ${game.photoUrl ? `<img src="${game.photoUrl}" class="game-thumbnail" alt="${game.title}">` : ''}
+                            <div class="result-item-content">
+                                <div class="game-title">🎲 ${game.title}</div>
+                                <div class="game-location">ID: ${game.id}${game.bggId ? ' • BGG: ' + game.bggId : ''}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            resultsDiv.classList.remove('hidden');
+        }
+        
+        function displayGamePlayInfo(gameInfo) {
+            const resultsDiv = document.getElementById('results');
+            const contentDiv = document.getElementById('results-content');
+            
+            contentDiv.innerHTML = `
+                <h4>🎮 Game Played</h4>
+                <div class="result-item">
+                    ${gameInfo.photoUrl ? `<img src="${gameInfo.photoUrl}" class="game-thumbnail" alt="${gameInfo.title}">` : ''}
+                    <div class="result-item-content">
+                        <div class="game-title">${gameInfo.title}</div>
+                        <div class="game-location">Current Location: ${gameInfo.location}</div>
+                        ${gameInfo.bggId ? '<div class="game-location">BGG ID: ' + gameInfo.bggId + '</div>' : ''}
+                    </div>
+                </div>
+            `;
+            
+            resultsDiv.classList.remove('hidden');
+        }
+        
+        // Settings Management
         function saveSettings() {
             const spreadsheetId = document.getElementById('spreadsheet-id').value;
             const apiKey = document.getElementById('api-key').value;
@@ -1119,8 +2832,10 @@
                 localStorage.setItem('apiKey', apiKey);
                 showStatus('Settings saved successfully!', 'success');
                 
-                // Reload players
+                // Reload data
                 loadPlayers();
+                loadAllGames();
+                loadPlayHistory();
                 
                 // Test the connection
                 testConnection();
@@ -1129,32 +2844,80 @@
             }
         }
         
-        // Add this to your settings section HTML
-        function getSettingsHTML() {
-            return `
-                <div class="setup-section hidden" id="settings-section">
-                    <h3>⚙️ Google Sheets Setup</h3>
-                    <input type="text" id="spreadsheet-id" placeholder="Google Spreadsheet ID" />
-                    <input type="text" id="api-key" placeholder="Google API Key" />
-                    <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
-                    
-                    <div class="setup-instructions">
-                        <strong>Sheet Setup:</strong><br>
-                        1. Create these sheets in your Google Spreadsheet:<br>
-                        <strong>Games:</strong> A-E: Game ID, Title, Current Location, BGG ID, Photo URL<br>
-                        <strong>Bins:</strong> A-B: Bin ID, Description<br>
-                        <strong>PlayLog:</strong> A-G: Timestamp, Game ID, Players, Notes, Winner, Duration (minutes), Rating<br>
-                        <strong>Players:</strong> A-C: Name, Email, Color<br><br>
-                        
-                        2. Share the sheet publicly or use API key<br>
-                        3. Copy the Spreadsheet ID from the URL
-                    </div>
-                </div>
-            `;
+        function savePhotoSettings() {
+            const photoFolderId = document.getElementById('photo-folder-id').value;
+            
+            if (photoFolderId) {
+                localStorage.setItem('photoFolderId', photoFolderId);
+                showStatus('Photo settings saved successfully!', 'success');
+            } else {
+                showStatus('Please enter a folder ID', 'error');
+            }
         }
         
-        // Include all other existing functions from the original code...
-        // [parseQRCode, startScanning, stopScanning, handleViewBin, etc.]
+        async function testConnection() {
+            try {
+                const spreadsheetId = localStorage.getItem('spreadsheetId');
+                const apiKey = localStorage.getItem('apiKey');
+                
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}?key=${apiKey}`
+                );
+                
+                if (response.ok) {
+                    showStatus('✅ Successfully connected to Google Sheets!', 'success');
+                } else {
+                    showStatus('❌ Connection failed. Please check your settings.', 'error');
+                }
+            } catch (error) {
+                showStatus('❌ Connection error: ' + error.message, 'error');
+            }
+        }
+        
+        function saveAppsScriptUrl() {
+            const scriptUrl = document.getElementById('apps-script-url').value;
+            
+            if (scriptUrl) {
+                localStorage.setItem('appsScriptUrl', scriptUrl);
+                showStatus('Apps Script URL saved! Automatic updates are now enabled.', 'success');
+                
+                // Update header to show auto-update is enabled
+                const header = document.querySelector('h1');
+                header.innerHTML = '🎲 BoardGame Collection Manager <span style="font-size: 0.7rem; background: #27ae60; padding: 0.2rem 0.5rem; border-radius: 4px; margin-left: 0.5rem;">Auto-Update Enabled</span>';
+            } else {
+                localStorage.removeItem('appsScriptUrl');
+                showStatus('Apps Script URL removed', 'success');
+                
+                // Remove auto-update indicator
+                const header = document.querySelector('h1');
+                header.innerHTML = '🎲 BoardGame Collection Manager';
+            }
+        }
+        
+        function loadSettings() {
+            // Pre-fill with user's credentials
+            const savedSpreadsheetId = localStorage.getItem('spreadsheetId');
+            const savedApiKey = localStorage.getItem('apiKey');
+            const savedPhotoFolderId = localStorage.getItem('photoFolderId');
+            const savedAppsScriptUrl = localStorage.getItem('appsScriptUrl');
+            
+            // Always show the credentials in the fields
+            document.getElementById('spreadsheet-id').value = savedSpreadsheetId || '1jf1ub1x0y6oal1So5rUHVANip5WeoAaoQgDyEOPS3fM';
+            document.getElementById('api-key').value = savedApiKey || 'AIzaSyDMvS1WL5kEjfSgq2V1uKmlfvJIwSPfpqo';
+            document.getElementById('photo-folder-id').value = savedPhotoFolderId || '';
+            document.getElementById('apps-script-url').value = savedAppsScriptUrl || '';
+            
+            // Show first-time notice if credentials are not yet saved
+            if (!savedSpreadsheetId || !savedApiKey) {
+                document.getElementById('first-time-notice').style.display = 'block';
+            }
+            
+            // Update header to show if automatic updates are enabled
+            if (savedAppsScriptUrl) {
+                const header = document.querySelector('h1');
+                header.innerHTML = '🎲 BoardGame Collection Manager <span style="font-size: 0.7rem; background: #27ae60; padding: 0.2rem 0.5rem; border-radius: 4px; margin-left: 0.5rem;">Auto-Update Enabled</span>';
+            }
+        }
     </script>
 </body>
 </html>
