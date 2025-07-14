@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BoardGame Collection Manager - Enhanced</title>
+    <title>BoardGame Collection Manager</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // Fallback if primary CDN fails
         if (typeof Html5Qrcode === 'undefined') {
@@ -329,50 +330,37 @@
             border-bottom-color: #3498db;
         }
         
-        /* New styles for enhanced play logging */
-        .play-form {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 1rem;
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
         }
         
-        .form-group {
-            margin-bottom: 1rem;
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
         }
         
-        .form-group label {
-            display: block;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #2c3e50;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
+        .file-input-label {
+            padding: 0.5rem 1rem;
+            background-color: #3498db;
+            color: white;
             border-radius: 6px;
-            font-size: 1rem;
+            cursor: pointer;
+            display: inline-block;
+            font-size: 0.875rem;
         }
         
-        .form-group textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-        
+        /* New styles for advanced features */
         .player-select {
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
-            margin-top: 0.5rem;
+            margin: 1rem 0;
         }
         
         .player-chip {
-            background: #ecf0f1;
+            background: #e8f4f8;
             padding: 0.5rem 1rem;
             border-radius: 20px;
             cursor: pointer;
@@ -386,42 +374,36 @@
             border-color: #2980b9;
         }
         
-        .add-player-btn {
-            background: #27ae60;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            cursor: pointer;
-            border: none;
-            font-size: 0.875rem;
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 2rem 0;
         }
         
-        .duration-input {
+        .session-template {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
             display: flex;
-            gap: 0.5rem;
+            justify-content: space-between;
             align-items: center;
         }
         
-        .duration-input input {
-            width: 80px;
-        }
-        
-        .rating-stars {
+        .rating-input {
             display: flex;
             gap: 0.25rem;
-            font-size: 1.5rem;
-            margin-top: 0.5rem;
+            margin: 0.5rem 0;
         }
         
-        .rating-stars span {
+        .star {
+            font-size: 1.5rem;
             cursor: pointer;
             color: #ddd;
-            transition: color 0.2s;
         }
         
-        .rating-stars span:hover,
-        .rating-stars span.active {
-            color: #f39c12;
+        .star.filled {
+            color: #f1c40f;
         }
         
         .player-stats-card {
@@ -429,76 +411,21 @@
             border-radius: 12px;
             padding: 1.5rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 1rem;
+            margin: 1rem 0;
         }
         
-        .player-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: #3498db;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-bottom: 1rem;
+        .win-rate-bar {
+            height: 20px;
+            background: #ecf0f1;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0.5rem 0;
         }
         
-        .stats-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid #ecf0f1;
-        }
-        
-        .stats-row:last-child {
-            border-bottom: none;
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
+        .win-rate-fill {
             height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            animation: fadeIn 0.3s;
-        }
-        
-        .modal-content {
-            background-color: white;
-            margin: 10% auto;
-            padding: 2rem;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
-            animation: slideIn 0.3s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .close-modal {
-            float: right;
-            font-size: 1.5rem;
-            font-weight: bold;
-            cursor: pointer;
-            color: #7f8c8d;
-        }
-        
-        .close-modal:hover {
-            color: #2c3e50;
+            background: #27ae60;
+            transition: width 0.3s;
         }
         
         @media (max-width: 600px) {
@@ -531,10 +458,6 @@
                 <span class="icon">🎮</span>
                 <span>Log Play</span>
             </button>
-            <button class="mode-btn" onclick="setMode('players')">
-                <span class="icon">👥</span>
-                <span>Players</span>
-            </button>
             <button class="mode-btn" onclick="setMode('checkout')">
                 <span class="icon">📤</span>
                 <span>Check Out</span>
@@ -546,6 +469,14 @@
             <button class="mode-btn" onclick="setMode('stats')">
                 <span class="icon">📊</span>
                 <span>Stats</span>
+            </button>
+            <button class="mode-btn" onclick="setMode('players')">
+                <span class="icon">👥</span>
+                <span>Players</span>
+            </button>
+            <button class="mode-btn" onclick="setMode('sessions')">
+                <span class="icon">🎯</span>
+                <span>Sessions</span>
             </button>
             <button class="mode-btn" onclick="setMode('bulk')">
                 <span class="icon">📋</span>
@@ -575,71 +506,46 @@
             </div>
         </div>
         
-        <!-- Enhanced Play Section -->
-        <div id="play-section" class="hidden">
-            <div class="scan-container">
-                <div id="play-reader"></div>
-                <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="startPlayScanning()">Start Scanning</button>
-                    <button class="btn btn-secondary" onclick="stopPlayScanning()">Stop</button>
-                </div>
-                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #ecf0f1;">
-                    <p style="text-align: center; color: #7f8c8d; margin-bottom: 0.5rem;">Or enter game code manually:</p>
-                    <input type="text" id="play-manual-input" placeholder="Enter game code (e.g., GAME:001)" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;" onkeypress="if(event.key==='Enter')processPlayManualQR()">
-                    <button class="btn btn-primary" onclick="processPlayManualQR()" style="margin-top: 0.5rem; width: 100%;">Process Manual Entry</button>
+        <!-- Enhanced Play Logging Section -->
+        <div id="play-log-section" class="setup-section hidden">
+            <h3>🎮 Log Game Play</h3>
+            <p id="play-game-info" style="margin-bottom: 1rem;"></p>
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Players (comma-separated)</label>
+                <input type="text" id="play-players" placeholder="e.g., Alice, Bob, Charlie">
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Winner</label>
+                <input type="text" id="play-winner" placeholder="Enter winner's name">
+            </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Game Rating</label>
+                <div class="rating-input" id="play-rating">
+                    <span class="star" data-rating="1">☆</span>
+                    <span class="star" data-rating="2">☆</span>
+                    <span class="star" data-rating="3">☆</span>
+                    <span class="star" data-rating="4">☆</span>
+                    <span class="star" data-rating="5">☆</span>
                 </div>
             </div>
             
-            <div id="play-form-container" class="play-form hidden">
-                <h3 id="play-form-title">Log Game Play</h3>
-                
-                <div class="form-group">
-                    <label>Players</label>
-                    <div class="player-select" id="player-select">
-                        <!-- Player chips will be added here dynamically -->
-                    </div>
-                    <button class="add-player-btn" onclick="showAddPlayerModal()">+ Add New Player</button>
-                </div>
-                
-                <div class="form-group">
-                    <label>Winner</label>
-                    <select id="winner-select">
-                        <option value="">No winner / Cooperative game</option>
-                        <!-- Options will be populated based on selected players -->
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Game Duration</label>
-                    <div class="duration-input">
-                        <input type="number" id="duration-hours" min="0" max="24" placeholder="0">
-                        <span>hours</span>
-                        <input type="number" id="duration-minutes" min="0" max="59" placeholder="0">
-                        <span>minutes</span>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Your Rating</label>
-                    <div class="rating-stars" id="rating-stars">
-                        <span data-rating="1">⭐</span>
-                        <span data-rating="2">⭐</span>
-                        <span data-rating="3">⭐</span>
-                        <span data-rating="4">⭐</span>
-                        <span data-rating="5">⭐</span>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>Notes</label>
-                    <textarea id="play-notes" placeholder="Add any notes about this play session..."></textarea>
-                </div>
-                
-                <div class="action-buttons">
-                    <button class="btn btn-primary" onclick="submitPlayLog()">Save Play Log</button>
-                    <button class="btn btn-secondary" onclick="cancelPlayLog()">Cancel</button>
-                </div>
+            <div style="margin-bottom: 1rem;">
+                <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Session Template</label>
+                <select id="play-session-template">
+                    <option value="">No template</option>
+                </select>
             </div>
+            
+            <div style="margin-bottom: 1rem;">
+                <label style="font-weight: 600; display: block; margin-bottom: 0.5rem;">Notes</label>
+                <textarea id="play-notes" rows="3" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;"></textarea>
+            </div>
+            
+            <button class="btn btn-primary" onclick="confirmLogPlay()" style="width: 100%;">Log Play</button>
+            <button class="btn btn-secondary" onclick="cancelLogPlay()" style="width: 100%; margin-top: 0.5rem;">Cancel</button>
         </div>
         
         <!-- Search Section -->
@@ -652,49 +558,123 @@
             </div>
         </div>
         
-        <!-- Players Section -->
-        <div id="players-section" class="hidden">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <h2>Player Management</h2>
-                <button class="btn btn-primary" onclick="showAddPlayerModal()">+ Add Player</button>
+        <!-- Advanced Stats Section -->
+        <div id="stats-section" class="hidden">
+            <div class="tabs">
+                <button class="tab active" onclick="setStatsTab('overview')">Overview</button>
+                <button class="tab" onclick="setStatsTab('trends')">Play Trends</button>
+                <button class="tab" onclick="setStatsTab('ratings')">Ratings</button>
+                <button class="tab" onclick="setStatsTab('sessions')">Session Analysis</button>
             </div>
             
-            <div id="players-list">
-                <!-- Player cards will be added here dynamically -->
+            <div id="stats-overview" class="stats-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-games">0</div>
+                        <div class="stat-label">Total Games</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-plays">0</div>
+                        <div class="stat-label">Total Plays</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="unique-played">0</div>
+                        <div class="stat-label">Games Played</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="avg-players">0</div>
+                        <div class="stat-label">Avg Players/Game</div>
+                    </div>
+                </div>
+                <div class="results">
+                    <h3>Most Played Games</h3>
+                    <div id="most-played-list"></div>
+                </div>
+                <div class="results" style="margin-top: 1rem;">
+                    <h3>Never Played Games</h3>
+                    <div id="never-played-list"></div>
+                </div>
+            </div>
+            
+            <div id="stats-trends" class="stats-content hidden">
+                <div class="chart-container">
+                    <canvas id="trends-chart"></canvas>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <label>Time Period:</label>
+                    <select id="trends-period" onchange="updateTrendsChart()">
+                        <option value="week">Last Week</option>
+                        <option value="month" selected>Last Month</option>
+                        <option value="quarter">Last Quarter</option>
+                        <option value="year">Last Year</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div id="stats-ratings" class="stats-content hidden">
+                <div class="results">
+                    <h3>Top Rated Games</h3>
+                    <div id="top-rated-list"></div>
+                </div>
+                <div class="chart-container" style="margin-top: 2rem;">
+                    <canvas id="ratings-distribution"></canvas>
+                </div>
+            </div>
+            
+            <div id="stats-sessions" class="stats-content hidden">
+                <div class="results">
+                    <h3>Game Night Analysis</h3>
+                    <div id="session-stats"></div>
+                </div>
+                <div class="chart-container" style="margin-top: 2rem;">
+                    <canvas id="session-chart"></canvas>
+                </div>
+            </div>
+            
+            <div style="margin-top: 2rem;">
+                <button class="btn btn-info" onclick="exportPlayHistory()">Export Play History (CSV)</button>
+                <button class="btn btn-info" onclick="exportPlayerStats()">Export Player Stats (CSV)</button>
+                <button class="btn btn-info" onclick="exportInventory()">Export Inventory (CSV)</button>
             </div>
         </div>
         
-        <!-- Stats Section -->
-        <div id="stats-section" class="hidden">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-value" id="total-games">0</div>
-                    <div class="stat-label">Total Games</div>
+        <!-- Players Section -->
+        <div id="players-section" class="hidden">
+            <div class="search-container">
+                <h3>Player Statistics & Comparison</h3>
+                <p style="margin: 1rem 0;">Select players to compare:</p>
+                <div class="player-select" id="player-select-list"></div>
+            </div>
+            
+            <div id="player-comparison" class="hidden">
+                <div class="results">
+                    <h3>Head-to-Head Comparison</h3>
+                    <div id="h2h-stats"></div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="total-plays">0</div>
-                    <div class="stat-label">Total Plays</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="unique-played">0</div>
-                    <div class="stat-label">Games Played</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-value" id="checked-out">0</div>
-                    <div class="stat-label">Checked Out</div>
+                
+                <div class="chart-container" style="margin-top: 2rem;">
+                    <canvas id="player-comparison-chart"></canvas>
                 </div>
             </div>
-            <div class="results">
-                <h3>Most Played Games</h3>
-                <div id="most-played-list"></div>
+            
+            <div id="individual-player-stats"></div>
+        </div>
+        
+        <!-- Sessions Section -->
+        <div id="sessions-section" class="setup-section hidden">
+            <h3>🎯 Session Templates</h3>
+            
+            <div style="margin-bottom: 2rem;">
+                <h4>Create New Template</h4>
+                <input type="text" id="template-name" placeholder="Template name (e.g., Friday Night Group)">
+                <input type="text" id="template-players" placeholder="Regular players (comma-separated)" style="margin-top: 0.5rem;">
+                <textarea id="template-notes" placeholder="Notes about this group" rows="2" style="width: 100%; margin-top: 0.5rem; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;"></textarea>
+                <button class="btn btn-primary" onclick="createSessionTemplate()" style="margin-top: 0.5rem;">Create Template</button>
             </div>
-            <div class="results" style="margin-top: 1rem;">
-                <h3>Never Played Games</h3>
-                <div id="never-played-list"></div>
-            </div>
-            <div style="margin-top: 1rem;">
-                <button class="btn btn-info" onclick="exportPlayHistory()">Export Play History (CSV)</button>
-                <button class="btn btn-info" onclick="exportInventory()">Export Inventory (CSV)</button>
+            
+            <div>
+                <h4>Existing Templates</h4>
+                <div id="session-templates-list"></div>
             </div>
         </div>
         
@@ -722,20 +702,23 @@
             <h3>🌐 BoardGameGeek Import</h3>
             <input type="text" id="bgg-search" placeholder="Search BoardGameGeek for a game..." onkeypress="if(event.key==='Enter')searchBGG()">
             <button class="btn btn-primary" onclick="searchBGG()" style="margin-top: 0.5rem;">Search BGG</button>
-            <p style="font-size: 0.875rem; color: #7f8c8d; margin-top: 0.5rem;">
-                Note: Without Apps Script setup, imports will generate data for copy/paste
-            </p>
             
             <div style="margin-top: 1rem;">
                 <h4>Or Import from BGG Collection</h4>
                 <input type="text" id="bgg-username" placeholder="BGG Username">
                 <button class="btn btn-primary" onclick="importBGGCollection()" style="margin-top: 0.5rem;">Import Collection</button>
-                <p style="font-size: 0.875rem; color: #7f8c8d; margin-top: 0.5rem;">
-                    Note: Due to Google API limitations, imports will generate data for you to copy/paste into your sheet
-                </p>
             </div>
             
             <div id="bgg-results" class="results hidden" style="margin-top: 1rem;"></div>
+        </div>
+        
+        <div id="workflow-state" class="workflow-state hidden"></div>
+        
+        <div id="status-message" class="hidden"></div>
+        
+        <div id="results" class="results hidden">
+            <h3>Results</h3>
+            <div id="results-content"></div>
         </div>
         
         <!-- Settings Section -->
@@ -752,34 +735,22 @@
             </div>
             
             <div class="setup-instructions">
-                <strong>Quick Setup:</strong><br>
-                1. Create a new Google Sheet<br>
-                2. Set up 4 sheets: "Games", "Bins", "PlayLog", "Players"<br>
-                3. In Games sheet: Columns A-E: Game ID, Title, Current Location, BGG ID, Photo URL<br>
-                4. In Bins sheet: Columns A-B: Bin ID, Description<br>
-                5. In PlayLog sheet: Columns A-G: Timestamp, Game ID, Players, Notes, Winner, Duration (minutes), Rating<br>
-                6. In Players sheet: Columns A-C: Name, Email, Color<br>
-                7. Share the sheet publicly or use API key<br>
-                8. Copy the Spreadsheet ID from the URL<br><br>
+                <strong>Enhanced Sheet Setup:</strong><br>
+                Your PlayLog sheet now needs these columns:<br>
+                A: Timestamp<br>
+                B: Game ID<br>
+                C: Players (comma-separated)<br>
+                D: Notes<br>
+                E: Winner<br>
+                F: Rating (1-5)<br>
+                G: Session ID (optional)<br><br>
                 
-                <strong>⚠️ Important: API Limitations</strong><br>
-                <div style="background: #fee; padding: 0.75rem; border-radius: 6px; margin: 0.5rem 0;">
-                    Google Sheets API with just an API key can only <strong>read</strong> data, not write it. This means:
-                    <ul style="margin: 0.5rem 0 0 1.5rem;">
-                        <li>Adding new players requires manual copy/paste</li>
-                        <li>Logging plays requires manual copy/paste</li>
-                        <li>Updating game locations requires manual copy/paste</li>
-                    </ul>
-                </div>
-                
-                <strong>✅ Solution: Enable Automatic Updates</strong><br>
-                Set up Google Apps Script (see below) to enable automatic saving without copy/paste!<br><br>
-                
-                <strong>📁 Using Google Drive QR Codes:</strong><br>
-                Your existing QR codes link to Google Drive folders. The system will automatically extract the folder ID and use it as the bin identifier.<br><br>
-                
-                <strong>📸 Photo Storage:</strong><br>
-                Create a Google Drive folder for game photos and share it publicly. Add the folder ID above to enable photo uploads.
+                <strong>Session Templates Sheet (optional):</strong><br>
+                Create a new sheet called "SessionTemplates" with:<br>
+                A: Template ID<br>
+                B: Template Name<br>
+                C: Regular Players<br>
+                D: Notes<br>
             </div>
             
             <div class="status-success" style="margin-top: 1rem; display: none;" id="first-time-notice">
@@ -789,126 +760,38 @@
             
             <div class="setup-section" style="margin-top: 1rem;">
                 <h4>🚀 Enable Automatic Updates (Optional)</h4>
-                <p>Want to skip the copy/paste? Set up a Google Apps Script:</p>
-                <details style="margin-top: 0.5rem;">
-                    <summary style="cursor: pointer; color: #3498db;">Click for instructions</summary>
-                    <div style="margin-top: 1rem; padding: 1rem; background: #f8f9fa; border-radius: 6px;">
-                        <ol style="text-align: left;">
-                            <li>Open your Google Sheet</li>
-                            <li>Go to Extensions → Apps Script</li>
-                            <li>Replace the code with this:
-                                <pre style="background: #2c3e50; color: white; padding: 1rem; border-radius: 4px; overflow-x: auto; font-size: 0.8rem; margin: 0.5rem 0;">
-function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet();
-  var data = JSON.parse(e.postData.contents);
-  
-  if (data.action === 'append') {
-    var targetSheet = sheet.getSheetByName(data.sheet);
-    targetSheet.appendRow(data.row);
-  } else if (data.action === 'update') {
-    var targetSheet = sheet.getSheetByName(data.sheet);
-    targetSheet.getRange(data.row, data.col).setValue(data.value);
-  }
-  
-  return ContentService.createTextOutput('Success');
-}
-
-function doGet() {
-  return ContentService.createTextOutput('BoardGame Tracker API Active');
-}</pre>
-                            </li>
-                            <li>Click Deploy → New Deployment</li>
-                            <li>Choose "Web app" as type</li>
-                            <li>Set "Execute as: Me" and "Who has access: Anyone"</li>
-                            <li>Copy the Web App URL</li>
-                            <li>Paste it below</li>
-                        </ol>
-                    </div>
-                </details>
                 <input type="text" id="apps-script-url" placeholder="Google Apps Script Web App URL (optional)" style="margin-top: 1rem;" />
                 <button class="btn btn-info" onclick="saveAppsScriptUrl()">Save Script URL</button>
             </div>
-        </div>
-        
-        <!-- Modal for adding players -->
-        <div id="add-player-modal" class="modal">
-            <div class="modal-content">
-                <span class="close-modal" onclick="closeAddPlayerModal()">&times;</span>
-                <h3>Add New Player</h3>
-                
-                <div class="form-group">
-                    <label>Player Name</label>
-                    <input type="text" id="new-player-name" placeholder="Enter player name">
-                </div>
-                
-                <div class="form-group">
-                    <label>Email (optional)</label>
-                    <input type="email" id="new-player-email" placeholder="player@email.com">
-                </div>
-                
-                <div class="form-group">
-                    <label>Avatar Color</label>
-                    <select id="new-player-color">
-                        <option value="#3498db">Blue</option>
-                        <option value="#e74c3c">Red</option>
-                        <option value="#27ae60">Green</option>
-                        <option value="#f39c12">Orange</option>
-                        <option value="#9b59b6">Purple</option>
-                        <option value="#1abc9c">Turquoise</option>
-                        <option value="#34495e">Dark Gray</option>
-                        <option value="#e91e63">Pink</option>
-                        <option value="#00bcd4">Cyan</option>
-                        <option value="#8bc34a">Light Green</option>
-                        <option value="#ff5722">Deep Orange</option>
-                        <option value="#795548">Brown</option>
-                        <option value="#607d8b">Blue Gray</option>
-                        <option value="#ffc107">Amber</option>
-                        <option value="#673ab7">Deep Purple</option>
-                        <option value="#4caf50">Medium Green</option>
-                        <option value="#2196f3">Light Blue</option>
-                        <option value="#ff9800">Pure Orange</option>
-                        <option value="#9e9e9e">Gray</option>
-                        <option value="#f44336">Bright Red</option>
-                    </select>
-                </div>
-                
-                <button class="btn btn-primary" onclick="saveNewPlayer()" style="width: 100%;">Add Player</button>
-            </div>
-        </div>
-        
-        <div id="workflow-state" class="workflow-state hidden"></div>
-        
-        <div id="status-message" class="hidden"></div>
-        
-        <div id="results" class="results hidden">
-            <h3>Results</h3>
-            <div id="results-content"></div>
         </div>
     </main>
     
     <script>
         // Global variables
         let html5QrcodeScanner = null;
-        let playScanner = null;
         let currentMode = 'view';
         let searchTab = 'all';
+        let statsTab = 'overview';
         let selectedGames = new Set();
+        let selectedPlayers = new Set();
         let allGames = [];
         let allBins = [];
         let playHistory = [];
+        let sessionTemplates = [];
         let checkoutWorkflow = {
             gameId: null,
             gameTitle: null,
             binId: null,
             step: 'game' // 'game' or 'bin'
         };
+        let currentPlayGame = null;
+        let currentRating = 0;
         
-        // Enhanced play logging variables
-        let allPlayers = [];
-        let selectedPlayers = new Set();
-        let currentGameId = null;
-        let currentGameTitle = null;
-        let selectedRating = 0;
+        // Chart.js instances
+        let trendsChart = null;
+        let ratingsChart = null;
+        let sessionChart = null;
+        let playerComparisonChart = null;
         
         // Google Sheets API base URL
         const SHEETS_API_BASE = 'https://sheets.googleapis.com/v4/spreadsheets';
@@ -917,13 +800,10 @@ function doGet() {
         const BGG_API_BASE = 'https://api.geekdo.com/xmlapi2';
         const CORS_PROXY = 'https://corsproxy.io/?';
         
-        // Make copyPlayerData available globally
-        window.copyPlayerData = copyPlayerData;
-        
         // Initialize on load
         window.onload = function() {
             loadSettings();
-            loadPlayers();
+            initializeRatingStars();
             
             // Check if QR library loaded
             if (typeof Html5Qrcode === 'undefined') {
@@ -933,6 +813,41 @@ function doGet() {
                 console.log('QR scanner library loaded successfully');
             }
         };
+        
+        // Initialize rating stars interaction
+        function initializeRatingStars() {
+            document.querySelectorAll('.star').forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    setRating(rating);
+                });
+                star.addEventListener('mouseover', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    highlightStars(rating);
+                });
+            });
+            
+            document.getElementById('play-rating').addEventListener('mouseleave', function() {
+                highlightStars(currentRating);
+            });
+        }
+        
+        function setRating(rating) {
+            currentRating = rating;
+            highlightStars(rating);
+        }
+        
+        function highlightStars(rating) {
+            document.querySelectorAll('.star').forEach((star, index) => {
+                if (index < rating) {
+                    star.textContent = '★';
+                    star.classList.add('filled');
+                } else {
+                    star.textContent = '☆';
+                    star.classList.remove('filled');
+                }
+            });
+        }
         
         // Mode management
         function setMode(mode) {
@@ -950,30 +865,36 @@ function doGet() {
             
             // Hide all sections
             document.getElementById('scan-section').classList.add('hidden');
-            document.getElementById('play-section').classList.add('hidden');
-            document.getElementById('players-section').classList.add('hidden');
+            document.getElementById('play-log-section').classList.add('hidden');
             document.getElementById('search-section').classList.add('hidden');
             document.getElementById('stats-section').classList.add('hidden');
+            document.getElementById('players-section').classList.add('hidden');
+            document.getElementById('sessions-section').classList.add('hidden');
             document.getElementById('bulk-section').classList.add('hidden');
             document.getElementById('bgg-section').classList.add('hidden');
             document.getElementById('settings-section').classList.add('hidden');
             
             // Show relevant sections
             switch(mode) {
+                case 'play':
+                    document.getElementById('scan-section').classList.remove('hidden');
+                    updateUIForMode();
+                    break;
                 case 'search':
                     document.getElementById('search-section').classList.remove('hidden');
                     loadAllGames();
                     break;
-                case 'play':
-                    document.getElementById('play-section').classList.remove('hidden');
-                    break;
-                case 'players':
-                    document.getElementById('players-section').classList.remove('hidden');
-                    displayPlayers();
-                    break;
                 case 'stats':
                     document.getElementById('stats-section').classList.remove('hidden');
                     loadStatistics();
+                    break;
+                case 'players':
+                    document.getElementById('players-section').classList.remove('hidden');
+                    loadPlayerStats();
+                    break;
+                case 'sessions':
+                    document.getElementById('sessions-section').classList.remove('hidden');
+                    loadSessionTemplates();
                     break;
                 case 'bulk':
                     document.getElementById('bulk-section').classList.remove('hidden');
@@ -996,7 +917,1015 @@ function doGet() {
                 showWorkflowState('Step 1: Scan the game QR code');
             } else if (currentMode === 'checkin') {
                 showWorkflowState('Step 1: Scan the game QR code');
+            } else if (currentMode === 'play') {
+                showWorkflowState('Scan a game QR code to log a play');
             }
+        }
+        
+        // Stats tab management
+        function setStatsTab(tab) {
+            statsTab = tab;
+            document.querySelectorAll('#stats-section .tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Hide all stats content
+            document.querySelectorAll('.stats-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Show selected content
+            switch(tab) {
+                case 'overview':
+                    document.getElementById('stats-overview').classList.remove('hidden');
+                    break;
+                case 'trends':
+                    document.getElementById('stats-trends').classList.remove('hidden');
+                    updateTrendsChart();
+                    break;
+                case 'ratings':
+                    document.getElementById('stats-ratings').classList.remove('hidden');
+                    updateRatingsDisplay();
+                    break;
+                case 'sessions':
+                    document.getElementById('stats-sessions').classList.remove('hidden');
+                    updateSessionAnalysis();
+                    break;
+            }
+        }
+        
+        // Enhanced play logging
+        async function handleLogPlay(data) {
+            if (data.type !== 'GAME') {
+                showStatus('Please scan a game QR code', 'error');
+                return;
+            }
+            
+            try {
+                const gameInfo = await getGameInfo(data.id);
+                if (!gameInfo) {
+                    showStatus('Game not found in inventory', 'error');
+                    return;
+                }
+                
+                // Store current game and show enhanced log form
+                currentPlayGame = gameInfo;
+                showPlayLogForm(gameInfo);
+                
+            } catch (error) {
+                showStatus('Error loading game: ' + error.message, 'error');
+            }
+        }
+        
+        async function showPlayLogForm(gameInfo) {
+            // Hide scan section, show play log form
+            document.getElementById('scan-section').classList.add('hidden');
+            document.getElementById('play-log-section').classList.remove('hidden');
+            
+            // Set game info
+            document.getElementById('play-game-info').innerHTML = `
+                <strong>Game:</strong> ${gameInfo.title}<br>
+                <strong>ID:</strong> ${gameInfo.id}
+            `;
+            
+            // Load session templates
+            const templates = await loadSessionTemplates();
+            const templateSelect = document.getElementById('play-session-template');
+            templateSelect.innerHTML = '<option value="">No template</option>';
+            templates.forEach(template => {
+                templateSelect.innerHTML += `<option value="${template.id}">${template.name}</option>`;
+            });
+            
+            // Reset form
+            document.getElementById('play-players').value = '';
+            document.getElementById('play-winner').value = '';
+            document.getElementById('play-notes').value = '';
+            setRating(0);
+        }
+        
+        function cancelLogPlay() {
+            currentPlayGame = null;
+            document.getElementById('play-log-section').classList.add('hidden');
+            document.getElementById('scan-section').classList.remove('hidden');
+        }
+        
+        async function confirmLogPlay() {
+            if (!currentPlayGame) return;
+            
+            const players = document.getElementById('play-players').value;
+            const winner = document.getElementById('play-winner').value;
+            const notes = document.getElementById('play-notes').value;
+            const templateId = document.getElementById('play-session-template').value;
+            const rating = currentRating;
+            
+            // If template selected, load players from template
+            let finalPlayers = players;
+            if (templateId && !players) {
+                const template = sessionTemplates.find(t => t.id === templateId);
+                if (template) {
+                    finalPlayers = template.players;
+                }
+            }
+            
+            try {
+                await logEnhancedGamePlay(currentPlayGame.id, finalPlayers, winner, rating, notes, templateId);
+                showStatus(`Play logged for ${currentPlayGame.title}!`, 'success');
+                cancelLogPlay();
+            } catch (error) {
+                showStatus('Error logging play: ' + error.message, 'error');
+            }
+        }
+        
+        async function logEnhancedGamePlay(gameId, players, winner, rating, notes, sessionId = '') {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            
+            try {
+                const timestamp = new Date().toLocaleString();
+                const playData = [
+                    timestamp,      // A: Timestamp
+                    gameId,         // B: Game ID
+                    players,        // C: Players
+                    notes,          // D: Notes
+                    winner,         // E: Winner
+                    rating || '',   // F: Rating
+                    sessionId       // G: Session ID
+                ];
+                
+                // If Apps Script URL is available, use it
+                if (appsScriptUrl) {
+                    const scriptResponse = await fetch(appsScriptUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'append',
+                            sheet: 'PlayLog',
+                            row: playData
+                        })
+                    });
+                    
+                    return true;
+                }
+                
+                // Otherwise provide manual instruction
+                const csvRow = playData.map(cell => `"${cell}"`).join(',');
+                showStatus(`Copy this play log entry: ${csvRow}`, 'error');
+                console.log('Add this to PlayLog sheet:', csvRow);
+                return false;
+                
+            } catch (error) {
+                console.error('Error logging play:', error);
+                throw error;
+            }
+        }
+        
+        // Player statistics
+        async function loadPlayerStats() {
+            const plays = await loadEnhancedPlayHistory();
+            
+            // Extract unique players
+            const playerSet = new Set();
+            plays.forEach(play => {
+                if (play.players) {
+                    play.players.split(',').forEach(player => {
+                        playerSet.add(player.trim());
+                    });
+                }
+            });
+            
+            // Display player selection
+            const playerSelectDiv = document.getElementById('player-select-list');
+            playerSelectDiv.innerHTML = '';
+            
+            Array.from(playerSet).sort().forEach(player => {
+                const chip = document.createElement('div');
+                chip.className = 'player-chip';
+                chip.textContent = player;
+                chip.onclick = () => togglePlayerSelection(player);
+                playerSelectDiv.appendChild(chip);
+            });
+            
+            // Load individual stats
+            displayIndividualPlayerStats(plays);
+        }
+        
+        function togglePlayerSelection(player) {
+            if (selectedPlayers.has(player)) {
+                selectedPlayers.delete(player);
+            } else {
+                selectedPlayers.add(player);
+            }
+            
+            // Update UI
+            document.querySelectorAll('.player-chip').forEach(chip => {
+                if (selectedPlayers.has(chip.textContent)) {
+                    chip.classList.add('selected');
+                } else {
+                    chip.classList.remove('selected');
+                }
+            });
+            
+            // Update comparison if 2+ players selected
+            if (selectedPlayers.size >= 2) {
+                updatePlayerComparison();
+            } else {
+                document.getElementById('player-comparison').classList.add('hidden');
+            }
+        }
+        
+        async function updatePlayerComparison() {
+            const plays = await loadEnhancedPlayHistory();
+            const players = Array.from(selectedPlayers);
+            
+            document.getElementById('player-comparison').classList.remove('hidden');
+            
+            // Calculate head-to-head stats
+            const h2hStats = calculateH2HStats(plays, players);
+            displayH2HStats(h2hStats);
+            
+            // Update comparison chart
+            updatePlayerComparisonChart(plays, players);
+        }
+        
+        function calculateH2HStats(plays, players) {
+            const stats = {};
+            
+            players.forEach(p1 => {
+                stats[p1] = {};
+                players.forEach(p2 => {
+                    if (p1 !== p2) {
+                        stats[p1][p2] = { games: 0, wins: 0 };
+                    }
+                });
+            });
+            
+            // Count games and wins
+            plays.forEach(play => {
+                const gamePlayers = play.players ? play.players.split(',').map(p => p.trim()) : [];
+                const winner = play.winner ? play.winner.trim() : '';
+                
+                // Check if this game includes our selected players
+                const includedPlayers = players.filter(p => gamePlayers.includes(p));
+                
+                if (includedPlayers.length >= 2) {
+                    includedPlayers.forEach(p1 => {
+                        includedPlayers.forEach(p2 => {
+                            if (p1 !== p2) {
+                                stats[p1][p2].games++;
+                                if (winner === p1) {
+                                    stats[p1][p2].wins++;
+                                }
+                            }
+                        });
+                    });
+                }
+            });
+            
+            return stats;
+        }
+        
+        function displayH2HStats(h2hStats) {
+            const container = document.getElementById('h2h-stats');
+            container.innerHTML = '';
+            
+            const players = Object.keys(h2hStats);
+            
+            // Create comparison table
+            let html = '<table style="width: 100%; border-collapse: collapse;">';
+            html += '<tr><th style="padding: 0.5rem; border: 1px solid #ddd;">Player</th>';
+            
+            players.forEach(p => {
+                html += `<th style="padding: 0.5rem; border: 1px solid #ddd;">${p}</th>`;
+            });
+            html += '</tr>';
+            
+            players.forEach(p1 => {
+                html += `<tr><th style="padding: 0.5rem; border: 1px solid #ddd; text-align: left;">${p1}</th>`;
+                players.forEach(p2 => {
+                    if (p1 === p2) {
+                        html += '<td style="padding: 0.5rem; border: 1px solid #ddd; background: #ecf0f1;">-</td>';
+                    } else {
+                        const stats = h2hStats[p1][p2];
+                        const winRate = stats.games > 0 ? (stats.wins / stats.games * 100).toFixed(0) : 0;
+                        html += `<td style="padding: 0.5rem; border: 1px solid #ddd; text-align: center;">
+                            ${stats.wins}/${stats.games}<br>
+                            <small>${winRate}%</small>
+                        </td>`;
+                    }
+                });
+                html += '</tr>';
+            });
+            
+            html += '</table>';
+            container.innerHTML = html;
+        }
+        
+        function updatePlayerComparisonChart(plays, players) {
+            const ctx = document.getElementById('player-comparison-chart').getContext('2d');
+            
+            // Calculate games played by month
+            const monthlyData = {};
+            
+            plays.forEach(play => {
+                const date = new Date(play.timestamp);
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                
+                if (!monthlyData[monthKey]) {
+                    monthlyData[monthKey] = {};
+                    players.forEach(p => monthlyData[monthKey][p] = 0);
+                }
+                
+                const gamePlayers = play.players ? play.players.split(',').map(p => p.trim()) : [];
+                players.forEach(p => {
+                    if (gamePlayers.includes(p)) {
+                        monthlyData[monthKey][p]++;
+                    }
+                });
+            });
+            
+            const labels = Object.keys(monthlyData).sort();
+            const datasets = players.map((player, index) => ({
+                label: player,
+                data: labels.map(month => monthlyData[month][player] || 0),
+                borderColor: `hsl(${index * 360 / players.length}, 70%, 50%)`,
+                backgroundColor: `hsla(${index * 360 / players.length}, 70%, 50%, 0.2)`,
+                tension: 0.1
+            }));
+            
+            if (playerComparisonChart) {
+                playerComparisonChart.destroy();
+            }
+            
+            playerComparisonChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Games Played Over Time'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Games Played'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function displayIndividualPlayerStats(plays) {
+            const container = document.getElementById('individual-player-stats');
+            container.innerHTML = '<h3 style="margin-top: 2rem;">Individual Player Statistics</h3>';
+            
+            // Calculate stats for each player
+            const playerStats = {};
+            
+            plays.forEach(play => {
+                const gamePlayers = play.players ? play.players.split(',').map(p => p.trim()) : [];
+                const winner = play.winner ? play.winner.trim() : '';
+                
+                gamePlayers.forEach(player => {
+                    if (!playerStats[player]) {
+                        playerStats[player] = {
+                            gamesPlayed: 0,
+                            wins: 0,
+                            favoriteGames: {},
+                            playPartners: {},
+                            ratings: []
+                        };
+                    }
+                    
+                    playerStats[player].gamesPlayed++;
+                    if (winner === player) {
+                        playerStats[player].wins++;
+                    }
+                    
+                    // Track favorite games
+                    const gameTitle = allGames.find(g => g.id === play.gameId)?.title || play.gameId;
+                    playerStats[player].favoriteGames[gameTitle] = (playerStats[player].favoriteGames[gameTitle] || 0) + 1;
+                    
+                    // Track play partners
+                    gamePlayers.forEach(partner => {
+                        if (partner !== player) {
+                            playerStats[player].playPartners[partner] = (playerStats[player].playPartners[partner] || 0) + 1;
+                        }
+                    });
+                    
+                    // Track ratings
+                    if (play.rating) {
+                        playerStats[player].ratings.push(parseInt(play.rating));
+                    }
+                });
+            });
+            
+            // Display top players
+            const sortedPlayers = Object.entries(playerStats)
+                .sort((a, b) => b[1].gamesPlayed - a[1].gamesPlayed)
+                .slice(0, 10);
+            
+            sortedPlayers.forEach(([player, stats]) => {
+                const winRate = stats.gamesPlayed > 0 ? (stats.wins / stats.gamesPlayed * 100).toFixed(1) : 0;
+                const avgRating = stats.ratings.length > 0 
+                    ? (stats.ratings.reduce((a, b) => a + b, 0) / stats.ratings.length).toFixed(1)
+                    : 'N/A';
+                
+                const topGames = Object.entries(stats.favoriteGames)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 3)
+                    .map(([game, count]) => `${game} (${count})`);
+                
+                const topPartners = Object.entries(stats.playPartners)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 3)
+                    .map(([partner, count]) => `${partner} (${count})`);
+                
+                container.innerHTML += `
+                    <div class="player-stats-card">
+                        <h4>${player}</h4>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
+                            <div>
+                                <strong>Games Played:</strong> ${stats.gamesPlayed}<br>
+                                <strong>Win Rate:</strong> ${winRate}%
+                                <div class="win-rate-bar">
+                                    <div class="win-rate-fill" style="width: ${winRate}%"></div>
+                                </div>
+                                <strong>Average Rating Given:</strong> ${avgRating}
+                            </div>
+                            <div>
+                                <strong>Favorite Games:</strong><br>
+                                ${topGames.join('<br>')}
+                                <br><br>
+                                <strong>Frequent Partners:</strong><br>
+                                ${topPartners.join('<br>')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        // Session templates
+        async function loadSessionTemplates() {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            
+            try {
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/SessionTemplates!A:D?key=${apiKey}`
+                );
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const rows = data.values || [];
+                    
+                    sessionTemplates = [];
+                    for (let i = 1; i < rows.length; i++) {
+                        const [id, name, players, notes] = rows[i];
+                        sessionTemplates.push({ id, name, players, notes });
+                    }
+                } else {
+                    // Sheet might not exist yet
+                    sessionTemplates = [];
+                }
+                
+                displaySessionTemplates();
+                return sessionTemplates;
+                
+            } catch (error) {
+                console.error('Error loading session templates:', error);
+                sessionTemplates = [];
+                return [];
+            }
+        }
+        
+        function displaySessionTemplates() {
+            const container = document.getElementById('session-templates-list');
+            container.innerHTML = '';
+            
+            if (sessionTemplates.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No templates created yet</p>';
+                return;
+            }
+            
+            sessionTemplates.forEach(template => {
+                container.innerHTML += `
+                    <div class="session-template">
+                        <div>
+                            <strong>${template.name}</strong><br>
+                            <small>Players: ${template.players}</small><br>
+                            ${template.notes ? `<small>${template.notes}</small>` : ''}
+                        </div>
+                        <button class="btn btn-secondary" onclick="deleteSessionTemplate('${template.id}')">Delete</button>
+                    </div>
+                `;
+            });
+        }
+        
+        async function createSessionTemplate() {
+            const name = document.getElementById('template-name').value;
+            const players = document.getElementById('template-players').value;
+            const notes = document.getElementById('template-notes').value;
+            
+            if (!name || !players) {
+                showStatus('Please enter template name and players', 'error');
+                return;
+            }
+            
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            const templateId = 'TEMPLATE:' + Date.now();
+            
+            try {
+                const templateData = [templateId, name, players, notes];
+                
+                if (appsScriptUrl) {
+                    await fetch(appsScriptUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'append',
+                            sheet: 'SessionTemplates',
+                            row: templateData
+                        })
+                    });
+                    
+                    showStatus('Template created successfully!', 'success');
+                    document.getElementById('template-name').value = '';
+                    document.getElementById('template-players').value = '';
+                    document.getElementById('template-notes').value = '';
+                    
+                    await loadSessionTemplates();
+                } else {
+                    const csvRow = templateData.map(cell => `"${cell}"`).join(',');
+                    showStatus(`Add this to SessionTemplates sheet: ${csvRow}`, 'error');
+                }
+                
+            } catch (error) {
+                showStatus('Error creating template: ' + error.message, 'error');
+            }
+        }
+        
+        async function deleteSessionTemplate(templateId) {
+            // This would require more complex Apps Script implementation
+            showStatus('Delete template ' + templateId + ' manually from the SessionTemplates sheet', 'error');
+        }
+        
+        // Enhanced play history loading
+        async function loadEnhancedPlayHistory() {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            
+            if (!spreadsheetId || !apiKey) {
+                return [];
+            }
+            
+            try {
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/PlayLog!A:G?key=${apiKey}`
+                );
+                
+                const data = await response.json();
+                const rows = data.values || [];
+                
+                playHistory = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const [timestamp, gameId, players, notes, winner, rating, sessionId] = rows[i];
+                    playHistory.push({
+                        timestamp,
+                        gameId,
+                        players: players || '',
+                        notes: notes || '',
+                        winner: winner || '',
+                        rating: rating || '',
+                        sessionId: sessionId || ''
+                    });
+                }
+                
+                return playHistory;
+            } catch (error) {
+                console.error('Error loading play history:', error);
+                return [];
+            }
+        }
+        
+        // Trends chart
+        function updateTrendsChart() {
+            const period = document.getElementById('trends-period').value;
+            const ctx = document.getElementById('trends-chart').getContext('2d');
+            
+            // Calculate date range
+            const endDate = new Date();
+            let startDate = new Date();
+            let groupBy = 'day';
+            
+            switch(period) {
+                case 'week':
+                    startDate.setDate(endDate.getDate() - 7);
+                    groupBy = 'day';
+                    break;
+                case 'month':
+                    startDate.setMonth(endDate.getMonth() - 1);
+                    groupBy = 'day';
+                    break;
+                case 'quarter':
+                    startDate.setMonth(endDate.getMonth() - 3);
+                    groupBy = 'week';
+                    break;
+                case 'year':
+                    startDate.setFullYear(endDate.getFullYear() - 1);
+                    groupBy = 'month';
+                    break;
+            }
+            
+            // Group plays by period
+            const playData = {};
+            playHistory.forEach(play => {
+                const playDate = new Date(play.timestamp);
+                if (playDate >= startDate && playDate <= endDate) {
+                    let key;
+                    
+                    if (groupBy === 'day') {
+                        key = playDate.toISOString().split('T')[0];
+                    } else if (groupBy === 'week') {
+                        const weekStart = new Date(playDate);
+                        weekStart.setDate(playDate.getDate() - playDate.getDay());
+                        key = weekStart.toISOString().split('T')[0];
+                    } else {
+                        key = `${playDate.getFullYear()}-${String(playDate.getMonth() + 1).padStart(2, '0')}`;
+                    }
+                    
+                    playData[key] = (playData[key] || 0) + 1;
+                }
+            });
+            
+            const labels = Object.keys(playData).sort();
+            const data = labels.map(label => playData[label]);
+            
+            if (trendsChart) {
+                trendsChart.destroy();
+            }
+            
+            trendsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Games Played',
+                        data,
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Play Frequency Over Time'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Plays'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Ratings display
+        async function updateRatingsDisplay() {
+            const plays = await loadEnhancedPlayHistory();
+            
+            // Calculate average ratings per game
+            const gameRatings = {};
+            
+            plays.forEach(play => {
+                if (play.rating) {
+                    if (!gameRatings[play.gameId]) {
+                        gameRatings[play.gameId] = [];
+                    }
+                    gameRatings[play.gameId].push(parseInt(play.rating));
+                }
+            });
+            
+            // Calculate averages and sort
+            const averageRatings = Object.entries(gameRatings).map(([gameId, ratings]) => {
+                const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+                const game = allGames.find(g => g.id === gameId);
+                return {
+                    gameId,
+                    title: game?.title || gameId,
+                    avgRating: avg,
+                    ratingCount: ratings.length
+                };
+            }).sort((a, b) => b.avgRating - a.avgRating);
+            
+            // Display top rated games
+            const container = document.getElementById('top-rated-list');
+            container.innerHTML = '';
+            
+            averageRatings.slice(0, 10).forEach(game => {
+                container.innerHTML += `
+                    <div class="result-item">
+                        <div class="result-item-content">
+                            <div class="game-title">${game.title}</div>
+                            <div class="game-location">
+                                ${getStarDisplay(game.avgRating)} 
+                                (${game.avgRating.toFixed(1)}/5 from ${game.ratingCount} ratings)
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Create rating distribution chart
+            updateRatingDistributionChart();
+        }
+        
+        function getStarDisplay(rating) {
+            let stars = '';
+            for (let i = 1; i <= 5; i++) {
+                stars += i <= Math.round(rating) ? '★' : '☆';
+            }
+            return stars;
+        }
+        
+        function updateRatingDistributionChart() {
+            const ctx = document.getElementById('ratings-distribution').getContext('2d');
+            
+            // Count ratings
+            const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+            
+            playHistory.forEach(play => {
+                if (play.rating) {
+                    ratingCounts[play.rating]++;
+                }
+            });
+            
+            if (ratingsChart) {
+                ratingsChart.destroy();
+            }
+            
+            ratingsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['1 Star', '2 Stars', '3 Stars', '4 Stars', '5 Stars'],
+                    datasets: [{
+                        label: 'Number of Ratings',
+                        data: Object.values(ratingCounts),
+                        backgroundColor: [
+                            '#e74c3c',
+                            '#e67e22',
+                            '#f1c40f',
+                            '#2ecc71',
+                            '#27ae60'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Rating Distribution'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Count'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Session analysis
+        async function updateSessionAnalysis() {
+            const plays = await loadEnhancedPlayHistory();
+            
+            // Group plays by day
+            const sessionsByDay = {};
+            
+            plays.forEach(play => {
+                const date = new Date(play.timestamp).toISOString().split('T')[0];
+                if (!sessionsByDay[date]) {
+                    sessionsByDay[date] = [];
+                }
+                sessionsByDay[date].push(play);
+            });
+            
+            // Calculate session statistics
+            const sessionStats = Object.entries(sessionsByDay).map(([date, plays]) => {
+                const uniqueGames = new Set(plays.map(p => p.gameId)).size;
+                const uniquePlayers = new Set();
+                plays.forEach(play => {
+                    if (play.players) {
+                        play.players.split(',').forEach(p => uniquePlayers.add(p.trim()));
+                    }
+                });
+                
+                return {
+                    date,
+                    gameCount: plays.length,
+                    uniqueGames,
+                    uniquePlayers: uniquePlayers.size,
+                    duration: plays.length // Approximate based on game count
+                };
+            }).sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // Display session stats
+            const container = document.getElementById('session-stats');
+            container.innerHTML = `
+                <p><strong>Total Game Sessions:</strong> ${sessionStats.length}</p>
+                <p><strong>Average Games per Session:</strong> ${(sessionStats.reduce((sum, s) => sum + s.gameCount, 0) / sessionStats.length).toFixed(1)}</p>
+                <p><strong>Most Popular Day:</strong> ${getMostPopularDay(sessionStats)}</p>
+            `;
+            
+            // Recent sessions
+            container.innerHTML += '<h4 style="margin-top: 2rem;">Recent Sessions</h4>';
+            sessionStats.slice(0, 5).forEach(session => {
+                container.innerHTML += `
+                    <div class="result-item">
+                        <div class="result-item-content">
+                            <div class="game-title">${new Date(session.date).toLocaleDateString()}</div>
+                            <div class="game-location">
+                                ${session.gameCount} games • ${session.uniquePlayers} players • ${session.uniqueGames} unique games
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // Update session chart
+            updateSessionChart(sessionStats);
+        }
+        
+        function getMostPopularDay(sessionStats) {
+            const dayCounts = {};
+            sessionStats.forEach(session => {
+                const day = new Date(session.date).toLocaleDateString('en-US', { weekday: 'long' });
+                dayCounts[day] = (dayCounts[day] || 0) + 1;
+            });
+            
+            return Object.entries(dayCounts)
+                .sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
+        }
+        
+        function updateSessionChart(sessionStats) {
+            const ctx = document.getElementById('session-chart').getContext('2d');
+            
+            // Group by month
+            const monthlyData = {};
+            sessionStats.forEach(session => {
+                const month = session.date.substring(0, 7);
+                if (!monthlyData[month]) {
+                    monthlyData[month] = { sessions: 0, games: 0 };
+                }
+                monthlyData[month].sessions++;
+                monthlyData[month].games += session.gameCount;
+            });
+            
+            const labels = Object.keys(monthlyData).sort();
+            
+            if (sessionChart) {
+                sessionChart.destroy();
+            }
+            
+            sessionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Sessions',
+                        data: labels.map(month => monthlyData[month].sessions),
+                        backgroundColor: '#3498db',
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Total Games',
+                        data: labels.map(month => monthlyData[month].games),
+                        backgroundColor: '#27ae60',
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Gaming Sessions by Month'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Sessions'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Games Played'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Export enhanced player statistics
+        function exportPlayerStats() {
+            const playerStats = {};
+            
+            // Calculate comprehensive player statistics
+            playHistory.forEach(play => {
+                const gamePlayers = play.players ? play.players.split(',').map(p => p.trim()) : [];
+                const winner = play.winner ? play.winner.trim() : '';
+                const game = allGames.find(g => g.id === play.gameId);
+                
+                gamePlayers.forEach(player => {
+                    if (!playerStats[player]) {
+                        playerStats[player] = {
+                            gamesPlayed: 0,
+                            wins: 0,
+                            uniqueGames: new Set(),
+                            playDates: [],
+                            ratings: [],
+                            partners: {}
+                        };
+                    }
+                    
+                    playerStats[player].gamesPlayed++;
+                    if (winner === player) {
+                        playerStats[player].wins++;
+                    }
+                    playerStats[player].uniqueGames.add(play.gameId);
+                    playerStats[player].playDates.push(play.timestamp);
+                    
+                    if (play.rating) {
+                        playerStats[player].ratings.push(parseInt(play.rating));
+                    }
+                    
+                    // Track play partners
+                    gamePlayers.forEach(partner => {
+                        if (partner !== player) {
+                            playerStats[player].partners[partner] = (playerStats[player].partners[partner] || 0) + 1;
+                        }
+                    });
+                });
+            });
+            
+            // Create CSV
+            let csv = 'Player,Games Played,Wins,Win Rate,Unique Games,First Play,Last Play,Avg Rating Given,Most Frequent Partner\n';
+            
+            Object.entries(playerStats).forEach(([player, stats]) => {
+                const winRate = stats.gamesPlayed > 0 ? (stats.wins / stats.gamesPlayed * 100).toFixed(1) : 0;
+                const avgRating = stats.ratings.length > 0 
+                    ? (stats.ratings.reduce((a, b) => a + b, 0) / stats.ratings.length).toFixed(1)
+                    : 'N/A';
+                const firstPlay = stats.playDates.length > 0 ? new Date(Math.min(...stats.playDates.map(d => new Date(d)))).toLocaleDateString() : '';
+                const lastPlay = stats.playDates.length > 0 ? new Date(Math.max(...stats.playDates.map(d => new Date(d)))).toLocaleDateString() : '';
+                const topPartner = Object.entries(stats.partners).sort((a, b) => b[1] - a[1])[0];
+                
+                csv += `"${player}",${stats.gamesPlayed},${stats.wins},${winRate}%,${stats.uniqueGames.size},"${firstPlay}","${lastPlay}",${avgRating},"${topPartner ? topPartner[0] : 'N/A'}"\n`;
+            });
+            
+            downloadCSV(csv, 'player_statistics.csv');
         }
         
         // Search functionality
@@ -1057,7 +1986,7 @@ function doGet() {
         // Statistics functionality
         async function loadStatistics() {
             const games = await loadAllGames();
-            const plays = await loadPlayHistory();
+            const plays = await loadEnhancedPlayHistory();
             
             // Calculate stats
             const totalGames = games.length;
@@ -1072,11 +2001,23 @@ function doGet() {
             
             const uniquePlayed = Object.keys(playCounts).length;
             
+            // Calculate average players
+            let totalPlayers = 0;
+            let gamesWithPlayers = 0;
+            plays.forEach(play => {
+                if (play.players) {
+                    const playerCount = play.players.split(',').length;
+                    totalPlayers += playerCount;
+                    gamesWithPlayers++;
+                }
+            });
+            const avgPlayers = gamesWithPlayers > 0 ? (totalPlayers / gamesWithPlayers).toFixed(1) : 0;
+            
             // Update stats display
             document.getElementById('total-games').textContent = totalGames;
             document.getElementById('total-plays').textContent = totalPlays;
             document.getElementById('unique-played').textContent = uniquePlayed;
-            document.getElementById('checked-out').textContent = checkedOut;
+            document.getElementById('avg-players').textContent = avgPlayers;
             
             // Most played games
             const mostPlayed = Object.entries(playCounts)
@@ -1234,7 +2175,7 @@ function doGet() {
             for (const gameId of selectedGames) {
                 try {
                     const locationResult = await updateGameLocation(gameId, 'CHECKED_OUT');
-                    const playResult = await logGamePlay(gameId);
+                    const playResult = await logEnhancedGamePlay(gameId, '', '', 0, 'Bulk checkout', '');
                     
                     if (locationResult && playResult) {
                         checkedOut++;
@@ -1649,11 +2590,11 @@ function doGet() {
         // Export functions
         function exportPlayHistory() {
             const plays = playHistory;
-            let csv = 'Timestamp,Game ID,Game Title,Players,Notes,Winner,Duration,Rating\n';
+            let csv = 'Timestamp,Game ID,Game Title,Players,Notes,Winner,Rating,Session ID\n';
             
             plays.forEach(play => {
                 const game = allGames.find(g => g.id === play.gameId);
-                csv += `"${play.timestamp}","${play.gameId}","${game?.title || ''}","${play.players || ''}","${play.notes || ''}","${play.winner || ''}","${play.duration || ''}","${play.rating || ''}"\n`;
+                csv += `"${play.timestamp}","${play.gameId}","${game?.title || ''}","${play.players || ''}","${play.notes || ''}","${play.winner || ''}","${play.rating || ''}","${play.sessionId || ''}"\n`;
             });
             
             downloadCSV(csv, 'play_history.csv');
@@ -1751,412 +2692,7 @@ function doGet() {
         }
         
         async function loadPlayHistory() {
-            const spreadsheetId = localStorage.getItem('spreadsheetId');
-            const apiKey = localStorage.getItem('apiKey');
-            
-            if (!spreadsheetId || !apiKey) {
-                return [];
-            }
-            
-            try {
-                const response = await fetch(
-                    `${SHEETS_API_BASE}/${spreadsheetId}/values/PlayLog!A:G?key=${apiKey}`
-                );
-                
-                const data = await response.json();
-                const rows = data.values || [];
-                
-                playHistory = [];
-                for (let i = 1; i < rows.length; i++) {
-                    const [timestamp, gameId, players, notes, winner, duration, rating] = rows[i];
-                    playHistory.push({
-                        timestamp,
-                        gameId,
-                        players: players || '',
-                        notes: notes || '',
-                        winner: winner || '',
-                        duration: parseInt(duration) || 0,
-                        rating: parseInt(rating) || 0
-                    });
-                }
-                
-                return playHistory;
-            } catch (error) {
-                console.error('Error loading play history:', error);
-                return [];
-            }
-        }
-        
-        // Player Management Functions
-        async function loadPlayers() {
-            const spreadsheetId = localStorage.getItem('spreadsheetId');
-            const apiKey = localStorage.getItem('apiKey');
-            
-            if (!spreadsheetId || !apiKey) {
-                return;
-            }
-            
-            try {
-                const response = await fetch(
-                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Players!A:C?key=${apiKey}`
-                );
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    const rows = data.values || [];
-                    
-                    allPlayers = [];
-                    for (let i = 1; i < rows.length; i++) {
-                        const [name, email, color] = rows[i];
-                        allPlayers.push({
-                            name: name || 'Unknown',
-                            email: email || '',
-                            color: color || '#3498db'
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading players:', error);
-                // If Players sheet doesn't exist, that's okay
-            }
-        }
-        
-        function displayPlayers() {
-            const playersList = document.getElementById('players-list');
-            playersList.innerHTML = '';
-            
-            if (allPlayers.length === 0) {
-                playersList.innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 2rem;">No players added yet. Click "+ Add Player" to get started!</p>';
-                return;
-            }
-            
-            allPlayers.forEach(player => {
-                const stats = calculatePlayerStats(player.name);
-                const card = document.createElement('div');
-                card.className = 'player-stats-card';
-                card.innerHTML = `
-                    <div style="display: flex; align-items: start; gap: 1rem;">
-                        <div class="player-avatar" style="background-color: ${player.color};">
-                            ${player.name.charAt(0).toUpperCase()}
-                        </div>
-                        <div style="flex: 1;">
-                            <h3>${player.name}</h3>
-                            ${player.email ? `<p style="color: #7f8c8d; font-size: 0.875rem;">${player.email}</p>` : ''}
-                            
-                            <div style="margin-top: 1rem;">
-                                <div class="stats-row">
-                                    <span>Total Plays</span>
-                                    <strong>${stats.totalPlays}</strong>
-                                </div>
-                                <div class="stats-row">
-                                    <span>Games Played</span>
-                                    <strong>${stats.uniqueGames}</strong>
-                                </div>
-                                <div class="stats-row">
-                                    <span>Wins</span>
-                                    <strong>${stats.wins}</strong>
-                                </div>
-                                <div class="stats-row">
-                                    <span>Win Rate</span>
-                                    <strong>${stats.winRate}%</strong>
-                                </div>
-                                <div class="stats-row">
-                                    <span>Favorite Game</span>
-                                    <strong>${stats.favoriteGame || 'None yet'}</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                playersList.appendChild(card);
-            });
-        }
-        
-        function calculatePlayerStats(playerName) {
-            const playerPlays = playHistory.filter(play => {
-                const players = play.players ? play.players.split(',').map(p => p.trim()) : [];
-                return players.includes(playerName);
-            });
-            
-            const wins = playHistory.filter(play => play.winner === playerName).length;
-            const winRate = playerPlays.length > 0 ? Math.round((wins / playerPlays.length) * 100) : 0;
-            
-            // Find favorite game
-            const gameCounts = {};
-            playerPlays.forEach(play => {
-                gameCounts[play.gameId] = (gameCounts[play.gameId] || 0) + 1;
-            });
-            
-            let favoriteGameId = null;
-            let maxPlays = 0;
-            Object.entries(gameCounts).forEach(([gameId, count]) => {
-                if (count > maxPlays) {
-                    maxPlays = count;
-                    favoriteGameId = gameId;
-                }
-            });
-            
-            const favoriteGame = favoriteGameId ? 
-                allGames.find(g => g.id === favoriteGameId)?.title : null;
-            
-            return {
-                totalPlays: playerPlays.length,
-                uniqueGames: Object.keys(gameCounts).length,
-                wins: wins,
-                winRate: winRate,
-                favoriteGame: favoriteGame
-            };
-        }
-        
-        function showAddPlayerModal() {
-            document.getElementById('add-player-modal').style.display = 'block';
-            document.getElementById('new-player-name').focus();
-        }
-        
-        function closeAddPlayerModal() {
-            document.getElementById('add-player-modal').style.display = 'none';
-            document.getElementById('new-player-name').value = '';
-            document.getElementById('new-player-email').value = '';
-        }
-        
-        async function saveNewPlayer() {
-            const name = document.getElementById('new-player-name').value.trim();
-            const email = document.getElementById('new-player-email').value.trim();
-            const color = document.getElementById('new-player-color').value;
-            
-            if (!name) {
-                showStatus('Please enter a player name', 'error');
-                return;
-            }
-            
-            // Check if player already exists
-            if (allPlayers.some(p => p.name.toLowerCase() === name.toLowerCase())) {
-                showStatus('Player already exists', 'error');
-                return;
-            }
-            
-            const spreadsheetId = localStorage.getItem('spreadsheetId');
-            const apiKey = localStorage.getItem('apiKey');
-            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
-            
-            const playerData = [name, email, color];
-            
-            try {
-                if (appsScriptUrl) {
-                    await fetch(appsScriptUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            action: 'append',
-                            sheet: 'Players',
-                            row: playerData
-                        })
-                    });
-                    
-                    showStatus(`Player "${name}" added successfully!`, 'success');
-                    
-                    // Add to local array
-                    allPlayers.push({ name, email, color });
-                    
-                    // Refresh UI
-                    closeAddPlayerModal();
-                    if (currentMode === 'players') {
-                        displayPlayers();
-                    } else if (currentMode === 'play' && currentGameId) {
-                        updatePlayerSelect();
-                    }
-                } else {
-                    // Manual instruction with better formatting
-                    const csvRow = playerData.map(cell => `"${cell}"`).join(',');
-                    
-                    // Create a more user-friendly manual entry interface
-                    const modalContent = document.querySelector('.modal-content');
-                    modalContent.innerHTML = `
-                        <span class="close-modal" onclick="closeAddPlayerModal()">&times;</span>
-                        <h3>Manual Entry Required</h3>
-                        <p style="margin: 1rem 0;">Google Sheets API requires manual entry for new data. Please follow these steps:</p>
-                        <ol style="text-align: left; margin: 1rem 0;">
-                            <li>Copy the data below</li>
-                            <li>Open your Google Sheet</li>
-                            <li>Go to the "Players" sheet</li>
-                            <li>Click on the first empty row</li>
-                            <li>Paste the data</li>
-                        </ol>
-                        <div style="background: #f5f5f5; padding: 1rem; border-radius: 6px; margin: 1rem 0;">
-                            <textarea id="player-csv-data" style="width: 100%; border: 1px solid #ddd; padding: 0.5rem; font-family: monospace;" readonly>${csvRow}</textarea>
-                        </div>
-                        <button class="btn btn-primary" onclick="copyPlayerData()" style="width: 100%;">Copy to Clipboard</button>
-                        <p style="margin-top: 1rem; font-size: 0.875rem; color: #7f8c8d;">
-                            💡 Tip: To enable automatic saving, set up Google Apps Script in Settings.
-                        </p>
-                    `;
-                    
-                    // Store player data temporarily
-                    window.pendingPlayer = { name, email, color };
-                }
-                
-            } catch (error) {
-                console.error('Error adding player:', error);
-                showStatus('Error adding player: ' + error.message, 'error');
-            }
-        }
-        
-        function copyPlayerData() {
-            const textarea = document.getElementById('player-csv-data');
-            textarea.select();
-            document.execCommand('copy');
-            showStatus('Player data copied! Now paste it into your Google Sheet.', 'success');
-            
-            // Add to local array for immediate use
-            if (window.pendingPlayer) {
-                allPlayers.push(window.pendingPlayer);
-                delete window.pendingPlayer;
-                
-                // Close modal and refresh
-                closeAddPlayerModal();
-                if (currentMode === 'players') {
-                    displayPlayers();
-                } else if (currentMode === 'play' && currentGameId) {
-                    updatePlayerSelect();
-                }
-            }
-        }
-        
-        // Enhanced Play Logging Functions
-        function updatePlayerSelect() {
-            const playerSelect = document.getElementById('player-select');
-            playerSelect.innerHTML = '';
-            
-            allPlayers.forEach(player => {
-                const chip = document.createElement('div');
-                chip.className = 'player-chip';
-                chip.textContent = player.name;
-                chip.style.backgroundColor = selectedPlayers.has(player.name) ? player.color : '';
-                chip.style.color = selectedPlayers.has(player.name) ? 'white' : '';
-                chip.onclick = () => togglePlayer(player.name);
-                playerSelect.appendChild(chip);
-            });
-            
-            // Update winner dropdown
-            updateWinnerSelect();
-        }
-        
-        function togglePlayer(playerName) {
-            if (selectedPlayers.has(playerName)) {
-                selectedPlayers.delete(playerName);
-            } else {
-                selectedPlayers.add(playerName);
-            }
-            updatePlayerSelect();
-        }
-        
-        function updateWinnerSelect() {
-            const winnerSelect = document.getElementById('winner-select');
-            winnerSelect.innerHTML = '<option value="">No winner / Cooperative game</option>';
-            
-            selectedPlayers.forEach(playerName => {
-                const option = document.createElement('option');
-                option.value = playerName;
-                option.textContent = playerName;
-                winnerSelect.appendChild(option);
-            });
-        }
-        
-        function initRatingStars() {
-            const stars = document.querySelectorAll('#rating-stars span');
-            stars.forEach(star => {
-                star.onclick = function() {
-                    selectedRating = parseInt(this.dataset.rating);
-                    updateRatingDisplay();
-                };
-            });
-        }
-        
-        function updateRatingDisplay() {
-            const stars = document.querySelectorAll('#rating-stars span');
-            stars.forEach((star, index) => {
-                if (index < selectedRating) {
-                    star.classList.add('active');
-                } else {
-                    star.classList.remove('active');
-                }
-            });
-        }
-        
-        async function submitPlayLog() {
-            if (selectedPlayers.size === 0) {
-                showStatus('Please select at least one player', 'error');
-                return;
-            }
-            
-            const spreadsheetId = localStorage.getItem('spreadsheetId');
-            const apiKey = localStorage.getItem('apiKey');
-            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
-            
-            const timestamp = new Date().toLocaleString();
-            const players = Array.from(selectedPlayers).join(', ');
-            const winner = document.getElementById('winner-select').value;
-            const hours = parseInt(document.getElementById('duration-hours').value) || 0;
-            const minutes = parseInt(document.getElementById('duration-minutes').value) || 0;
-            const duration = hours * 60 + minutes;
-            const notes = document.getElementById('play-notes').value;
-            
-            // Enhanced play data with new columns
-            const playData = [
-                timestamp,
-                currentGameId,
-                players,
-                notes,
-                winner,
-                duration,
-                selectedRating
-            ];
-            
-            try {
-                if (appsScriptUrl) {
-                    await fetch(appsScriptUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            action: 'append',
-                            sheet: 'PlayLog',
-                            row: playData
-                        })
-                    });
-                    
-                    showStatus(`Play logged for ${currentGameTitle}!`, 'success');
-                } else {
-                    // Manual instruction
-                    const csvRow = playData.map(cell => `"${cell}"`).join(',');
-                    showStatus(`Copy this play log entry and paste into PlayLog sheet: ${csvRow}`, 'error');
-                }
-                
-                // Hide form
-                document.getElementById('play-form-container').classList.add('hidden');
-                
-                // Reset form
-                currentGameId = null;
-                currentGameTitle = null;
-                selectedPlayers.clear();
-                selectedRating = 0;
-                
-            } catch (error) {
-                showStatus('Error logging play: ' + error.message, 'error');
-            }
-        }
-        
-        function cancelPlayLog() {
-            document.getElementById('play-form-container').classList.add('hidden');
-            currentGameId = null;
-            currentGameTitle = null;
-            selectedPlayers.clear();
-            selectedRating = 0;
+            return loadEnhancedPlayHistory();
         }
         
         // QR Code processing
@@ -2174,22 +2710,6 @@ function doGet() {
             
             // Clear the input
             document.getElementById('manual-qr-input').value = '';
-        }
-        
-        function processPlayManualQR() {
-            const input = document.getElementById('play-manual-input').value.trim();
-            if (!input) {
-                showStatus('Please enter a game code', 'error');
-                return;
-            }
-            
-            console.log('Processing manual game entry:', input);
-            
-            // Process it as if it was scanned
-            onScanSuccess(input, null);
-            
-            // Clear the input
-            document.getElementById('play-manual-input').value = '';
         }
         
         // QR Code Scanning
@@ -2243,55 +2763,6 @@ function doGet() {
             if (html5QrcodeScanner) {
                 html5QrcodeScanner.stop().then(() => {
                     html5QrcodeScanner.clear();
-                }).catch(err => console.error(err));
-            }
-        }
-        
-        function startPlayScanning() {
-            if (typeof Html5Qrcode === 'undefined') {
-                showStatus('QR scanner library not loaded. Please refresh the page.', 'error');
-                return;
-            }
-            
-            showStatus('Initializing camera...', 'success');
-            
-            const config = { 
-                fps: 10, 
-                qrbox: { width: 250, height: 250 },
-                aspectRatio: 1.0
-            };
-            
-            playScanner = new Html5Qrcode("play-reader");
-            
-            playScanner.start(
-                { facingMode: "environment" },
-                config,
-                (decodedText, decodedResult) => {
-                    console.log('Play scan successful:', decodedText);
-                    onScanSuccess(decodedText, decodedResult);
-                },
-                (errorMessage) => {
-                    // Silent fail during scanning
-                }
-            ).then(() => {
-                showStatus('Camera ready - point at game QR code', 'success');
-            }).catch(err => {
-                let errorMsg = 'Unable to access camera. ';
-                if (err.name === 'NotAllowedError') {
-                    errorMsg += 'Please allow camera permissions and refresh the page.';
-                } else if (err.name === 'NotFoundError') {
-                    errorMsg += 'No camera found on this device.';
-                } else {
-                    errorMsg += err.message || 'Please check permissions.';
-                }
-                showStatus(errorMsg, 'error');
-            });
-        }
-        
-        function stopPlayScanning() {
-            if (playScanner) {
-                playScanner.stop().then(() => {
-                    playScanner.clear();
                 }).catch(err => console.error(err));
             }
         }
@@ -2430,44 +2901,6 @@ function doGet() {
             }
         }
         
-        async function handleLogPlay(data) {
-            if (data.type !== 'GAME') {
-                showStatus('Please scan a game QR code', 'error');
-                return;
-            }
-            
-            try {
-                const gameInfo = await getGameInfo(data.id);
-                if (!gameInfo) {
-                    showStatus('Game not found in inventory', 'error');
-                    return;
-                }
-                
-                currentGameId = data.id;
-                currentGameTitle = gameInfo.title;
-                
-                // Show the enhanced play form
-                document.getElementById('play-form-title').textContent = `Log Play: ${gameInfo.title}`;
-                document.getElementById('play-form-container').classList.remove('hidden');
-                
-                // Initialize form
-                selectedPlayers.clear();
-                selectedRating = 0;
-                updatePlayerSelect();
-                updateRatingDisplay();
-                initRatingStars();
-                
-                // Clear form fields
-                document.getElementById('winner-select').value = '';
-                document.getElementById('duration-hours').value = '';
-                document.getElementById('duration-minutes').value = '';
-                document.getElementById('play-notes').value = '';
-                
-            } catch (error) {
-                showStatus('Error loading game: ' + error.message, 'error');
-            }
-        }
-        
         async function handleCheckout(data) {
             if (checkoutWorkflow.step === 'game') {
                 if (data.type !== 'GAME') {
@@ -2507,7 +2940,7 @@ function doGet() {
                     showStatus(`✅ ${checkoutWorkflow.gameTitle} checked out from ${binDisplay}!`, 'success');
                     
                     // Log this as a play event too
-                    await logGamePlay(checkoutWorkflow.gameId);
+                    await logEnhancedGamePlay(checkoutWorkflow.gameId, '', '', 0, 'Checked out', '');
                     
                     // Reset workflow
                     checkoutWorkflow = { gameId: null, gameTitle: null, binId: null, step: 'game' };
@@ -2687,98 +3120,13 @@ function doGet() {
                     return true;
                 }
                 
-                // Otherwise try direct API update
-                const updateResponse = await fetch(
-                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!C${rowIndex}?valueInputOption=USER_ENTERED&key=${apiKey}`,
-                    {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            values: [[newLocation]]
-                        })
-                    }
-                );
+                // Otherwise provide manual instruction
+                const gameInfo = await getGameInfo(gameId);
+                showStatus(`Please update row ${rowIndex} in your Games sheet: Change location of "${gameInfo.title}" to "${newLocation}"`, 'error');
+                return false;
                 
-                if (!updateResponse.ok) {
-                    // If write fails, provide manual instruction
-                    if (updateResponse.status === 401) {
-                        const gameInfo = await getGameInfo(gameId);
-                        showStatus(`Please update row ${rowIndex} in your Games sheet: Change location of "${gameInfo.title}" to "${newLocation}"`, 'error');
-                        return false;
-                    }
-                    throw new Error(`Failed to update location: ${updateResponse.status}`);
-                }
-                
-                return true;
             } catch (error) {
                 console.error('Error updating game location:', error);
-                throw error;
-            }
-        }
-        
-        async function logGamePlay(gameId) {
-            const spreadsheetId = localStorage.getItem('spreadsheetId');
-            const apiKey = localStorage.getItem('apiKey');
-            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
-            
-            try {
-                // Get game info first
-                const gameInfo = await getGameInfo(gameId);
-                if (!gameInfo) {
-                    throw new Error('Game not found');
-                }
-                
-                const timestamp = new Date().toLocaleString();
-                const playData = [timestamp, gameId, '', `Played ${gameInfo.title}`, '', '', ''];
-                
-                // If Apps Script URL is available, use it
-                if (appsScriptUrl) {
-                    const scriptResponse = await fetch(appsScriptUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            action: 'append',
-                            sheet: 'PlayLog',
-                            row: playData
-                        })
-                    });
-                    
-                    return true;
-                }
-                
-                // Otherwise try direct API append
-                const response = await fetch(
-                    `${SHEETS_API_BASE}/${spreadsheetId}/values/PlayLog!A:G:append?valueInputOption=USER_ENTERED&key=${apiKey}`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            values: [playData]
-                        })
-                    }
-                );
-                
-                if (!response.ok) {
-                    // If write fails, provide manual instruction
-                    if (response.status === 401) {
-                        const csvRow = playData.map(cell => `"${cell}"`).join(',');
-                        showStatus(`Copy this play log entry: ${csvRow}`, 'error');
-                        console.log('Add this to PlayLog sheet:', csvRow);
-                        return false;
-                    }
-                    throw new Error(`Failed to log play: ${response.status}`);
-                }
-                
-                return true;
-            } catch (error) {
-                console.error('Error logging play:', error);
                 throw error;
             }
         }
@@ -2904,18 +3252,6 @@ function doGet() {
                 localStorage.setItem('apiKey', apiKey);
                 showStatus('Settings saved successfully!', 'success');
                 
-                // Update header to show manual mode if no Apps Script
-                const appsScriptUrl = localStorage.getItem('appsScriptUrl');
-                const header = document.querySelector('h1');
-                if (!appsScriptUrl) {
-                    header.innerHTML = '🎲 BoardGame Collection Manager <span style="font-size: 0.7rem; background: #f39c12; padding: 0.2rem 0.5rem; border-radius: 4px; margin-left: 0.5rem;">Manual Mode</span>';
-                }
-                
-                // Reload data
-                loadPlayers();
-                loadAllGames();
-                loadPlayHistory();
-                
                 // Test the connection
                 testConnection();
             } else {
@@ -2967,9 +3303,9 @@ function doGet() {
                 localStorage.removeItem('appsScriptUrl');
                 showStatus('Apps Script URL removed', 'success');
                 
-                // Update header to show manual mode
+                // Remove auto-update indicator
                 const header = document.querySelector('h1');
-                header.innerHTML = '🎲 BoardGame Collection Manager <span style="font-size: 0.7rem; background: #f39c12; padding: 0.2rem 0.5rem; border-radius: 4px; margin-left: 0.5rem;">Manual Mode</span>';
+                header.innerHTML = '🎲 BoardGame Collection Manager';
             }
         }
         
@@ -2992,11 +3328,9 @@ function doGet() {
             }
             
             // Update header to show if automatic updates are enabled
-            const header = document.querySelector('h1');
             if (savedAppsScriptUrl) {
+                const header = document.querySelector('h1');
                 header.innerHTML = '🎲 BoardGame Collection Manager <span style="font-size: 0.7rem; background: #27ae60; padding: 0.2rem 0.5rem; border-radius: 4px; margin-left: 0.5rem;">Auto-Update Enabled</span>';
-            } else if (savedSpreadsheetId && savedApiKey) {
-                header.innerHTML = '🎲 BoardGame Collection Manager <span style="font-size: 0.7rem; background: #f39c12; padding: 0.2rem 0.5rem; border-radius: 4px; margin-left: 0.5rem;">Manual Mode</span>';
             }
         }
     </script>
