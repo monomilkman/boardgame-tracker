@@ -508,6 +508,163 @@
             color: #7f8c8d;
         }
         
+        /* New styles for game history feature */
+        .game-history-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+        
+        .game-history-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .game-history-header {
+            background: #2c3e50;
+            color: white;
+            padding: 1.5rem;
+            border-radius: 12px 12px 0 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .game-history-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .game-history-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .game-history-body {
+            padding: 1.5rem;
+        }
+        
+        .history-section {
+            margin-bottom: 2rem;
+        }
+        
+        .history-section h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .history-section-icon {
+            font-size: 1.2rem;
+        }
+        
+        .play-history-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            border-left: 4px solid #3498db;
+        }
+        
+        .play-history-date {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        
+        .play-history-details {
+            font-size: 0.875rem;
+            color: #7f8c8d;
+            line-height: 1.5;
+        }
+        
+        .travel-history-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .travel-arrow {
+            color: #3498db;
+            font-size: 1.5rem;
+        }
+        
+        .travel-location {
+            flex: 1;
+        }
+        
+        .travel-location-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .travel-date {
+            font-size: 0.875rem;
+            color: #7f8c8d;
+        }
+        
+        .game-stats-summary {
+            background: #e8f4f8;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .game-stats-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .game-stats-label {
+            color: #7f8c8d;
+        }
+        
+        .game-stats-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .no-history {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 2rem;
+        }
+        
+        .history-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #ecf0f1;
+        }
+        
         @media (max-width: 600px) {
             .mode-selector {
                 grid-template-columns: repeat(2, 1fr);
@@ -515,6 +672,10 @@
             
             .stats-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .game-history-content {
+                margin: 0.5rem;
             }
         }
     </style>
@@ -529,6 +690,10 @@
             <button class="mode-btn active" onclick="setMode('view')">
                 <span class="icon">📦</span>
                 <span>View Bin</span>
+            </button>
+            <button class="mode-btn" onclick="setMode('history')">
+                <span class="icon">📚</span>
+                <span>Game History</span>
             </button>
             <button class="mode-btn" onclick="setMode('search')">
                 <span class="icon">🔍</span>
@@ -884,7 +1049,15 @@
                 C: Regular Players<br>
                 D: Notes<br><br>
                 
-                <strong>Note:</strong> The Players and SessionTemplates sheets will be created automatically when you add your first player/template if you have auto-update enabled.
+                <strong>Travel History Sheet (NEW):</strong><br>
+                Create a sheet called "TravelHistory" with these columns:<br>
+                A: Timestamp<br>
+                B: Game ID<br>
+                C: From Location<br>
+                D: To Location<br>
+                E: Action (CHECKOUT/CHECKIN/MOVE)<br><br>
+                
+                <strong>Note:</strong> The sheets will be created automatically when you use features if you have auto-update enabled.
             </div>
             
             <div class="status-success" style="margin-top: 1rem; display: none;" id="first-time-notice">
@@ -900,6 +1073,35 @@
         </div>
     </main>
     
+    <!-- Game History Modal -->
+    <div id="game-history-modal" class="game-history-modal hidden">
+        <div class="game-history-content">
+            <div class="game-history-header">
+                <h2 id="game-history-title">Game History</h2>
+                <button class="game-history-close" onclick="closeGameHistory()">×</button>
+            </div>
+            <div class="game-history-body">
+                <div id="game-stats-summary" class="game-stats-summary"></div>
+                
+                <div class="history-section">
+                    <h3><span class="history-section-icon">🎮</span> Play History</h3>
+                    <div id="game-play-history"></div>
+                </div>
+                
+                <div class="history-section">
+                    <h3><span class="history-section-icon">📍</span> Travel History</h3>
+                    <div id="game-travel-history"></div>
+                </div>
+                
+                <div class="history-actions">
+                    <button class="btn btn-primary" onclick="checkoutGameFromHistory()">Check Out</button>
+                    <button class="btn btn-info" onclick="logPlayFromHistory()">Log Play</button>
+                    <button class="btn btn-secondary" onclick="closeGameHistory()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <script>
         // Global variables
         let html5QrcodeScanner = null;
@@ -913,8 +1115,11 @@
         let allBins = [];
         let allPlayers = [];
         let playHistory = [];
+        let travelHistory = [];
         let sessionTemplates = [];
         let selectedPlayerForStats = null;
+        let currentHistoryGameId = null;
+        let currentHistoryGameInfo = null;
         let checkoutWorkflow = {
             gameId: null,
             gameTitle: null,
@@ -1002,6 +1207,7 @@
             document.querySelectorAll('.mode-btn').forEach(btn => {
                 if (btn.querySelector('span:last-child').textContent === 
                     (mode === 'view' ? 'View Bin' :
+                     mode === 'history' ? 'Game History' :
                      mode === 'search' ? 'Search' :
                      mode === 'play' ? 'Log Play' :
                      mode === 'checkout' ? 'Check Out' :
@@ -1039,12 +1245,16 @@
             document.getElementById('settings-section').classList.add('hidden');
             
             // Preload game data for modes that need it
-            if (['play', 'checkout', 'checkin', 'search', 'bulk'].includes(mode)) {
+            if (['play', 'checkout', 'checkin', 'search', 'bulk', 'history'].includes(mode)) {
                 loadAllGames().catch(err => console.log('Preload error:', err));
             }
             
             // Show relevant sections
             switch(mode) {
+                case 'history':
+                    document.getElementById('scan-section').classList.remove('hidden');
+                    showWorkflowState('Scan a game QR code to view its history');
+                    break;
                 case 'play':
                     document.getElementById('scan-section').classList.remove('hidden');
                     updateUIForMode();
@@ -1090,6 +1300,450 @@
                 showWorkflowState('Step 1: Scan the game QR code');
             } else if (currentMode === 'play') {
                 showWorkflowState('Scan a game QR code to log a play');
+            } else if (currentMode === 'history') {
+                showWorkflowState('Scan a game QR code to view its history');
+            }
+        }
+        
+        // Game History Functions
+        async function handleGameHistory(data) {
+            if (data.type !== 'GAME') {
+                showStatus('Please scan a game QR code', 'error');
+                // Restart scanner
+                setTimeout(() => startScanning(), 2000);
+                return;
+            }
+            
+            try {
+                showStatus('Loading game history...', 'success');
+                
+                // Load all necessary data
+                const [gameInfo, plays, travels] = await Promise.all([
+                    getGameInfo(data.id),
+                    loadEnhancedPlayHistory(),
+                    loadTravelHistory()
+                ]);
+                
+                if (!gameInfo) {
+                    showStatus('Game not found in inventory', 'error');
+                    setTimeout(() => startScanning(), 2000);
+                    return;
+                }
+                
+                // Store current game info
+                currentHistoryGameId = data.id;
+                currentHistoryGameInfo = gameInfo;
+                
+                // Display the history modal
+                displayGameHistory(gameInfo, plays, travels);
+                
+            } catch (error) {
+                showStatus('Error loading game history: ' + error.message, 'error');
+                setTimeout(() => startScanning(), 3000);
+            }
+        }
+        
+        function displayGameHistory(gameInfo, allPlays, allTravels) {
+            // Filter plays and travels for this game
+            const gamePlays = allPlays.filter(play => play.gameId === gameInfo.id);
+            const gameTravels = allTravels.filter(travel => travel.gameId === gameInfo.id);
+            
+            // Update modal header
+            document.getElementById('game-history-title').textContent = gameInfo.title;
+            
+            // Calculate statistics
+            const stats = calculateGameStatistics(gamePlays);
+            
+            // Display statistics summary
+            const statsHtml = `
+                <div class="game-stats-row">
+                    <span class="game-stats-label">Total Plays:</span>
+                    <span class="game-stats-value">${stats.totalPlays}</span>
+                </div>
+                <div class="game-stats-row">
+                    <span class="game-stats-label">Average Rating:</span>
+                    <span class="game-stats-value">${stats.avgRating ? stats.avgRating.toFixed(1) + '/5' : 'No ratings'}</span>
+                </div>
+                <div class="game-stats-row">
+                    <span class="game-stats-label">Most Frequent Winner:</span>
+                    <span class="game-stats-value">${stats.topWinner || 'No winner data'}</span>
+                </div>
+                <div class="game-stats-row">
+                    <span class="game-stats-label">Average Player Count:</span>
+                    <span class="game-stats-value">${stats.avgPlayers ? stats.avgPlayers.toFixed(1) : 'Unknown'}</span>
+                </div>
+                <div class="game-stats-row">
+                    <span class="game-stats-label">Current Location:</span>
+                    <span class="game-stats-value">${formatLocation(gameInfo.location)}</span>
+                </div>
+                <div class="game-stats-row">
+                    <span class="game-stats-label">Last Played:</span>
+                    <span class="game-stats-value">${stats.lastPlayed || 'Never'}</span>
+                </div>
+            `;
+            document.getElementById('game-stats-summary').innerHTML = statsHtml;
+            
+            // Display play history
+            const playHistoryContainer = document.getElementById('game-play-history');
+            if (gamePlays.length === 0) {
+                playHistoryContainer.innerHTML = '<div class="no-history">No plays recorded yet</div>';
+            } else {
+                playHistoryContainer.innerHTML = gamePlays
+                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+                    .slice(0, 10) // Show last 10 plays
+                    .map(play => {
+                        const date = new Date(play.timestamp);
+                        let details = [];
+                        
+                        if (play.players) details.push(`Players: ${play.players}`);
+                        if (play.winner) details.push(`Winner: ${play.winner}`);
+                        if (play.rating) details.push(`Rating: ${getStarDisplay(play.rating)}`);
+                        if (play.notes) details.push(`Notes: ${play.notes}`);
+                        
+                        return `
+                            <div class="play-history-item">
+                                <div class="play-history-date">${date.toLocaleDateString()} ${date.toLocaleTimeString()}</div>
+                                <div class="play-history-details">${details.join('<br>')}</div>
+                            </div>
+                        `;
+                    }).join('');
+                    
+                if (gamePlays.length > 10) {
+                    playHistoryContainer.innerHTML += `<p style="text-align: center; color: #7f8c8d; margin-top: 1rem;">...and ${gamePlays.length - 10} more plays</p>`;
+                }
+            }
+            
+            // Display travel history
+            const travelHistoryContainer = document.getElementById('game-travel-history');
+            if (gameTravels.length === 0) {
+                travelHistoryContainer.innerHTML = '<div class="no-history">No location changes recorded yet</div>';
+            } else {
+                // Get current location as most recent
+                const travelItems = [{
+                    timestamp: new Date().toISOString(),
+                    toLocation: gameInfo.location,
+                    action: 'CURRENT'
+                }];
+                
+                // Add historical travels
+                travelItems.push(...gameTravels.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)));
+                
+                travelHistoryContainer.innerHTML = travelItems
+                    .slice(0, 10)
+                    .map((travel, index) => {
+                        const date = new Date(travel.timestamp);
+                        const isCurrentLocation = travel.action === 'CURRENT';
+                        
+                        return `
+                            <div class="travel-history-item">
+                                <div class="travel-location">
+                                    <div class="travel-location-name">${formatLocation(travel.toLocation)}</div>
+                                    <div class="travel-date">
+                                        ${isCurrentLocation ? 'Current Location' : 
+                                          travel.action === 'CHECKOUT' ? 'Checked out on ' + date.toLocaleDateString() :
+                                          travel.action === 'CHECKIN' ? 'Checked in on ' + date.toLocaleDateString() :
+                                          'Moved on ' + date.toLocaleDateString()}
+                                    </div>
+                                </div>
+                                ${index < travelItems.length - 1 ? '<div class="travel-arrow">↓</div>' : ''}
+                            </div>
+                        `;
+                    }).join('');
+                    
+                if (gameTravels.length > 9) {
+                    travelHistoryContainer.innerHTML += `<p style="text-align: center; color: #7f8c8d; margin-top: 1rem;">...and ${gameTravels.length - 9} more location changes</p>`;
+                }
+            }
+            
+            // Show the modal
+            document.getElementById('game-history-modal').classList.remove('hidden');
+        }
+        
+        function calculateGameStatistics(plays) {
+            const stats = {
+                totalPlays: plays.length,
+                avgRating: null,
+                topWinner: null,
+                avgPlayers: null,
+                lastPlayed: null
+            };
+            
+            if (plays.length === 0) return stats;
+            
+            // Calculate average rating
+            const ratings = plays.filter(p => p.rating).map(p => parseInt(p.rating));
+            if (ratings.length > 0) {
+                stats.avgRating = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+            }
+            
+            // Find most frequent winner
+            const winners = {};
+            plays.forEach(play => {
+                if (play.winner) {
+                    winners[play.winner] = (winners[play.winner] || 0) + 1;
+                }
+            });
+            if (Object.keys(winners).length > 0) {
+                const topWinnerEntry = Object.entries(winners).sort((a, b) => b[1] - a[1])[0];
+                stats.topWinner = `${topWinnerEntry[0]} (${topWinnerEntry[1]} wins)`;
+            }
+            
+            // Calculate average player count
+            const playerCounts = plays
+                .filter(p => p.players)
+                .map(p => p.players.split(',').length);
+            if (playerCounts.length > 0) {
+                stats.avgPlayers = playerCounts.reduce((a, b) => a + b, 0) / playerCounts.length;
+            }
+            
+            // Get last played date
+            const sortedPlays = plays.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            if (sortedPlays.length > 0) {
+                stats.lastPlayed = new Date(sortedPlays[0].timestamp).toLocaleDateString();
+            }
+            
+            return stats;
+        }
+        
+        function formatLocation(location) {
+            if (location === 'CHECKED_OUT') return 'Checked Out';
+            if (location === 'NEW') return 'New (No Bin)';
+            if (location.length > 20 && !location.includes(':')) {
+                return 'Bin ' + location.substring(0, 8) + '...';
+            }
+            return location;
+        }
+        
+        function closeGameHistory() {
+            document.getElementById('game-history-modal').classList.add('hidden');
+            currentHistoryGameId = null;
+            currentHistoryGameInfo = null;
+            // Restart scanning
+            setTimeout(() => startScanning(), 500);
+        }
+        
+        function checkoutGameFromHistory() {
+            if (currentHistoryGameInfo && currentHistoryGameInfo.location !== 'CHECKED_OUT') {
+                closeGameHistory();
+                setMode('checkout');
+                // Pre-fill the checkout workflow
+                checkoutWorkflow.gameId = currentHistoryGameId;
+                checkoutWorkflow.gameTitle = currentHistoryGameInfo.title;
+                checkoutWorkflow.step = 'bin';
+                showWorkflowState(`Step 2: Now scan the bin QR code you're taking "${currentHistoryGameInfo.title}" FROM`);
+            } else {
+                showStatus('This game is already checked out', 'error');
+            }
+        }
+        
+        function logPlayFromHistory() {
+            if (currentHistoryGameInfo) {
+                closeGameHistory();
+                setMode('play');
+                showPlayLogForm(currentHistoryGameInfo);
+            }
+        }
+        
+        // Travel History Functions
+        async function loadTravelHistory() {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            
+            if (!spreadsheetId || !apiKey) {
+                console.log('No spreadsheet ID or API key found for loading travel history');
+                return [];
+            }
+            
+            try {
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/TravelHistory!A:E?key=${apiKey}`
+                );
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const rows = data.values || [];
+                    
+                    travelHistory = [];
+                    for (let i = 1; i < rows.length; i++) {
+                        const [timestamp, gameId, fromLocation, toLocation, action] = rows[i];
+                        travelHistory.push({
+                            timestamp,
+                            gameId,
+                            fromLocation: fromLocation || '',
+                            toLocation: toLocation || '',
+                            action: action || 'MOVE'
+                        });
+                    }
+                } else if (response.status === 400) {
+                    // TravelHistory sheet doesn't exist yet
+                    console.log('TravelHistory sheet not found, will be created when first location change is logged');
+                    travelHistory = [];
+                }
+                
+                console.log(`Loaded ${travelHistory.length} travel history entries`);
+                return travelHistory;
+            } catch (error) {
+                console.error('Error loading travel history:', error);
+                return [];
+            }
+        }
+        
+        async function logLocationChange(gameId, fromLocation, toLocation, action = 'MOVE') {
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            const timestamp = new Date().toISOString();
+            
+            try {
+                const travelData = [
+                    timestamp,      // A: Timestamp
+                    gameId,         // B: Game ID
+                    fromLocation,   // C: From Location
+                    toLocation,     // D: To Location
+                    action          // E: Action (CHECKOUT/CHECKIN/MOVE)
+                ];
+                
+                if (appsScriptUrl) {
+                    await fetch(appsScriptUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'append',
+                            sheet: 'TravelHistory',
+                            row: travelData
+                        })
+                    });
+                    
+                    return true;
+                }
+                
+                // Otherwise provide manual instruction
+                const csvRow = travelData.map(cell => `"${cell}"`).join(',');
+                console.log('Add this to TravelHistory sheet:', csvRow);
+                return false;
+                
+            } catch (error) {
+                console.error('Error logging location change:', error);
+                return false;
+            }
+        }
+        
+        // Updated location change handlers
+        async function handleCheckout(data) {
+            if (checkoutWorkflow.step === 'game') {
+                if (data.type !== 'GAME') {
+                    showStatus('Please scan a game QR code', 'error');
+                    return;
+                }
+                
+                // Verify game exists
+                const gameInfo = await getGameInfo(data.id);
+                if (!gameInfo) {
+                    showStatus('Game not found in inventory', 'error');
+                    return;
+                }
+                
+                checkoutWorkflow.gameId = data.id;
+                checkoutWorkflow.gameTitle = gameInfo.title;
+                checkoutWorkflow.fromLocation = gameInfo.location;
+                checkoutWorkflow.step = 'bin';
+                showWorkflowState(`Step 2: Now scan the bin QR code you're taking "${gameInfo.title}" FROM`);
+                
+            } else if (checkoutWorkflow.step === 'bin') {
+                if (data.type !== 'BIN') {
+                    showStatus('Please scan a bin QR code', 'error');
+                    return;
+                }
+                
+                checkoutWorkflow.binId = data.id;
+                
+                try {
+                    // Update game location
+                    await updateGameLocation(checkoutWorkflow.gameId, 'CHECKED_OUT');
+                    
+                    // Log the location change
+                    await logLocationChange(
+                        checkoutWorkflow.gameId,
+                        checkoutWorkflow.fromLocation,
+                        'CHECKED_OUT',
+                        'CHECKOUT'
+                    );
+                    
+                    // Show friendly bin identifier
+                    let binDisplay = checkoutWorkflow.binId;
+                    if (checkoutWorkflow.binId.length > 20 && !checkoutWorkflow.binId.includes(':')) {
+                        binDisplay = 'bin ' + checkoutWorkflow.binId.substring(0, 8) + '...';
+                    }
+                    
+                    showStatus(`✅ ${checkoutWorkflow.gameTitle} checked out from ${binDisplay}!`, 'success');
+                    
+                    // Log this as a play event too
+                    await logEnhancedGamePlay(checkoutWorkflow.gameId, '', '', 0, 'Checked out', '');
+                    
+                    // Reset workflow
+                    checkoutWorkflow = { gameId: null, gameTitle: null, binId: null, step: 'game' };
+                    hideWorkflowState();
+                } catch (error) {
+                    showStatus('Error checking out game: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        async function handleCheckin(data) {
+            if (checkoutWorkflow.step === 'game') {
+                if (data.type !== 'GAME') {
+                    showStatus('Please scan a game QR code', 'error');
+                    return;
+                }
+                
+                // Verify game exists
+                const gameInfo = await getGameInfo(data.id);
+                if (!gameInfo) {
+                    showStatus('Game not found in inventory', 'error');
+                    return;
+                }
+                
+                checkoutWorkflow.gameId = data.id;
+                checkoutWorkflow.gameTitle = gameInfo.title;
+                checkoutWorkflow.fromLocation = gameInfo.location;
+                checkoutWorkflow.step = 'bin';
+                showWorkflowState(`Step 2: Now scan the bin QR code you're putting "${gameInfo.title}" INTO`);
+                
+            } else if (checkoutWorkflow.step === 'bin') {
+                if (data.type !== 'BIN') {
+                    showStatus('Please scan a bin QR code', 'error');
+                    return;
+                }
+                
+                checkoutWorkflow.binId = data.id;
+                
+                try {
+                    // Update game location
+                    await updateGameLocation(checkoutWorkflow.gameId, checkoutWorkflow.binId);
+                    
+                    // Log the location change
+                    await logLocationChange(
+                        checkoutWorkflow.gameId,
+                        checkoutWorkflow.fromLocation,
+                        checkoutWorkflow.binId,
+                        'CHECKIN'
+                    );
+                    
+                    // Show friendly bin identifier
+                    let binDisplay = checkoutWorkflow.binId;
+                    if (checkoutWorkflow.binId.length > 20 && !checkoutWorkflow.binId.includes(':')) {
+                        binDisplay = 'bin ' + checkoutWorkflow.binId.substring(0, 8) + '...';
+                    }
+                    
+                    showStatus(`✅ ${checkoutWorkflow.gameTitle} checked into ${binDisplay}!`, 'success');
+                    
+                    // Reset workflow
+                    checkoutWorkflow = { gameId: null, gameTitle: null, binId: null, step: 'game' };
+                    hideWorkflowState();
+                } catch (error) {
+                    showStatus('Error checking in game: ' + error.message, 'error');
+                }
             }
         }
         
@@ -2701,11 +3355,35 @@
                             <div class="game-title">${game.title}</div>
                             <div class="game-location">ID: ${game.id} • Location: ${locationText}</div>
                         </div>
+                        <button class="btn btn-info" onclick="viewGameHistoryById('${game.id}')" style="margin-left: auto;">View History</button>
                     </div>
                 `;
             });
             
             resultsDiv.classList.remove('hidden');
+        }
+        
+        // View game history from search results
+        async function viewGameHistoryById(gameId) {
+            try {
+                const [gameInfo, plays, travels] = await Promise.all([
+                    getGameInfo(gameId),
+                    loadEnhancedPlayHistory(),
+                    loadTravelHistory()
+                ]);
+                
+                if (!gameInfo) {
+                    showStatus('Game not found', 'error');
+                    return;
+                }
+                
+                currentHistoryGameId = gameId;
+                currentHistoryGameInfo = gameInfo;
+                displayGameHistory(gameInfo, plays, travels);
+                
+            } catch (error) {
+                showStatus('Error loading game history: ' + error.message, 'error');
+            }
         }
         
         // Statistics functionality
@@ -2768,6 +3446,7 @@
                                     <div class="game-title">${game.title}</div>
                                     <div class="game-location">${count} plays</div>
                                 </div>
+                                <button class="btn btn-info" onclick="viewGameHistoryById('${game.id}')" style="margin-left: auto;">View History</button>
                             </div>
                         `;
                     }
@@ -2884,8 +3563,14 @@
             
             for (const gameId of selectedGames) {
                 try {
+                    // Get current location
+                    const gameInfo = await getGameInfo(gameId);
+                    const fromLocation = gameInfo ? gameInfo.location : 'Unknown';
+                    
                     const result = await updateGameLocation(gameId, binId);
                     if (result) {
+                        // Log location change
+                        await logLocationChange(gameId, fromLocation, binId, 'MOVE');
                         moved++;
                     } else {
                         failed++;
@@ -2915,8 +3600,17 @@
             
             for (const gameId of selectedGames) {
                 try {
+                    // Get current location
+                    const gameInfo = await getGameInfo(gameId);
+                    const fromLocation = gameInfo ? gameInfo.location : 'Unknown';
+                    
                     const locationResult = await updateGameLocation(gameId, 'CHECKED_OUT');
                     const playResult = await logEnhancedGamePlay(gameId, '', '', 0, 'Bulk checkout', '');
+                    
+                    if (locationResult) {
+                        // Log location change
+                        await logLocationChange(gameId, fromLocation, 'CHECKED_OUT', 'CHECKOUT');
+                    }
                     
                     if (locationResult && playResult) {
                         checkedOut++;
@@ -3165,7 +3859,6 @@
                     <select id="import-bin-select" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
                         <option value="IMPORTED">Create new "IMPORTED" location</option>
                     </select>
-                    <button class="btn btn-primary" onclick="confirmBGGImport('${username.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')" style="width: 100%;">
                     <button class="btn btn-primary" onclick="confirmBGGImport('${username.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')" style="width: 100%;">Confirm Import</button>
                 `;
                 
@@ -3559,6 +4252,9 @@
                 case 'view':
                     handleViewBin(data);
                     break;
+                case 'history':
+                    handleGameHistory(data);
+                    break;
                 case 'play':
                     handleLogPlay(data);
                     break;
@@ -3676,103 +4372,6 @@
                 displayBinContents(data.id, games, binInfo);
             } catch (error) {
                 showStatus('Error loading bin contents: ' + error.message, 'error');
-            }
-        }
-        
-        async function handleCheckout(data) {
-            if (checkoutWorkflow.step === 'game') {
-                if (data.type !== 'GAME') {
-                    showStatus('Please scan a game QR code', 'error');
-                    return;
-                }
-                
-                // Verify game exists
-                const gameInfo = await getGameInfo(data.id);
-                if (!gameInfo) {
-                    showStatus('Game not found in inventory', 'error');
-                    return;
-                }
-                
-                checkoutWorkflow.gameId = data.id;
-                checkoutWorkflow.gameTitle = gameInfo.title;
-                checkoutWorkflow.step = 'bin';
-                showWorkflowState(`Step 2: Now scan the bin QR code you're taking "${gameInfo.title}" FROM`);
-                
-            } else if (checkoutWorkflow.step === 'bin') {
-                if (data.type !== 'BIN') {
-                    showStatus('Please scan a bin QR code', 'error');
-                    return;
-                }
-                
-                checkoutWorkflow.binId = data.id;
-                
-                try {
-                    await updateGameLocation(checkoutWorkflow.gameId, 'CHECKED_OUT');
-                    
-                    // Show friendly bin identifier
-                    let binDisplay = checkoutWorkflow.binId;
-                    if (checkoutWorkflow.binId.length > 20 && !checkoutWorkflow.binId.includes(':')) {
-                        binDisplay = 'bin ' + checkoutWorkflow.binId.substring(0, 8) + '...';
-                    }
-                    
-                    showStatus(`✅ ${checkoutWorkflow.gameTitle} checked out from ${binDisplay}!`, 'success');
-                    
-                    // Log this as a play event too
-                    await logEnhancedGamePlay(checkoutWorkflow.gameId, '', '', 0, 'Checked out', '');
-                    
-                    // Reset workflow
-                    checkoutWorkflow = { gameId: null, gameTitle: null, binId: null, step: 'game' };
-                    hideWorkflowState();
-                } catch (error) {
-                    showStatus('Error checking out game: ' + error.message, 'error');
-                }
-            }
-        }
-        
-        async function handleCheckin(data) {
-            if (checkoutWorkflow.step === 'game') {
-                if (data.type !== 'GAME') {
-                    showStatus('Please scan a game QR code', 'error');
-                    return;
-                }
-                
-                // Verify game exists
-                const gameInfo = await getGameInfo(data.id);
-                if (!gameInfo) {
-                    showStatus('Game not found in inventory', 'error');
-                    return;
-                }
-                
-                checkoutWorkflow.gameId = data.id;
-                checkoutWorkflow.gameTitle = gameInfo.title;
-                checkoutWorkflow.step = 'bin';
-                showWorkflowState(`Step 2: Now scan the bin QR code you're putting "${gameInfo.title}" INTO`);
-                
-            } else if (checkoutWorkflow.step === 'bin') {
-                if (data.type !== 'BIN') {
-                    showStatus('Please scan a bin QR code', 'error');
-                    return;
-                }
-                
-                checkoutWorkflow.binId = data.id;
-                
-                try {
-                    await updateGameLocation(checkoutWorkflow.gameId, checkoutWorkflow.binId);
-                    
-                    // Show friendly bin identifier
-                    let binDisplay = checkoutWorkflow.binId;
-                    if (checkoutWorkflow.binId.length > 20 && !checkoutWorkflow.binId.includes(':')) {
-                        binDisplay = 'bin ' + checkoutWorkflow.binId.substring(0, 8) + '...';
-                    }
-                    
-                    showStatus(`✅ ${checkoutWorkflow.gameTitle} checked into ${binDisplay}!`, 'success');
-                    
-                    // Reset workflow
-                    checkoutWorkflow = { gameId: null, gameTitle: null, binId: null, step: 'game' };
-                    hideWorkflowState();
-                } catch (error) {
-                    showStatus('Error checking in game: ' + error.message, 'error');
-                }
             }
         }
         
@@ -4020,6 +4619,7 @@
                                 <div class="game-title">🎲 ${game.title}</div>
                                 <div class="game-location">ID: ${game.id}${game.bggId ? ' • BGG: ' + game.bggId : ''}</div>
                             </div>
+                            <button class="btn btn-info" onclick="viewGameHistoryById('${game.id}')" style="margin-left: auto;">History</button>
                         </div>
                     `;
                 });
