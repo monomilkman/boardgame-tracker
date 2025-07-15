@@ -930,6 +930,11 @@
         let sessionChart = null;
         let playerComparisonChart = null;
         
+        // Cache variables
+        let gameCache = new Map();
+        let cacheTimestamp = 0;
+        const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+        
         // Google Sheets API base URL
         const SHEETS_API_BASE = 'https://sheets.googleapis.com/v4/spreadsheets';
         
@@ -1017,6 +1022,11 @@
             hideStatus();
             hideResults();
             
+            // Stop any active scanning
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().catch(err => console.log('Stop error:', err));
+            }
+            
             // Hide all sections
             document.getElementById('scan-section').classList.add('hidden');
             document.getElementById('play-log-section').classList.add('hidden');
@@ -1027,6 +1037,11 @@
             document.getElementById('bulk-section').classList.add('hidden');
             document.getElementById('bgg-section').classList.add('hidden');
             document.getElementById('settings-section').classList.add('hidden');
+            
+            // Preload game data for modes that need it
+            if (['play', 'checkout', 'checkin', 'search', 'bulk'].includes(mode)) {
+                loadAllGames().catch(err => console.log('Preload error:', err));
+            }
             
             // Show relevant sections
             switch(mode) {
@@ -1113,13 +1128,19 @@
         async function handleLogPlay(data) {
             if (data.type !== 'GAME') {
                 showStatus('Please scan a game QR code', 'error');
+                // Restart scanner
+                setTimeout(() => startScanning(), 2000);
                 return;
             }
             
             try {
+                showStatus('Loading game information...', 'success');
                 const gameInfo = await getGameInfo(data.id);
+                
                 if (!gameInfo) {
                     showStatus('Game not found in inventory', 'error');
+                    // Restart scanner
+                    setTimeout(() => startScanning(), 2000);
                     return;
                 }
                 
@@ -1128,7 +1149,13 @@
                 showPlayLogForm(gameInfo);
                 
             } catch (error) {
-                showStatus('Error loading game: ' + error.message, 'error');
+                if (error.message.includes('rate limit')) {
+                    showStatus('Too many requests. Please wait 10 seconds and try again.', 'error');
+                } else {
+                    showStatus('Error loading game: ' + error.message, 'error');
+                }
+                // Restart scanner after error
+                setTimeout(() => startScanning(), 3000);
             }
         }
         
@@ -1168,6 +1195,8 @@
             currentPlayGame = null;
             document.getElementById('play-log-section').classList.add('hidden');
             document.getElementById('scan-section').classList.remove('hidden');
+            // Restart scanning
+            setTimeout(() => startScanning(), 500);
         }
         
         async function confirmLogPlay() {
@@ -3136,6 +3165,7 @@
                     <select id="import-bin-select" style="width: 100%; padding: 0.5rem; margin: 0.5rem 0;">
                         <option value="IMPORTED">Create new "IMPORTED" location</option>
                     </select>
+                    <button class="btn btn-primary" onclick="confirmBGGImport('${username.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')" style="width: 100%;">
                     <button class="btn btn-primary" onclick="confirmBGGImport('${username.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')" style="width: 100%;">Confirm Import</button>
                 `;
                 
@@ -3345,36 +3375,58 @@
                 return [];
             }
             
+            // Check if we have recent cached data
+            const now = Date.now();
+            if (allGames.length > 0 && gameCache.size > 0 && (now - cacheTimestamp) < CACHE_DURATION) {
+                console.log('Using cached games data');
+                return allGames;
+            }
+            
             try {
                 const response = await fetch(
                     `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:E?key=${apiKey}`
                 );
                 
+                if (response.status === 429) {
+                    // If rate limited and we have cached data, use it
+                    if (allGames.length > 0) {
+                        console.log('Rate limited - using cached data');
+                        return allGames;
+                    }
+                    throw new Error('API rate limit exceeded. Please wait and try again.');
+                }
+                
                 if (!response.ok) {
                     console.error('Failed to load games:', response.status);
-                    return [];
+                    return allGames; // Return cached data if available
                 }
                 
                 const data = await response.json();
                 const rows = data.values || [];
                 
+                // Clear caches
                 allGames = [];
+                gameCache.clear();
+                cacheTimestamp = now;
+                
                 for (let i = 1; i < rows.length; i++) {
                     const [gameId, title, location, bggId, photoUrl] = rows[i];
-                    allGames.push({
+                    const game = {
                         id: gameId,
                         title: title || 'Unknown Game',
                         location: location || 'Unknown',
                         bggId: bggId || '',
                         photoUrl: photoUrl || ''
-                    });
+                    };
+                    allGames.push(game);
+                    gameCache.set(gameId, game);
                 }
                 
                 console.log(`Loaded ${allGames.length} games from spreadsheet`);
                 return allGames;
             } catch (error) {
                 console.error('Error loading games:', error);
-                return [];
+                return allGames; // Return cached data if available
             }
         }
         
@@ -3487,11 +3539,18 @@
         }
         
         function onScanSuccess(decodedText, decodedResult) {
+            // Stop the scanner immediately to prevent multiple scans
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().catch(err => console.log('Stop error:', err));
+            }
+            
             // Parse QR code data
             const data = parseQRCode(decodedText);
             
             if (!data) {
                 showStatus('Invalid QR code format: ' + decodedText, 'error');
+                // Restart scanner after error
+                setTimeout(() => startScanning(), 2000);
                 return;
             }
             
@@ -3762,6 +3821,13 @@
         }
         
         async function getGameInfo(gameId) {
+            // Check cache first
+            const now = Date.now();
+            if (gameCache.has(gameId) && (now - cacheTimestamp) < CACHE_DURATION) {
+                console.log('Using cached game info for:', gameId);
+                return gameCache.get(gameId);
+            }
+            
             const spreadsheetId = localStorage.getItem('spreadsheetId');
             const apiKey = localStorage.getItem('apiKey');
             
@@ -3770,25 +3836,45 @@
                     `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:E?key=${apiKey}`
                 );
                 
+                if (response.status === 429) {
+                    throw new Error('API rate limit exceeded. Please wait a moment and try again.');
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 const rows = data.values || [];
                 
-                // Find the game
+                // Clear and rebuild cache
+                gameCache.clear();
+                cacheTimestamp = now;
+                
+                // Cache all games while we're at it
                 for (let i = 1; i < rows.length; i++) {
-                    if (rows[i][0] === gameId) {
-                        return {
-                            id: rows[i][0],
-                            title: rows[i][1] || 'Unknown Game',
-                            location: rows[i][2] || 'Unknown',
-                            bggId: rows[i][3] || '',
-                            photoUrl: rows[i][4] || ''
-                        };
-                    }
+                    const game = {
+                        id: rows[i][0],
+                        title: rows[i][1] || 'Unknown Game',
+                        location: rows[i][2] || 'Unknown',
+                        bggId: rows[i][3] || '',
+                        photoUrl: rows[i][4] || ''
+                    };
+                    gameCache.set(game.id, game);
                 }
                 
-                return null;
+                // Return the requested game
+                return gameCache.get(gameId) || null;
+                
             } catch (error) {
                 console.error('Error fetching game info:', error);
+                
+                // If we have cached data, use it even if expired
+                if (gameCache.has(gameId)) {
+                    console.log('Using expired cache due to API error');
+                    return gameCache.get(gameId);
+                }
+                
                 throw error;
             }
         }
