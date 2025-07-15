@@ -738,7 +738,7 @@
         </div>
         
         <!-- Scan Section -->
-        <div id="scan-section" class="scan-container">
+        <div id="scan-section" class="scan-container hidden">
             <div id="reader"></div>
             <div class="action-buttons">
                 <button class="btn btn-primary" onclick="startScanning()">Start Scanning</button>
@@ -1159,6 +1159,24 @@
             } else {
                 console.log('QR scanner library loaded successfully');
             }
+            
+            // Set initial mode without triggering camera
+            currentMode = 'view';
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                if (btn.querySelector('span:last-child').textContent === 'View Bin') {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Ensure modal is hidden
+            document.getElementById('game-history-modal').classList.add('hidden');
+            
+            // Add click handler to modal background to close when clicking outside
+            document.getElementById('game-history-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeGameHistory();
+                }
+            });
         };
         
         // Initialize rating stars interaction
@@ -1230,7 +1248,7 @@
             
             // Stop any active scanning
             if (html5QrcodeScanner) {
-                html5QrcodeScanner.stop().catch(err => console.log('Stop error:', err));
+                stopScanning();
             }
             
             // Hide all sections
@@ -1251,9 +1269,13 @@
             
             // Show relevant sections
             switch(mode) {
+                case 'view':
+                    document.getElementById('scan-section').classList.remove('hidden');
+                    updateUIForMode();
+                    break;
                 case 'history':
                     document.getElementById('scan-section').classList.remove('hidden');
-                    showWorkflowState('Scan a game QR code to view its history');
+                    updateUIForMode();
                     break;
                 case 'play':
                     document.getElementById('scan-section').classList.remove('hidden');
@@ -1287,14 +1309,18 @@
                 case 'settings':
                     document.getElementById('settings-section').classList.remove('hidden');
                     break;
-                default:
+                case 'checkout':
+                case 'checkin':
                     document.getElementById('scan-section').classList.remove('hidden');
                     updateUIForMode();
+                    break;
             }
         }
         
         function updateUIForMode() {
-            if (currentMode === 'checkout') {
+            if (currentMode === 'view') {
+                showWorkflowState('Scan a bin QR code to view contents');
+            } else if (currentMode === 'checkout') {
                 showWorkflowState('Step 1: Scan the game QR code');
             } else if (currentMode === 'checkin') {
                 showWorkflowState('Step 1: Scan the game QR code');
@@ -1303,6 +1329,7 @@
             } else if (currentMode === 'history') {
                 showWorkflowState('Scan a game QR code to view its history');
             }
+            // Don't automatically start scanning
         }
         
         // Game History Functions
@@ -1344,15 +1371,31 @@
         }
         
         function displayGameHistory(gameInfo, allPlays, allTravels) {
+            // Make sure we have valid game info
+            if (!gameInfo) {
+                console.error('No game info provided to displayGameHistory');
+                return;
+            }
+            
             // Filter plays and travels for this game
             const gamePlays = allPlays.filter(play => play.gameId === gameInfo.id);
             const gameTravels = allTravels.filter(travel => travel.gameId === gameInfo.id);
             
-            // Update modal header
-            document.getElementById('game-history-title').textContent = gameInfo.title;
+            // Ensure all containers exist and are clear
+            const summaryDiv = document.getElementById('game-stats-summary');
+            const playHistoryDiv = document.getElementById('game-play-history');
+            const travelHistoryDiv = document.getElementById('game-travel-history');
+            
+            if (!summaryDiv || !playHistoryDiv || !travelHistoryDiv) {
+                console.error('Game history modal elements not found');
+                return;
+            }
             
             // Calculate statistics
             const stats = calculateGameStatistics(gamePlays);
+            
+            // Update modal header
+            document.getElementById('game-history-title').textContent = gameInfo.title;
             
             // Display statistics summary
             const statsHtml = `
@@ -1381,14 +1424,13 @@
                     <span class="game-stats-value">${stats.lastPlayed || 'Never'}</span>
                 </div>
             `;
-            document.getElementById('game-stats-summary').innerHTML = statsHtml;
+            summaryDiv.innerHTML = statsHtml;
             
             // Display play history
-            const playHistoryContainer = document.getElementById('game-play-history');
             if (gamePlays.length === 0) {
-                playHistoryContainer.innerHTML = '<div class="no-history">No plays recorded yet</div>';
+                playHistoryDiv.innerHTML = '<div class="no-history">No plays recorded yet</div>';
             } else {
-                playHistoryContainer.innerHTML = gamePlays
+                playHistoryDiv.innerHTML = gamePlays
                     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
                     .slice(0, 10) // Show last 10 plays
                     .map(play => {
@@ -1409,14 +1451,13 @@
                     }).join('');
                     
                 if (gamePlays.length > 10) {
-                    playHistoryContainer.innerHTML += `<p style="text-align: center; color: #7f8c8d; margin-top: 1rem;">...and ${gamePlays.length - 10} more plays</p>`;
+                    playHistoryDiv.innerHTML += `<p style="text-align: center; color: #7f8c8d; margin-top: 1rem;">...and ${gamePlays.length - 10} more plays</p>`;
                 }
             }
             
             // Display travel history
-            const travelHistoryContainer = document.getElementById('game-travel-history');
             if (gameTravels.length === 0) {
-                travelHistoryContainer.innerHTML = '<div class="no-history">No location changes recorded yet</div>';
+                travelHistoryDiv.innerHTML = '<div class="no-history">No location changes recorded yet</div>';
             } else {
                 // Get current location as most recent
                 const travelItems = [{
@@ -1428,7 +1469,7 @@
                 // Add historical travels
                 travelItems.push(...gameTravels.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)));
                 
-                travelHistoryContainer.innerHTML = travelItems
+                travelHistoryDiv.innerHTML = travelItems
                     .slice(0, 10)
                     .map((travel, index) => {
                         const date = new Date(travel.timestamp);
@@ -1451,7 +1492,7 @@
                     }).join('');
                     
                 if (gameTravels.length > 9) {
-                    travelHistoryContainer.innerHTML += `<p style="text-align: center; color: #7f8c8d; margin-top: 1rem;">...and ${gameTravels.length - 9} more location changes</p>`;
+                    travelHistoryDiv.innerHTML += `<p style="text-align: center; color: #7f8c8d; margin-top: 1rem;">...and ${gameTravels.length - 9} more location changes</p>`;
                 }
             }
             
@@ -1518,12 +1559,21 @@
             document.getElementById('game-history-modal').classList.add('hidden');
             currentHistoryGameId = null;
             currentHistoryGameInfo = null;
-            // Restart scanning
-            setTimeout(() => startScanning(), 500);
+            
+            // If we're in history mode, update the workflow state
+            if (currentMode === 'history') {
+                showWorkflowState('Scan a game QR code to view its history');
+            }
+            // Don't automatically restart scanning
         }
         
         function checkoutGameFromHistory() {
-            if (currentHistoryGameInfo && currentHistoryGameInfo.location !== 'CHECKED_OUT') {
+            if (!currentHistoryGameInfo || !currentHistoryGameId) {
+                showStatus('No game selected', 'error');
+                return;
+            }
+            
+            if (currentHistoryGameInfo.location !== 'CHECKED_OUT') {
                 closeGameHistory();
                 setMode('checkout');
                 // Pre-fill the checkout workflow
@@ -1537,6 +1587,11 @@
         }
         
         function logPlayFromHistory() {
+            if (!currentHistoryGameInfo || !currentHistoryGameId) {
+                showStatus('No game selected', 'error');
+                return;
+            }
+            
             if (currentHistoryGameInfo) {
                 closeGameHistory();
                 setMode('play');
@@ -1814,6 +1869,14 @@
         }
         
         async function showPlayLogForm(gameInfo) {
+            if (!gameInfo) {
+                showStatus('No game information available', 'error');
+                return;
+            }
+            
+            // Store current game
+            currentPlayGame = gameInfo;
+            
             // Hide scan section, show play log form
             document.getElementById('scan-section').classList.add('hidden');
             document.getElementById('play-log-section').classList.remove('hidden');
@@ -3245,6 +3308,76 @@
                     }
                 }
             });
+        }Chart(sessionStats) {
+            const ctx = document.getElementById('session-chart').getContext('2d');
+            
+            // Group by month
+            const monthlyData = {};
+            sessionStats.forEach(session => {
+                const month = session.date.substring(0, 7);
+                if (!monthlyData[month]) {
+                    monthlyData[month] = { sessions: 0, games: 0 };
+                }
+                monthlyData[month].sessions++;
+                monthlyData[month].games += session.gameCount;
+            });
+            
+            const labels = Object.keys(monthlyData).sort();
+            
+            if (sessionChart) {
+                sessionChart.destroy();
+            }
+            
+            sessionChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Sessions',
+                        data: labels.map(month => monthlyData[month].sessions),
+                        backgroundColor: '#3498db',
+                        yAxisID: 'y'
+                    }, {
+                        label: 'Total Games',
+                        data: labels.map(month => monthlyData[month].games),
+                        backgroundColor: '#27ae60',
+                        yAxisID: 'y1'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Gaming Sessions by Month'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'Sessions'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'Games Played'
+                            },
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        }
+                    }
+                }
+            });
         }
         
         // Export enhanced player statistics
@@ -4226,8 +4359,9 @@
         function stopScanning() {
             if (html5QrcodeScanner) {
                 html5QrcodeScanner.stop().then(() => {
-                    html5QrcodeScanner.clear();
-                }).catch(err => console.error(err));
+                    console.log('Camera stopped successfully');
+                    html5QrcodeScanner = null;
+                }).catch(err => console.error('Error stopping camera:', err));
             }
         }
         
@@ -4358,6 +4492,8 @@
         async function handleViewBin(data) {
             if (data.type !== 'BIN') {
                 showStatus('Please scan a bin QR code', 'error');
+                // Restart scanner
+                setTimeout(() => startScanning(), 2000);
                 return;
             }
             
@@ -4370,8 +4506,11 @@
                 ]);
                 
                 displayBinContents(data.id, games, binInfo);
+                // Don't automatically restart scanning
             } catch (error) {
                 showStatus('Error loading bin contents: ' + error.message, 'error');
+                // Restart scanner on error
+                setTimeout(() => startScanning(), 2000);
             }
         }
         
