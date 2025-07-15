@@ -516,12 +516,17 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.8);
-            display: flex;
+            display: none; /* Changed from flex to none */
             align-items: center;
             justify-content: center;
             z-index: 1000;
             padding: 1rem;
             overflow-y: auto;
+        }
+        
+        /* Add this new rule to show the modal when not hidden */
+        .game-history-modal:not(.hidden) {
+            display: flex;
         }
         
         .game-history-content {
