@@ -428,6 +428,86 @@
             transition: width 0.3s;
         }
         
+        .player-tab-content {
+            margin-top: 1rem;
+        }
+        
+        .player-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin: 1rem 0;
+            position: relative;
+        }
+        
+        .player-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .player-card h4 {
+            margin: 0;
+            color: #2c3e50;
+        }
+        
+        .player-card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .player-card-actions button {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .player-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .player-stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .player-stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #3498db;
+        }
+        
+        .player-stat-label {
+            font-size: 0.875rem;
+            color: #7f8c8d;
+            margin-top: 0.25rem;
+        }
+        
+        .session-history-item {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 0.5rem 0;
+        }
+        
+        .session-history-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .session-history-games {
+            font-size: 0.875rem;
+            color: #7f8c8d;
+        }
+        
         @media (max-width: 600px) {
             .mode-selector {
                 grid-template-columns: repeat(2, 1fr);
@@ -640,24 +720,70 @@
         
         <!-- Players Section -->
         <div id="players-section" class="hidden">
-            <div class="search-container">
-                <h3>Player Statistics & Comparison</h3>
-                <p style="margin: 1rem 0;">Select players to compare:</p>
-                <div class="player-select" id="player-select-list"></div>
+            <div class="tabs">
+                <button class="tab active" onclick="setPlayerTab('manage')">Manage Players</button>
+                <button class="tab" onclick="setPlayerTab('stats')">Statistics</button>
+                <button class="tab" onclick="setPlayerTab('compare')">Compare</button>
+                <button class="tab" onclick="setPlayerTab('history')">Session History</button>
             </div>
             
-            <div id="player-comparison" class="hidden">
-                <div class="results">
-                    <h3>Head-to-Head Comparison</h3>
-                    <div id="h2h-stats"></div>
+            <!-- Manage Players Tab -->
+            <div id="player-manage" class="player-tab-content">
+                <div class="setup-section">
+                    <h3>Add New Player</h3>
+                    <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                        <input type="text" id="new-player-name" placeholder="Player name" style="flex: 1;">
+                        <input type="email" id="new-player-email" placeholder="Email (optional)" style="flex: 1;">
+                        <button class="btn btn-primary" onclick="addNewPlayer()">Add Player</button>
+                    </div>
                 </div>
                 
-                <div class="chart-container" style="margin-top: 2rem;">
-                    <canvas id="player-comparison-chart"></canvas>
+                <div class="results">
+                    <h3>All Players</h3>
+                    <div id="all-players-list"></div>
                 </div>
             </div>
             
-            <div id="individual-player-stats"></div>
+            <!-- Statistics Tab -->
+            <div id="player-stats" class="player-tab-content hidden">
+                <div class="search-container">
+                    <h3>Player Statistics</h3>
+                    <p style="margin: 1rem 0;">Click on a player to see detailed statistics:</p>
+                    <div class="player-select" id="player-stats-list"></div>
+                </div>
+                <div id="individual-player-stats"></div>
+            </div>
+            
+            <!-- Compare Tab -->
+            <div id="player-compare" class="player-tab-content hidden">
+                <div class="search-container">
+                    <h3>Compare Players</h3>
+                    <p style="margin: 1rem 0;">Select 2 or more players to compare:</p>
+                    <div class="player-select" id="player-compare-list"></div>
+                </div>
+                
+                <div id="player-comparison" class="hidden">
+                    <div class="results">
+                        <h3>Head-to-Head Comparison</h3>
+                        <div id="h2h-stats"></div>
+                    </div>
+                    
+                    <div class="chart-container" style="margin-top: 2rem;">
+                        <canvas id="player-comparison-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Session History Tab -->
+            <div id="player-history" class="player-tab-content hidden">
+                <div class="search-container">
+                    <h3>Player Session History</h3>
+                    <select id="player-history-select" onchange="loadPlayerSessionHistory()" style="width: 100%; padding: 0.75rem; margin: 1rem 0;">
+                        <option value="">Select a player...</option>
+                    </select>
+                </div>
+                <div id="player-session-history"></div>
+            </div>
         </div>
         
         <!-- Sessions Section -->
@@ -745,6 +871,12 @@
                 F: Rating (1-5)<br>
                 G: Session ID (optional)<br><br>
                 
+                <strong>Players Sheet Setup:</strong><br>
+                Create a sheet called "Players" with these columns:<br>
+                A: Player ID<br>
+                B: Name<br>
+                C: Email (optional)<br><br>
+                
                 <strong>Session Templates Sheet (optional):</strong><br>
                 Create a new sheet called "SessionTemplates" with:<br>
                 A: Template ID<br>
@@ -752,7 +884,7 @@
                 C: Regular Players<br>
                 D: Notes<br><br>
                 
-                <strong>Note:</strong> The SessionTemplates sheet will be created automatically when you save your first template if you have auto-update enabled.
+                <strong>Note:</strong> The Players and SessionTemplates sheets will be created automatically when you add your first player/template if you have auto-update enabled.
             </div>
             
             <div class="status-success" style="margin-top: 1rem; display: none;" id="first-time-notice">
@@ -774,12 +906,15 @@
         let currentMode = 'view';
         let searchTab = 'all';
         let statsTab = 'overview';
+        let playerTab = 'manage';
         let selectedGames = new Set();
         let selectedPlayers = new Set();
         let allGames = [];
         let allBins = [];
+        let allPlayers = [];
         let playHistory = [];
         let sessionTemplates = [];
+        let selectedPlayerForStats = null;
         let checkoutWorkflow = {
             gameId: null,
             gameTitle: null,
@@ -1113,48 +1248,615 @@
         async function loadPlayerStats() {
             console.log('Loading player stats...');
             
-            // Load all games first (needed for displayIndividualPlayerStats)
-            await loadAllGames();
-            console.log(`Loaded ${allGames.length} games`);
+            // Load all data
+            await Promise.all([
+                loadAllGames(),
+                loadAllPlayers(),
+                loadEnhancedPlayHistory()
+            ]);
             
-            const plays = await loadEnhancedPlayHistory();
-            console.log(`Loaded ${plays.length} plays`);
+            console.log(`Loaded ${allGames.length} games, ${allPlayers.length} players, ${playHistory.length} plays`);
             
-            // Extract unique players
-            const playerSet = new Set();
-            plays.forEach(play => {
+            // Update all player tabs
+            updatePlayerManageTab();
+            updatePlayerStatsTab();
+            updatePlayerCompareTab();
+            updatePlayerHistoryTab();
+        }
+        
+        function setPlayerTab(tab) {
+            playerTab = tab;
+            document.querySelectorAll('#players-section .tab').forEach(t => t.classList.remove('active'));
+            
+            // Find and activate the correct tab button
+            document.querySelectorAll('#players-section .tab').forEach(t => {
+                if ((tab === 'manage' && t.textContent === 'Manage Players') ||
+                    (tab === 'stats' && t.textContent === 'Statistics') ||
+                    (tab === 'compare' && t.textContent === 'Compare') ||
+                    (tab === 'history' && t.textContent === 'Session History')) {
+                    t.classList.add('active');
+                }
+            });
+            
+            // Hide all player tab content
+            document.querySelectorAll('.player-tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Show selected tab
+            switch(tab) {
+                case 'manage':
+                    document.getElementById('player-manage').classList.remove('hidden');
+                    updatePlayerManageTab();
+                    break;
+                case 'stats':
+                    document.getElementById('player-stats').classList.remove('hidden');
+                    updatePlayerStatsTab();
+                    break;
+                case 'compare':
+                    document.getElementById('player-compare').classList.remove('hidden');
+                    updatePlayerCompareTab();
+                    break;
+                case 'history':
+                    document.getElementById('player-history').classList.remove('hidden');
+                    updatePlayerHistoryTab();
+                    break;
+            }
+        }
+        
+        async function loadAllPlayers() {
+            const spreadsheetId = localStorage.getItem('spreadsheetId');
+            const apiKey = localStorage.getItem('apiKey');
+            
+            if (!spreadsheetId || !apiKey) {
+                console.log('No spreadsheet ID or API key found for loading players');
+                return [];
+            }
+            
+            try {
+                const response = await fetch(
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Players!A:C?key=${apiKey}`
+                );
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const rows = data.values || [];
+                    
+                    allPlayers = [];
+                    for (let i = 1; i < rows.length; i++) {
+                        const [id, name, email] = rows[i];
+                        allPlayers.push({
+                            id: id || `PLAYER:${Date.now()}`,
+                            name: name || 'Unknown Player',
+                            email: email || ''
+                        });
+                    }
+                } else if (response.status === 400) {
+                    // Players sheet doesn't exist yet
+                    console.log('Players sheet not found, will be created when first player is added');
+                    allPlayers = [];
+                }
+                
+                console.log(`Loaded ${allPlayers.length} players from Players sheet`);
+                return allPlayers;
+            } catch (error) {
+                console.error('Error loading players:', error);
+                return [];
+            }
+        }
+        
+        async function addNewPlayer() {
+            const name = document.getElementById('new-player-name').value.trim();
+            const email = document.getElementById('new-player-email').value.trim();
+            
+            if (!name) {
+                showStatus('Please enter a player name', 'error');
+                return;
+            }
+            
+            // Check if player already exists
+            const existingPlayer = allPlayers.find(p => p.name.toLowerCase() === name.toLowerCase());
+            if (existingPlayer) {
+                showStatus('Player already exists', 'error');
+                return;
+            }
+            
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            const playerId = 'PLAYER:' + Date.now();
+            
+            try {
+                const playerData = [playerId, name, email];
+                
+                if (appsScriptUrl) {
+                    await fetch(appsScriptUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            action: 'append',
+                            sheet: 'Players',
+                            row: playerData
+                        })
+                    });
+                    
+                    showStatus(`Added ${name} to players!`, 'success');
+                    document.getElementById('new-player-name').value = '';
+                    document.getElementById('new-player-email').value = '';
+                    
+                    await loadAllPlayers();
+                    updatePlayerManageTab();
+                } else {
+                    const csvRow = playerData.map(cell => `"${cell}"`).join(',');
+                    showStatus(`Create a "Players" sheet in your Google Sheets with columns: Player ID, Name, Email. Then add: ${csvRow}`, 'error');
+                }
+                
+            } catch (error) {
+                showStatus('Error adding player: ' + error.message, 'error');
+            }
+        }
+        
+        async function removePlayer(playerId) {
+            if (!confirm('Are you sure you want to remove this player? Their play history will be preserved.')) {
+                return;
+            }
+            
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            
+            if (!appsScriptUrl) {
+                showStatus('Please enable auto-update to remove players, or delete manually from the Players sheet', 'error');
+                return;
+            }
+            
+            // This would require more complex Apps Script implementation
+            showStatus(`To remove player, delete their row from the Players sheet (ID: ${playerId})`, 'error');
+        }
+        
+        function updatePlayerManageTab() {
+            const container = document.getElementById('all-players-list');
+            container.innerHTML = '';
+            
+            if (allPlayers.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No players added yet. Add your first player above!</p>';
+                return;
+            }
+            
+            // Get play statistics for each player
+            const playerStats = calculateAllPlayerStats();
+            
+            allPlayers.forEach(player => {
+                const stats = playerStats[player.name] || { gamesPlayed: 0, wins: 0 };
+                const winRate = stats.gamesPlayed > 0 ? (stats.wins / stats.gamesPlayed * 100).toFixed(1) : 0;
+                
+                container.innerHTML += `
+                    <div class="player-card">
+                        <div class="player-card-header">
+                            <div>
+                                <h4>${player.name}</h4>
+                                ${player.email ? `<small style="color: #7f8c8d;">${player.email}</small>` : ''}
+                            </div>
+                            <div class="player-card-actions">
+                                <button class="btn btn-info" onclick="viewPlayerDetails('${player.name}')">View Stats</button>
+                                <button class="btn btn-secondary" onclick="removePlayer('${player.id}')">Remove</button>
+                            </div>
+                        </div>
+                        <div class="player-stats-grid">
+                            <div class="player-stat-item">
+                                <div class="player-stat-value">${stats.gamesPlayed}</div>
+                                <div class="player-stat-label">Games Played</div>
+                            </div>
+                            <div class="player-stat-item">
+                                <div class="player-stat-value">${stats.wins}</div>
+                                <div class="player-stat-label">Wins</div>
+                            </div>
+                            <div class="player-stat-item">
+                                <div class="player-stat-value">${winRate}%</div>
+                                <div class="player-stat-label">Win Rate</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        function updatePlayerStatsTab() {
+            const container = document.getElementById('player-stats-list');
+            container.innerHTML = '';
+            
+            // Combine registered players and players from play history
+            const allPlayerNames = new Set();
+            
+            // Add registered players
+            allPlayers.forEach(player => {
+                allPlayerNames.add(player.name);
+            });
+            
+            // Add players from play history
+            playHistory.forEach(play => {
                 if (play.players) {
                     play.players.split(',').forEach(player => {
                         const trimmedPlayer = player.trim();
                         if (trimmedPlayer) {
-                            playerSet.add(trimmedPlayer);
+                            allPlayerNames.add(trimmedPlayer);
                         }
                     });
                 }
             });
             
-            console.log(`Found ${playerSet.size} unique players:`, Array.from(playerSet));
+            if (allPlayerNames.size === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No players found. Add players or log some game plays!</p>';
+                return;
+            }
             
-            // Display player selection
-            const playerSelectDiv = document.getElementById('player-select-list');
-            playerSelectDiv.innerHTML = '';
+            Array.from(allPlayerNames).sort().forEach(playerName => {
+                const chip = document.createElement('div');
+                chip.className = 'player-chip';
+                chip.textContent = playerName;
+                chip.onclick = () => viewPlayerDetails(playerName);
+                container.appendChild(chip);
+            });
+        }
+        
+        function updatePlayerCompareTab() {
+            const container = document.getElementById('player-compare-list');
+            container.innerHTML = '';
             
-            if (playerSet.size === 0) {
-                playerSelectDiv.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No players found. Log some game plays first!</p>';
-            } else {
-                Array.from(playerSet).sort().forEach(player => {
-                    const chip = document.createElement('div');
-                    chip.className = 'player-chip';
-                    chip.textContent = player;
-                    chip.onclick = () => togglePlayerSelection(player);
-                    playerSelectDiv.appendChild(chip);
+            // Combine all player names
+            const allPlayerNames = new Set();
+            
+            allPlayers.forEach(player => {
+                allPlayerNames.add(player.name);
+            });
+            
+            playHistory.forEach(play => {
+                if (play.players) {
+                    play.players.split(',').forEach(player => {
+                        const trimmedPlayer = player.trim();
+                        if (trimmedPlayer) {
+                            allPlayerNames.add(trimmedPlayer);
+                        }
+                    });
+                }
+            });
+            
+            if (allPlayerNames.size === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No players found.</p>';
+                return;
+            }
+            
+            Array.from(allPlayerNames).sort().forEach(playerName => {
+                const chip = document.createElement('div');
+                chip.className = 'player-chip';
+                chip.textContent = playerName;
+                chip.onclick = () => togglePlayerSelection(playerName);
+                if (selectedPlayers.has(playerName)) {
+                    chip.classList.add('selected');
+                }
+                container.appendChild(chip);
+            });
+        }
+        
+        function updatePlayerHistoryTab() {
+            const select = document.getElementById('player-history-select');
+            select.innerHTML = '<option value="">Select a player...</option>';
+            
+            // Combine all player names
+            const allPlayerNames = new Set();
+            
+            allPlayers.forEach(player => {
+                allPlayerNames.add(player.name);
+            });
+            
+            playHistory.forEach(play => {
+                if (play.players) {
+                    play.players.split(',').forEach(player => {
+                        const trimmedPlayer = player.trim();
+                        if (trimmedPlayer) {
+                            allPlayerNames.add(trimmedPlayer);
+                        }
+                    });
+                }
+            });
+            
+            Array.from(allPlayerNames).sort().forEach(playerName => {
+                select.innerHTML += `<option value="${playerName}">${playerName}</option>`;
+            });
+        }
+        
+        function viewPlayerDetails(playerName) {
+            selectedPlayerForStats = playerName;
+            setPlayerTab('stats');
+            displayDetailedPlayerStats(playerName);
+        }
+        
+        function displayDetailedPlayerStats(playerName) {
+            const container = document.getElementById('individual-player-stats');
+            container.innerHTML = '';
+            
+            // Calculate detailed stats for this player
+            const stats = calculatePlayerDetailedStats(playerName);
+            
+            if (stats.gamesPlayed === 0) {
+                container.innerHTML = `
+                    <div class="player-card">
+                        <h3>${playerName}</h3>
+                        <p style="text-align: center; color: #7f8c8d; padding: 2rem;">No games played yet.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const winRate = (stats.wins / stats.gamesPlayed * 100).toFixed(1);
+            const avgRating = stats.ratings.length > 0 
+                ? (stats.ratings.reduce((a, b) => a + b, 0) / stats.ratings.length).toFixed(1)
+                : 'N/A';
+            
+            const topGames = Object.entries(stats.favoriteGames)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(([game, count]) => `${game} (${count} plays)`);
+            
+            const topPartners = Object.entries(stats.playPartners)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5)
+                .map(([partner, count]) => `${partner} (${count} games)`);
+            
+            const recentGames = stats.recentPlays.slice(0, 10);
+            
+            container.innerHTML = `
+                <div class="player-card">
+                    <h3>${playerName}'s Detailed Statistics</h3>
+                    
+                    <div class="player-stats-grid" style="margin: 2rem 0;">
+                        <div class="player-stat-item">
+                            <div class="player-stat-value">${stats.gamesPlayed}</div>
+                            <div class="player-stat-label">Total Games</div>
+                        </div>
+                        <div class="player-stat-item">
+                            <div class="player-stat-value">${stats.wins}</div>
+                            <div class="player-stat-label">Wins</div>
+                        </div>
+                        <div class="player-stat-item">
+                            <div class="player-stat-value">${winRate}%</div>
+                            <div class="player-stat-label">Win Rate</div>
+                        </div>
+                        <div class="player-stat-item">
+                            <div class="player-stat-value">${stats.uniqueGames}</div>
+                            <div class="player-stat-label">Unique Games</div>
+                        </div>
+                        <div class="player-stat-item">
+                            <div class="player-stat-value">${avgRating}</div>
+                            <div class="player-stat-label">Avg Rating Given</div>
+                        </div>
+                        <div class="player-stat-item">
+                            <div class="player-stat-value">${stats.streak}</div>
+                            <div class="player-stat-label">Current Streak</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                        <div>
+                            <h4>Favorite Games</h4>
+                            ${topGames.length > 0 ? topGames.map(game => `<div style="padding: 0.5rem 0;">${game}</div>`).join('') : '<p style="color: #7f8c8d;">No games played yet</p>'}
+                        </div>
+                        
+                        <div>
+                            <h4>Frequent Play Partners</h4>
+                            ${topPartners.length > 0 ? topPartners.map(partner => `<div style="padding: 0.5rem 0;">${partner}</div>`).join('') : '<p style="color: #7f8c8d;">No play partners yet</p>'}
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 2rem;">
+                        <h4>Recent Games</h4>
+                        ${recentGames.length > 0 ? recentGames.map(play => `
+                            <div class="session-history-item">
+                                <div class="session-history-header">
+                                    <span>${play.gameTitle}</span>
+                                    <span>${new Date(play.timestamp).toLocaleDateString()}</span>
+                                </div>
+                                <div class="session-history-games">
+                                    ${play.won ? '🏆 Won' : 'Lost'} • 
+                                    ${play.rating ? `Rated ${play.rating}/5` : 'No rating'} • 
+                                    With: ${play.otherPlayers.join(', ') || 'Solo'}
+                                </div>
+                            </div>
+                        `).join('') : '<p style="color: #7f8c8d;">No recent games</p>'}
+                    </div>
+                </div>
+            `;
+        }
+        
+        function calculatePlayerDetailedStats(playerName) {
+            const stats = {
+                gamesPlayed: 0,
+                wins: 0,
+                uniqueGames: new Set(),
+                favoriteGames: {},
+                playPartners: {},
+                ratings: [],
+                recentPlays: [],
+                streak: 0
+            };
+            
+            let currentStreak = 0;
+            let lastWon = null;
+            
+            // Sort plays by date for streak calculation
+            const sortedPlays = [...playHistory].sort((a, b) => 
+                new Date(b.timestamp) - new Date(a.timestamp)
+            );
+            
+            sortedPlays.forEach(play => {
+                const gamePlayers = play.players ? play.players.split(',').map(p => p.trim()) : [];
+                
+                if (gamePlayers.includes(playerName)) {
+                    stats.gamesPlayed++;
+                    
+                    const won = play.winner && play.winner.trim() === playerName;
+                    if (won) {
+                        stats.wins++;
+                    }
+                    
+                    // Calculate streak
+                    if (lastWon === null) {
+                        lastWon = won;
+                        currentStreak = won ? 1 : -1;
+                    } else if ((won && lastWon) || (!won && !lastWon)) {
+                        currentStreak = won ? Math.abs(currentStreak) + 1 : -(Math.abs(currentStreak) + 1);
+                    } else {
+                        stats.streak = currentStreak;
+                        currentStreak = won ? 1 : -1;
+                        lastWon = won;
+                    }
+                    
+                    // Track unique games
+                    stats.uniqueGames.add(play.gameId);
+                    
+                    // Track favorite games
+                    const game = allGames.find(g => g.id === play.gameId);
+                    const gameTitle = game?.title || play.gameId;
+                    stats.favoriteGames[gameTitle] = (stats.favoriteGames[gameTitle] || 0) + 1;
+                    
+                    // Track play partners
+                    gamePlayers.forEach(partner => {
+                        if (partner !== playerName) {
+                            stats.playPartners[partner] = (stats.playPartners[partner] || 0) + 1;
+                        }
+                    });
+                    
+                    // Track ratings
+                    if (play.rating) {
+                        stats.ratings.push(parseInt(play.rating));
+                    }
+                    
+                    // Add to recent plays
+                    stats.recentPlays.push({
+                        timestamp: play.timestamp,
+                        gameId: play.gameId,
+                        gameTitle,
+                        won,
+                        rating: play.rating,
+                        otherPlayers: gamePlayers.filter(p => p !== playerName)
+                    });
+                }
+            });
+            
+            // Set final streak if not set
+            if (stats.streak === 0 && currentStreak !== 0) {
+                stats.streak = currentStreak;
+            }
+            
+            stats.uniqueGames = stats.uniqueGames.size;
+            stats.recentPlays.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            
+            return stats;
+        }
+        
+        function calculateAllPlayerStats() {
+            const playerStats = {};
+            
+            playHistory.forEach(play => {
+                const gamePlayers = play.players ? play.players.split(',').map(p => p.trim()) : [];
+                const winner = play.winner ? play.winner.trim() : '';
+                
+                gamePlayers.forEach(player => {
+                    if (!playerStats[player]) {
+                        playerStats[player] = {
+                            gamesPlayed: 0,
+                            wins: 0
+                        };
+                    }
+                    
+                    playerStats[player].gamesPlayed++;
+                    if (winner === player) {
+                        playerStats[player].wins++;
+                    }
                 });
+            });
+            
+            return playerStats;
+        }
+        
+        async function loadPlayerSessionHistory() {
+            const playerName = document.getElementById('player-history-select').value;
+            if (!playerName) {
+                document.getElementById('player-session-history').innerHTML = '';
+                return;
             }
             
-            // Load individual stats only if there are plays
-            if (plays.length > 0) {
-                displayIndividualPlayerStats(plays);
+            const container = document.getElementById('player-session-history');
+            container.innerHTML = '<h4>Loading session history...</h4>';
+            
+            // Group plays by session (date)
+            const sessionsByDate = {};
+            
+            playHistory.forEach(play => {
+                const gamePlayers = play.players ? play.players.split(',').map(p => p.trim()) : [];
+                
+                if (gamePlayers.includes(playerName)) {
+                    const date = new Date(play.timestamp).toLocaleDateString();
+                    
+                    if (!sessionsByDate[date]) {
+                        sessionsByDate[date] = {
+                            date: play.timestamp,
+                            games: [],
+                            wins: 0,
+                            totalGames: 0,
+                            partners: new Set()
+                        };
+                    }
+                    
+                    const game = allGames.find(g => g.id === play.gameId);
+                    const won = play.winner && play.winner.trim() === playerName;
+                    
+                    sessionsByDate[date].games.push({
+                        title: game?.title || play.gameId,
+                        won,
+                        rating: play.rating,
+                        notes: play.notes
+                    });
+                    
+                    sessionsByDate[date].totalGames++;
+                    if (won) sessionsByDate[date].wins++;
+                    
+                    gamePlayers.forEach(p => {
+                        if (p !== playerName) sessionsByDate[date].partners.add(p);
+                    });
+                }
+            });
+            
+            // Convert to array and sort by date
+            const sessions = Object.values(sessionsByDate).sort((a, b) => 
+                new Date(b.date) - new Date(a.date)
+            );
+            
+            if (sessions.length === 0) {
+                container.innerHTML = `<p style="text-align: center; color: #7f8c8d; padding: 2rem;">No session history for ${playerName}</p>`;
+                return;
             }
+            
+            container.innerHTML = `
+                <h4>${playerName}'s Session History</h4>
+                <p style="margin: 1rem 0;">Total Sessions: ${sessions.length}</p>
+                ${sessions.map(session => {
+                    const winRate = session.totalGames > 0 ? (session.wins / session.totalGames * 100).toFixed(0) : 0;
+                    return `
+                        <div class="session-history-item">
+                            <div class="session-history-header">
+                                <span>${new Date(session.date).toLocaleDateString()}</span>
+                                <span>${session.wins}/${session.totalGames} wins (${winRate}%)</span>
+                            </div>
+                            <div class="session-history-games">
+                                <strong>Games:</strong> ${session.games.map(g => 
+                                    `${g.title}${g.won ? ' 🏆' : ''}${g.rating ? ` (${g.rating}★)` : ''}`
+                                ).join(', ')}<br>
+                                <strong>Played with:</strong> ${Array.from(session.partners).join(', ') || 'Solo'}
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            `;
         }
         
         function togglePlayerSelection(player) {
@@ -1165,13 +1867,7 @@
             }
             
             // Update UI
-            document.querySelectorAll('.player-chip').forEach(chip => {
-                if (selectedPlayers.has(chip.textContent)) {
-                    chip.classList.add('selected');
-                } else {
-                    chip.classList.remove('selected');
-                }
-            });
+            updatePlayerCompareTab();
             
             // Update comparison if 2+ players selected
             if (selectedPlayers.size >= 2) {
@@ -1331,103 +2027,6 @@
                         }
                     }
                 }
-            });
-        }
-        
-        function displayIndividualPlayerStats(plays) {
-            const container = document.getElementById('individual-player-stats');
-            container.innerHTML = '<h3 style="margin-top: 2rem;">Individual Player Statistics</h3>';
-            
-            // Calculate stats for each player
-            const playerStats = {};
-            
-            plays.forEach(play => {
-                const gamePlayers = play.players ? play.players.split(',').map(p => p.trim()) : [];
-                const winner = play.winner ? play.winner.trim() : '';
-                
-                gamePlayers.forEach(player => {
-                    if (!playerStats[player]) {
-                        playerStats[player] = {
-                            gamesPlayed: 0,
-                            wins: 0,
-                            favoriteGames: {},
-                            playPartners: {},
-                            ratings: []
-                        };
-                    }
-                    
-                    playerStats[player].gamesPlayed++;
-                    if (winner === player) {
-                        playerStats[player].wins++;
-                    }
-                    
-                    // Track favorite games
-                    const game = allGames.find(g => g.id === play.gameId);
-                    const gameTitle = game?.title || play.gameId;
-                    playerStats[player].favoriteGames[gameTitle] = (playerStats[player].favoriteGames[gameTitle] || 0) + 1;
-                    
-                    // Track play partners
-                    gamePlayers.forEach(partner => {
-                        if (partner !== player) {
-                            playerStats[player].playPartners[partner] = (playerStats[player].playPartners[partner] || 0) + 1;
-                        }
-                    });
-                    
-                    // Track ratings
-                    if (play.rating) {
-                        playerStats[player].ratings.push(parseInt(play.rating));
-                    }
-                });
-            });
-            
-            // Display top players
-            const sortedPlayers = Object.entries(playerStats)
-                .sort((a, b) => b[1].gamesPlayed - a[1].gamesPlayed)
-                .slice(0, 10);
-            
-            if (sortedPlayers.length === 0) {
-                container.innerHTML += '<p style="text-align: center; color: #7f8c8d; padding: 2rem;">No player statistics available yet. Log some game plays with player names!</p>';
-                return;
-            }
-            
-            sortedPlayers.forEach(([player, stats]) => {
-                const winRate = stats.gamesPlayed > 0 ? (stats.wins / stats.gamesPlayed * 100).toFixed(1) : 0;
-                const avgRating = stats.ratings.length > 0 
-                    ? (stats.ratings.reduce((a, b) => a + b, 0) / stats.ratings.length).toFixed(1)
-                    : 'N/A';
-                
-                const topGames = Object.entries(stats.favoriteGames)
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, 3)
-                    .map(([game, count]) => `${game} (${count})`);
-                
-                const topPartners = Object.entries(stats.playPartners)
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, 3)
-                    .map(([partner, count]) => `${partner} (${count})`);
-                
-                container.innerHTML += `
-                    <div class="player-stats-card">
-                        <h4>${player}</h4>
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem;">
-                            <div>
-                                <strong>Games Played:</strong> ${stats.gamesPlayed}<br>
-                                <strong>Win Rate:</strong> ${winRate}%
-                                <div class="win-rate-bar">
-                                    <div class="win-rate-fill" style="width: ${winRate}%"></div>
-                                </div>
-                                <strong>Average Rating Given:</strong> ${avgRating}
-                            </div>
-                            <div>
-                                <strong>Favorite Games:</strong><br>
-                                ${topGames.join('<br>')}
-                                <br><br>
-                                <strong>Frequent Partners:</strong><br>
-                                ${topPartners.join('<br>')}
-                            </div>
-                        </div>
-                    </div>
-                `;
             });
         }
         
