@@ -3308,77 +3308,10 @@
                     }
                 }
             });
-        }Chart(sessionStats) {
-            const ctx = document.getElementById('session-chart').getContext('2d');
-            
-            // Group by month
-            const monthlyData = {};
-            sessionStats.forEach(session => {
-                const month = session.date.substring(0, 7);
-                if (!monthlyData[month]) {
-                    monthlyData[month] = { sessions: 0, games: 0 };
-                }
-                monthlyData[month].sessions++;
-                monthlyData[month].games += session.gameCount;
-            });
-            
-            const labels = Object.keys(monthlyData).sort();
-            
-            if (sessionChart) {
-                sessionChart.destroy();
-            }
-            
-            sessionChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels,
-                    datasets: [{
-                        label: 'Sessions',
-                        data: labels.map(month => monthlyData[month].sessions),
-                        backgroundColor: '#3498db',
-                        yAxisID: 'y'
-                    }, {
-                        label: 'Total Games',
-                        data: labels.map(month => monthlyData[month].games),
-                        backgroundColor: '#27ae60',
-                        yAxisID: 'y1'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Gaming Sessions by Month'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            type: 'linear',
-                            display: true,
-                            position: 'left',
-                            title: {
-                                display: true,
-                                text: 'Sessions'
-                            }
-                        },
-                        y1: {
-                            type: 'linear',
-                            display: true,
-                            position: 'right',
-                            title: {
-                                display: true,
-                                text: 'Games Played'
-                            },
-                            grid: {
-                                drawOnChartArea: false
-                            }
-                        }
-                    }
-                }
-            });
         }
+        
+        // Session analysis
+        async function updateSessionAnalysis() {
         
         // Export enhanced player statistics
         function exportPlayerStats() {
