@@ -1603,14 +1603,11 @@
                     <button class="btn btn-primary" onclick="checkoutGameFromHistory()">Check Out</button>
                     <button class="btn btn-info" onclick="logPlayFromHistory()">Log Play</button>
                     ${gameInfo.bggId ? `
-                        <button class="btn btn-info" onclick="window.open('https://boardgamegeek.com/geekmarket/browse?objecttype=thing&objectid=${gameInfo.bggId}', '_blank')">
+                    <button class="btn btn-info" onclick="window.open('https://boardgamegeek.com/geekmarket/browse?objecttype=thing&objectid=${gameInfo.bggId}', '_blank')">
                             🛒 Check Geek Market
-                        </button>
+                    </button>
                     ` : ''}
                     ${addGeekGroupButton(gameInfo.bggId)} // Add this line to include the Geek Group button
-                    <button class="btn btn-info" onclick="openManualValueModal('${gameInfo.id}', '${gameInfo.title.replace(/'/g, "\\'")}')">
-                        💰 Enter Value
-                    </button>
                     <button class="btn btn-secondary" onclick="closeGameHistory()">Close</button>
                 `;
     
@@ -1661,8 +1658,6 @@
                 const historicalHigh = Math.max(marketData.value, gameInfo.historicalHigh || 0);
                 const historicalLow = gameInfo.historicalLow > 0 ?
                     Math.min(marketData.value, gameInfo.historicalLow) : marketData.value;
-    
-                await updateGameValue(gameId, marketData.value, historicalHigh, historicalLow);
     
                 // Only update the modal element if it exists
                 if (marketValueElement) {
