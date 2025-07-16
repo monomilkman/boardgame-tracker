@@ -1367,6 +1367,13 @@
                 case 'search':
                     document.getElementById('search-section').classList.remove('hidden');
                     searchTab = 'all'; // Ensure we start with 'all' tab
+                    // Set the "All Games" tab as active
+                    document.querySelectorAll('#search-section .tab').forEach(t => {
+                        t.classList.remove('active');
+                        if (t.textContent === 'All Games') {
+                            t.classList.add('active');
+                        }
+                    });
                     loadAllGames().then(() => {
                         performSearch();
                     });
@@ -3531,11 +3538,20 @@
         // Search functionality
        function setSearchTab(tab) {
             searchTab = tab;
-            // Change this line to only select tabs within the search section
+            // Remove active class from all search tabs
             document.querySelectorAll('#search-section .tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            
+            // Find and activate the clicked tab
+            document.querySelectorAll('#search-section .tab').forEach(t => {
+                if ((tab === 'all' && t.textContent === 'All Games') ||
+                    (tab === 'available' && t.textContent === 'Available') ||
+                    (tab === 'checked-out' && t.textContent === 'Checked Out')) {
+                    t.classList.add('active');
+                }
+            });
+            
             performSearch();
-        }
+            }
         
         async function performSearch() {
             const query = document.getElementById('search-input').value.toLowerCase();
