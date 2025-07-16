@@ -1489,6 +1489,27 @@
                         <span class="game-stats-value">${stats.avgRating ? stats.avgRating.toFixed(1) + '/5' : 'No ratings'}</span>
                     </div>
                     <div class="game-stats-row">
+                        <span class="game-stats-label">Current Market Value:</span>
+                        <span class="game-stats-value" id="game-market-value">
+                            ${gameInfo.currentValue ? '$' + gameInfo.currentValue.toFixed(2) : 'Loading...'}
+                            ${gameInfo.valueUpdated ? '<small style="color: #7f8c8d;"> (as of ' + new Date(gameInfo.valueUpdated).toLocaleDateString() + ')</small>' : ''}
+                        </span>
+                    </div>
+                    <div class="game-stats-row">
+                        <span class="game-stats-label">Historical Range:</span>
+                        <span class="game-stats-value">
+                            ${gameInfo.historicalLow && gameInfo.historicalHigh ? 
+                                '$' + gameInfo.historicalLow.toFixed(2) + ' - $' + gameInfo.historicalHigh.toFixed(2) : 
+                                'No history'}
+                        </span>
+                    </div>
+                    <div class="game-stats-row">
+                        <span class="game-stats-label">Trade Status:</span>
+                        <span class="game-stats-value">
+                            <span id="trade-status-display">${getTradeStatusDisplay(gameInfo.tradeStatus)}</span>
+                        </span>
+                    </div>
+                    <div class="game-stats-row">
                         <span class="game-stats-label">Most Frequent Winner:</span>
                         <span class="game-stats-value">${stats.topWinner || 'No winner data'}</span>
                     </div>
@@ -1576,45 +1597,7 @@
                         travelHistoryDiv.innerHTML += `<p style="text-align: center; color: #7f8c8d; margin-top: 1rem;">...and ${gameTravels.length - 9} more location changes</p>`;
                     }
                 }
-                
-                // Update the stats HTML to include value
-                const statsHtml = `
-                    <div class="game-stats-row">
-                        <span class="game-stats-label">Total Plays:</span>
-                        <span class="game-stats-value">${stats.totalPlays}</span>
-                    </div>
-                    <div class="game-stats-row">
-                        <span class="game-stats-label">Average Rating:</span>
-                        <span class="game-stats-value">${stats.avgRating ? stats.avgRating.toFixed(1) + '/5' : 'No ratings'}</span>
-                    </div>
-                    <div class="game-stats-row">
-                        <span class="game-stats-label">Current Market Value:</span>
-                        <span class="game-stats-value" id="game-market-value">
-                            ${gameInfo.currentValue ? '$' + gameInfo.currentValue.toFixed(2) : 'Loading...'}
-                            ${gameInfo.valueUpdated ? '<small style="color: #7f8c8d;"> (as of ' + new Date(gameInfo.valueUpdated).toLocaleDateString() + ')</small>' : ''}
-                        </span>
-                    </div>
-                    <div class="game-stats-row">
-                        <span class="game-stats-label">Historical Range:</span>
-                        <span class="game-stats-value">
-                            ${gameInfo.historicalLow && gameInfo.historicalHigh ? 
-                                '$' + gameInfo.historicalLow.toFixed(2) + ' - $' + gameInfo.historicalHigh.toFixed(2) : 
-                                'No history'}
-                        </span>
-                    </div>
-                    <div class="game-stats-row">
-                        <span class="game-stats-label">Trade Status:</span>
-                        <span class="game-stats-value">
-                            <span id="trade-status-display">${getTradeStatusDisplay(gameInfo.tradeStatus)}</span>
-                        </span>
-                    </div>
-                    <div class="game-stats-row">
-                        <span class="game-stats-label">Most Frequent Winner:</span>
-                        <span class="game-stats-value">${stats.topWinner || 'No winner data'}</span>
-                    </div>
-                    <!-- ... rest of existing stats ... -->
-                `;
-                
+                                
                 // Update action buttons to include trade/sell toggle
                 const actionsHtml = `
                     <button class="btn btn-primary" onclick="checkoutGameFromHistory()">Check Out</button>
