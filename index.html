@@ -1600,15 +1600,19 @@
                                 
                 // Update action buttons to include trade/sell toggle
                 const actionsHtml = `
-                    <button class="btn btn-primary" onclick="checkoutGameFromHistory()">Check Out</button>
-                    <button class="btn btn-info" onclick="logPlayFromHistory()">Log Play</button>
-                    <button class="btn btn-info" onclick="refreshGameValue('${gameInfo.id}')">Refresh Value</button>
-                    <button class="btn ${gameInfo.tradeStatus === 'TRADE' ? 'btn-secondary' : 'btn-info'}" 
-                            onclick="toggleGameTradeStatus('${gameInfo.id}')" id="trade-status-btn">
-                        ${getTradeButtonText(gameInfo.tradeStatus)}
-                    </button>
-                    <button class="btn btn-secondary" onclick="closeGameHistory()">Close</button>
-                `;
+                    const actionsHtml = `
+                        <button class="btn btn-primary" onclick="checkoutGameFromHistory()">Check Out</button>
+                        <button class="btn btn-info" onclick="logPlayFromHistory()">Log Play</button>
+                        ${gameInfo.bggId ? `
+                            <button class="btn btn-info" onclick="window.open('https://boardgamegeek.com/geekmarket/browse?objecttype=thing&objectid=${gameInfo.bggId}', '_blank')">
+                                🛒 Check Geek Market
+                            </button>
+                        ` : ''}
+                        <button class="btn btn-info" onclick="openManualValueModal('${gameInfo.id}', '${gameInfo.title.replace(/'/g, "\\'")}')">
+                            💰 Enter Value
+                        </button>
+                        <button class="btn btn-secondary" onclick="closeGameHistory()">Close</button>
+                    `;
                 
                 // Replace the history-actions div content
                 document.querySelector('.history-actions').innerHTML = actionsHtml;
@@ -5010,80 +5014,87 @@
             }
         }
 
-        // BGG Marketplace API Integration
+        // New fetchBGGMarketValue
         async function fetchBGGMarketValue(bggId) {
             if (!bggId) return null;
             
-            // Try multiple CORS proxies in case one fails
-            const corsProxies = [
-                'https://cors-anywhere.herokuapp.com/',
-                'https://api.allorigins.win/raw?url=',
-                'https://corsproxy.org/?',
-                ''  // Try without proxy as last resort
-            ];
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
             
-            for (const proxy of corsProxies) {
-                try {
-                    console.log(`Trying to fetch BGG value for ID ${bggId} using proxy: ${proxy || 'direct'}`);
-                    
-                    const url = `${proxy}https://boardgamegeek.com/api/geekmarket/products?objectid=${bggId}&objecttype=thing&pageid=1&perPage=50`;
-                    console.log('Full URL:', url);
-                    
-                    const response = await fetch(url, {
-                        headers: proxy.includes('cors-anywhere') ? {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        } : {}
-                    });
-                    
-                    console.log(`Response status: ${response.status}`);
-                    
-                    if (!response.ok) {
-                        console.log(`Proxy ${proxy || 'direct'} failed with status: ${response.status}`);
-                        continue;
-                    }
-                    
-                    const data = await response.json();
-                    console.log('BGG marketplace data:', data);
-                    
-                    if (!data.products || data.products.length === 0) {
-                        console.log('No products found in marketplace');
-                        return { value: 0, currency: 'USD', listings: 0 };
-                    }
-                    
-                    // Calculate average price from active listings
-                    const activePrices = data.products
-                        .filter(p => p.price && !p.sold)
-                        .map(p => parseFloat(p.price.replace(/[^0-9.]/g, '')));
-                    
-                    console.log('Active prices found:', activePrices);
-                    
-                    if (activePrices.length === 0) {
-                        return { value: 0, currency: 'USD', listings: 0 };
-                    }
-                    
-                    const avgPrice = activePrices.reduce((a, b) => a + b, 0) / activePrices.length;
-                    
-                    const result = {
-                        value: Math.round(avgPrice * 100) / 100,
-                        currency: 'USD',
-                        listings: activePrices.length,
-                        lowest: Math.min(...activePrices),
-                        highest: Math.max(...activePrices)
-                    };
-                    
-                    console.log('Calculated market value:', result);
-                    return result;
-                    
-                } catch (error) {
-                    console.error(`Error with proxy ${proxy}:`, error);
-                    continue;
-                }
+            if (!appsScriptUrl) {
+                // If no Apps Script URL, fall back to manual entry
+                console.log('No Apps Script URL configured for Geek Market fetching');
+                return null;
             }
             
-            // All proxies failed
-            console.error('All CORS proxies failed for BGG marketplace');
-            return null;
+            try {
+                console.log(`Fetching Geek Market prices for BGG ID: ${bggId}`);
+                
+                const response = await fetch(appsScriptUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'fetchGeekMarket',
+                        bggId: bggId
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log('Geek Market data:', result);
+                    return {
+                        value: Math.round(result.average * 100) / 100,
+                        currency: result.currency,
+                        listings: result.listings,
+                        lowest: result.lowest,
+                        highest: result.highest,
+                        median: result.median
+                    };
+                } else {
+                    console.log('No Geek Market data available:', result.message);
+                    return null;
+                }
+                
+            } catch (error) {
+                console.error('Error fetching Geek Market data:', error);
+                return null;
+            }
         }
+        // Alternative: Use BGG XML API to get game info (doesn't include marketplace data)
+        async function fetchBGGGameInfo(bggId) {
+            try {
+                const response = await fetch(
+                    `https://boardgamegeek.com/xmlapi2/thing?id=${bggId}&stats=1`
+                );
+                
+                if (!response.ok) return null;
+                
+                const text = await response.text();
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(text, 'text/xml');
+                
+                // Extract relevant data
+                const item = xml.querySelector('item');
+                const statistics = item?.querySelector('statistics');
+                const ratings = statistics?.querySelector('ratings');
+                
+                return {
+                    name: item?.querySelector('name[type="primary"]')?.getAttribute('value'),
+                    yearPublished: item?.querySelector('yearpublished')?.getAttribute('value'),
+                    minPlayers: item?.querySelector('minplayers')?.getAttribute('value'),
+                    maxPlayers: item?.querySelector('maxplayers')?.getAttribute('value'),
+                    playingTime: item?.querySelector('playingtime')?.getAttribute('value'),
+                    averageRating: ratings?.querySelector('average')?.getAttribute('value'),
+                    bggRank: ratings?.querySelector('ranks rank[name="boardgame"]')?.getAttribute('value')
+                };
+            } catch (error) {
+                console.error('Error fetching BGG data:', error);
+                return null;
+            }
+        }
+        
         // Update game value in spreadsheet
         async function updateGameValue(gameId, value, historicalHigh, historicalLow) {
             const appsScriptUrl = localStorage.getItem('appsScriptUrl');
