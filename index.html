@@ -1607,6 +1607,7 @@
                             🛒 Check Geek Market
                         </button>
                     ` : ''}
+                    ${addGeekGroupButton(gameInfo.bggId)} // Add this line to include the Geek Group button
                     <button class="btn btn-info" onclick="openManualValueModal('${gameInfo.id}', '${gameInfo.title.replace(/'/g, "\\'")}')">
                         💰 Enter Value
                     </button>
