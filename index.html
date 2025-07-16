@@ -921,48 +921,49 @@
                     <canvas id="session-chart"></canvas>
                 </div>
             </div>
-
             <div id="stats-value" class="stats-content hidden">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="total-collection-value">$0</div>
-                        <div class="stat-label">Total Collection Value</div>
+                <div class="setup-section">
+                    <h3>📊 Collection Valuation via Geek Group</h3>
+                    
+                    <div style="margin-bottom: 1.5rem;">
+                        <p style="margin-bottom: 1rem;">Geek Group provides advanced collection analytics and valuation for your BoardGameGeek collection.</p>
+                        
+                        <label style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Your BGG Username:</label>
+                        <input type="text" id="geekgroup-username" placeholder="Enter your BGG username" 
+                               style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 1rem;">
+                        
+                        <button class="btn btn-primary" onclick="openGeekGroup()" style="width: 100%; margin-bottom: 0.5rem;">
+                            🚀 View Collection on Geek Group
+                        </button>
+                        
+                        <button class="btn btn-info" onclick="saveGeekGroupUsername()" style="width: 100%;">
+                            💾 Save Username
+                        </button>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="avg-game-value">$0</div>
-                        <div class="stat-label">Average Game Value</div>
+                    
+                    <div class="setup-instructions">
+                        <h4>How to use Geek Group:</h4>
+                        <ol>
+                            <li>Enter your BoardGameGeek username above</li>
+                            <li>Click "View Collection on Geek Group"</li>
+                            <li>Geek Group will analyze your BGG collection and provide:
+                                <ul>
+                                    <li>Current market valuations</li>
+                                    <li>Collection statistics</li>
+                                    <li>Price trends</li>
+                                    <li>Rarity analysis</li>
+                                </ul>
+                            </li>
+                            <li>Bookmark your Geek Group page for quick access</li>
+                        </ol>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="trade-sell-value">$0</div>
-                        <div class="stat-label">Trade/Sell Value</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="value-last-updated">Never</div>
-                        <div class="stat-label">Last Full Update</div>
+                    
+                    <div id="geekgroup-iframe-container" style="margin-top: 2rem; display: none;">
+                        <h4>Geek Group Collection View</h4>
+                        <iframe id="geekgroup-iframe" src="" style="width: 100%; height: 600px; border: 1px solid #ddd; border-radius: 8px;"></iframe>
                     </div>
                 </div>
-                
-                <div class="tabs" style="margin-top: 2rem;">
-                    <button class="tab active" onclick="setValueView('all')">All Games</button>
-                    <button class="tab" onclick="setValueView('valuable')">Most Valuable</button>
-                    <button class="tab" onclick="setValueView('trade')">For Trade</button>
-                    <button class="tab" onclick="setValueView('sell')">For Sale</button>
-                </div>
-                
-                <div class="action-buttons" style="margin: 1rem 0;">
-                    <button class="btn btn-primary" onclick="updateAllGameValues()">Update All Values</button>
-                    <button class="btn btn-info" onclick="exportCollectionValue()">Export Value Report</button>
-                </div>
-                
-                <div id="value-games-list" class="results" style="margin-top: 1rem;"></div>
             </div>
-            
-            <div style="margin-top: 2rem;">
-                <button class="btn btn-info" onclick="exportPlayHistory()">Export Play History (CSV)</button>
-                <button class="btn btn-info" onclick="exportPlayerStats()">Export Player Stats (CSV)</button>
-                <button class="btn btn-info" onclick="exportInventory()">Export Inventory (CSV)</button>
-            </div>
-        </div>
         
         <!-- Players Section -->
         <div id="players-section" class="hidden">
@@ -1183,44 +1184,7 @@
         </div>
     </div>
 
-    <!-- Manual Value Entry Modal -->
-    <div id="manual-value-modal" class="game-history-modal hidden">
-        <div class="game-history-content" style="max-width: 500px;">
-            <div class="game-history-header">
-                <h2>Enter Game Value</h2>
-                <button class="game-history-close" onclick="closeManualValueModal()">×</button>
-            </div>
-            <div class="game-history-body">
-                <p id="manual-value-game-name" style="font-weight: bold; margin-bottom: 1rem;"></p>
-                
-                <div id="market-data-display" style="background: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: none;">
-                    <h4 style="margin: 0 0 0.5rem 0;">BGG Geek Market Data</h4>
-                    <div id="market-data-content"></div>
-                </div>
-                
-                <div style="margin-bottom: 1rem;">
-                    <button class="btn btn-info" onclick="fetchMarketDataForModal()" style="width: 100%;" id="fetch-market-btn">
-                        🔄 Fetch Current Geek Market Prices
-                    </button>
-                    <button class="btn btn-info" onclick="openGeekMarketInNewTab()" style="width: 100%; margin-top: 0.5rem;">
-                        🛒 View on BGG Geek Market
-                    </button>
-                </div>
-                
-                <div style="margin-bottom: 1rem;">
-                    <label style="display: block; margin-bottom: 0.5rem;">Current Value ($)</label>
-                    <input type="number" id="manual-value-input" step="0.01" min="0" 
-                           style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;">
-                </div>
-                
-                <div class="action-buttons" style="margin-top: 1.5rem;">
-                    <button class="btn btn-primary" onclick="saveManualValue()">Save Value</button>
-                    <button class="btn btn-secondary" onclick="closeManualValueModal()">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
+   
     <script>
         // Global variables
         let html5QrcodeScanner = null;
@@ -1525,27 +1489,6 @@
                     <div class="game-stats-row">
                         <span class="game-stats-label">Average Rating:</span>
                         <span class="game-stats-value">${stats.avgRating ? stats.avgRating.toFixed(1) + '/5' : 'No ratings'}</span>
-                    </div>
-                    <div class="game-stats-row">
-                        <span class="game-stats-label">Current Market Value:</span>
-                        <span class="game-stats-value" id="game-market-value">
-                            ${gameInfo.currentValue ? '$' + gameInfo.currentValue.toFixed(2) : 'Loading...'}
-                            ${gameInfo.valueUpdated ? '<small style="color: #7f8c8d;"> (as of ' + new Date(gameInfo.valueUpdated).toLocaleDateString() + ')</small>' : ''}
-                        </span>
-                    </div>
-                    <div class="game-stats-row">
-                        <span class="game-stats-label">Historical Range:</span>
-                        <span class="game-stats-value">
-                            ${gameInfo.historicalLow && gameInfo.historicalHigh ? 
-                                '$' + gameInfo.historicalLow.toFixed(2) + ' - $' + gameInfo.historicalHigh.toFixed(2) : 
-                                'No history'}
-                        </span>
-                    </div>
-                    <div class="game-stats-row">
-                        <span class="game-stats-label">Trade Status:</span>
-                        <span class="game-stats-value">
-                            <span id="trade-status-display">${getTradeStatusDisplay(gameInfo.tradeStatus)}</span>
-                        </span>
                     </div>
                     <div class="game-stats-row">
                         <span class="game-stats-label">Most Frequent Winner:</span>
@@ -2042,37 +1985,6 @@
                 } catch (error) {
                     showStatus('Error checking in game: ' + error.message, 'error');
                 }
-            }
-        }
-        
-        // Stats tab management
-        function setStatsTab(tab) {
-            statsTab = tab;
-            document.querySelectorAll('#stats-section .tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            // Hide all stats content
-            document.querySelectorAll('.stats-content').forEach(content => {
-                content.classList.add('hidden');
-            });
-            
-            // Show selected content
-            switch(tab) {
-                case 'overview':
-                    document.getElementById('stats-overview').classList.remove('hidden');
-                    break;
-                case 'trends':
-                    document.getElementById('stats-trends').classList.remove('hidden');
-                    updateTrendsChart();
-                    break;
-                case 'ratings':
-                    document.getElementById('stats-ratings').classList.remove('hidden');
-                    updateRatingsDisplay();
-                    break;
-                case 'sessions':
-                    document.getElementById('stats-sessions').classList.remove('hidden');
-                    updateSessionAnalysis();
-                    break;
             }
         }
         
@@ -5050,232 +4962,54 @@
                 header.innerHTML = '🎲 BoardGame Collection Manager <span style="font-size: 0.7rem; background: #27ae60; padding: 0.2rem 0.5rem; border-radius: 4px; margin-left: 0.5rem;">Auto-Update Enabled</span>';
             }
         }
-
-        // New fetchBGGMarketValue
-        async function fetchBGGMarketValue(bggId) {
-            if (!bggId) return null;
+        
+        // Geek Group Integration Functions
+        function saveGeekGroupUsername() {
+            const username = document.getElementById('geekgroup-username').value.trim();
             
-            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
-            
-            if (!appsScriptUrl) {
-                console.log('No Apps Script URL configured for Geek Market fetching');
-                return null;
+            if (!username) {
+                showStatus('Please enter your BGG username', 'error');
+                return;
             }
             
-            try {
-                console.log(`Fetching Geek Market prices for BGG ID: ${bggId}`);
-                
-                // Method 1: Use URL parameters instead of JSON body
-                const url = `${appsScriptUrl}?action=fetchGeekMarket&bggId=${bggId}`;
-                
-                const response = await fetch(url, {
-                    method: 'GET',  // Use GET to avoid CORS preflight
-                    redirect: 'follow'
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    console.log('Geek Market data:', result);
-                    return {
-                        value: Math.round(result.average * 100) / 100,
-                        currency: result.currency,
-                        listings: result.listings,
-                        lowest: result.lowest,
-                        highest: result.highest,
-                        median: result.median
-                    };
-                } else {
-                    console.log('No Geek Market data available:', result.message);
-                    return null;
-                }
-                
-            } catch (error) {
-                console.error('Error fetching Geek Market data:', error);
-                return null;
+            localStorage.setItem('bggUsername', username);
+            showStatus('BGG username saved!', 'success');
+        }
+        
+        function loadGeekGroupUsername() {
+            const savedUsername = localStorage.getItem('bggUsername');
+            if (savedUsername) {
+                document.getElementById('geekgroup-username').value = savedUsername;
             }
         }
-                
-        // Update game value in spreadsheet
-        async function updateGameValue(gameId, value, historicalHigh, historicalLow) {
-            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
-            const timestamp = new Date().toISOString();
+        
+        function openGeekGroup() {
+            const username = document.getElementById('geekgroup-username').value.trim();
             
-            try {
-                // Find the game row
-                const gameInfo = await getGameInfo(gameId);
-                if (!gameInfo) return false;
-                
-                const spreadsheetId = localStorage.getItem('spreadsheetId');
-                const apiKey = localStorage.getItem('apiKey');
-                
-                // Find row index
-                const response = await fetch(
-                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:A?key=${apiKey}`
-                );
-                const data = await response.json();
-                const gameIds = data.values || [];
-                
-                let rowIndex = -1;
-                for (let i = 1; i < gameIds.length; i++) {
-                    if (gameIds[i][0] === gameId) {
-                        rowIndex = i + 1;
-                        break;
-                    }
-                }
-                
-                if (rowIndex === -1) return false;
-                
-                if (appsScriptUrl) {
-                    // Update multiple cells
-                    await fetch(appsScriptUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'updateMultiple',
-                            sheet: 'Games',
-                            updates: [
-                                { row: rowIndex, col: 6, value: `$${value.toFixed(2)}` },
-                                { row: rowIndex, col: 7, value: timestamp },
-                                { row: rowIndex, col: 9, value: `$${historicalHigh.toFixed(2)}` },
-                                { row: rowIndex, col: 10, value: `$${historicalLow.toFixed(2)}` }
-                            ]
-                        })
-                    });
-                    return true;
-                } else {
-                    showStatus(`Manual update needed: Set value of ${gameInfo.title} to $${value.toFixed(2)}`, 'error');
-                    return false;
-                }
-            } catch (error) {
-                console.error('Error updating game value:', error);
-                return false;
-            }
-        }
-
-        // Toggle trade/sell status
-        async function toggleTradeStatus(gameId, status) {
-            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
-            
-            try {
-                const gameInfo = await getGameInfo(gameId);
-                if (!gameInfo) return false;
-                
-                const spreadsheetId = localStorage.getItem('spreadsheetId');
-                const apiKey = localStorage.getItem('apiKey');
-                
-                // Find row index
-                const response = await fetch(
-                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:A?key=${apiKey}`
-                );
-                const data = await response.json();
-                const gameIds = data.values || [];
-                
-                let rowIndex = -1;
-                for (let i = 1; i < gameIds.length; i++) {
-                    if (gameIds[i][0] === gameId) {
-                        rowIndex = i + 1;
-                        break;
-                    }
-                }
-                
-                if (rowIndex === -1) return false;
-                
-                // Toggle status: empty -> TRADE -> SELL -> empty
-                let newStatus = '';
-                if (!gameInfo.tradeStatus || gameInfo.tradeStatus === '') {
-                    newStatus = status || 'TRADE';
-                } else if (gameInfo.tradeStatus === 'TRADE' && !status) {
-                    newStatus = 'SELL';
-                } else if (gameInfo.tradeStatus === 'SELL' && !status) {
-                    newStatus = '';
-                } else {
-                    newStatus = status || '';
-                }
-                
-                if (appsScriptUrl) {
-                    await fetch(appsScriptUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'update',
-                            sheet: 'Games',
-                            row: rowIndex,
-                            col: 8, // Column H
-                            value: newStatus
-                        })
-                    });
-                    return newStatus;
-                } else {
-                    showStatus(`Manual update needed: Set trade status of ${gameInfo.title} to ${newStatus || 'none'}`, 'error');
-                    return false;
-                }
-            } catch (error) {
-                console.error('Error updating trade status:', error);
-                return false;
-            }
-        }
-
-        // Load enhanced game data including values
-        async function loadAllGamesWithValues() {
-            const spreadsheetId = localStorage.getItem('spreadsheetId');
-            const apiKey = localStorage.getItem('apiKey');
-            
-            if (!spreadsheetId || !apiKey) {
-                console.log('No spreadsheet ID or API key found');
-                return [];
+            if (!username) {
+                showStatus('Please enter your BGG username first', 'error');
+                return;
             }
             
-            try {
-                const response = await fetch(
-                    `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:J?key=${apiKey}`
-                );
-                
-                if (!response.ok) {
-                    console.error('Failed to load games:', response.status);
-                    return [];
-                }
-                
-                const data = await response.json();
-                const rows = data.values || [];
-                
-                const gamesWithValues = [];
-                for (let i = 1; i < rows.length; i++) {
-                    const [gameId, title, location, bggId, photoUrl, currentValue, valueUpdated, tradeStatus, historicalHigh, historicalLow] = rows[i];
-                    gamesWithValues.push({
-                        id: gameId,
-                        title: title || 'Unknown Game',
-                        location: location || 'Unknown',
-                        bggId: bggId || '',
-                        photoUrl: photoUrl || '',
-                        currentValue: parseFloat((currentValue || '$0').replace(/[^0-9.]/g, '')) || 0,
-                        valueUpdated: valueUpdated || '',
-                        tradeStatus: tradeStatus || '',
-                        historicalHigh: parseFloat((historicalHigh || '$0').replace(/[^0-9.]/g, '')) || 0,
-                        historicalLow: parseFloat((historicalLow || '$0').replace(/[^0-9.]/g, '')) || 0
-                    });
-                }
-                
-                return gamesWithValues;
-            } catch (error) {
-                console.error('Error loading games with values:', error);
-                return [];
-            }
+            // Save the username
+            localStorage.setItem('bggUsername', username);
+            
+            // Construct Geek Group URL
+            const geekGroupUrl = `https://geekgroup.app/${username}`;
+            
+            // Option 1: Open in new tab (recommended)
+            window.open(geekGroupUrl, '_blank');
+            
+            // Option 2: Try to embed (uncomment if Geek Group allows iframes)
+            /*
+            const iframeContainer = document.getElementById('geekgroup-iframe-container');
+            const iframe = document.getElementById('geekgroup-iframe');
+            iframe.src = geekGroupUrl;
+            iframeContainer.style.display = 'block';
+            */
         }
-
-        // Set value view filter
-        let currentValueView = 'all';
-
-        function setValueView(view) {
-            currentValueView = view;
-            document.querySelectorAll('#stats-value .tabs .tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            updateValueDisplay();
-        }
-
-        // Update stats tab handler
+        
+        // Update the stats tab handler
         function setStatsTab(tab) {
             statsTab = tab;
             document.querySelectorAll('#stats-section .tab').forEach(t => t.classList.remove('active'));
@@ -5305,303 +5039,11 @@
                     break;
                 case 'value':
                     document.getElementById('stats-value').classList.remove('hidden');
-                    loadCollectionValue();
+                    loadGeekGroupUsername(); // Load saved username
                     break;
             }
         }
-
-        // Load and display collection value
-        async function loadCollectionValue() {
-            showStatus('Loading collection values...', 'success');
-            
-            const games = await loadAllGamesWithValues();
-            
-            // Calculate totals
-            let totalValue = 0;
-            let tradeValue = 0;
-            let sellValue = 0;
-            let gamesWithValue = 0;
-            let lastUpdate = null;
-            
-            games.forEach(game => {
-                if (game.currentValue > 0) {
-                    totalValue += game.currentValue;
-                    gamesWithValue++;
-                    
-                    if (game.tradeStatus === 'TRADE') {
-                        tradeValue += game.currentValue;
-                    } else if (game.tradeStatus === 'SELL') {
-                        sellValue += game.currentValue;
-                    }
-                    
-                    if (game.valueUpdated) {
-                        const updateDate = new Date(game.valueUpdated);
-                        if (!lastUpdate || updateDate > lastUpdate) {
-                            lastUpdate = updateDate;
-                        }
-                    }
-                }
-            });
-            
-            const avgValue = gamesWithValue > 0 ? totalValue / gamesWithValue : 0;
-            
-            // Update display
-            document.getElementById('total-collection-value').textContent = '$' + totalValue.toFixed(2);
-            document.getElementById('avg-game-value').textContent = '$' + avgValue.toFixed(2);
-            document.getElementById('trade-sell-value').textContent = '$' + (tradeValue + sellValue).toFixed(2);
-            document.getElementById('value-last-updated').textContent = 
-                lastUpdate ? lastUpdate.toLocaleDateString() : 'Never';
-            
-            // Store for filtering
-            window.collectionGames = games;
-            
-            // Display games list
-            updateValueDisplay();
-        }
-
-        // Update value display based on current filter
-        function updateValueDisplay() {
-            const games = window.collectionGames || [];
-            let filteredGames = [];
-            
-            switch(currentValueView) {
-                case 'all':
-                    filteredGames = games;
-                    break;
-                case 'valuable':
-                    filteredGames = games
-                        .filter(g => g.currentValue > 0)
-                        .sort((a, b) => b.currentValue - a.currentValue);
-                    break;
-                case 'trade':
-                    filteredGames = games.filter(g => g.tradeStatus === 'TRADE');
-                    break;
-                case 'sell':
-                    filteredGames = games.filter(g => g.tradeStatus === 'SELL');
-                    break;
-            }
-            
-            const container = document.getElementById('value-games-list');
-            container.innerHTML = `<h4>${filteredGames.length} games</h4>`;
-            
-            if (filteredGames.length === 0) {
-                container.innerHTML += '<p style="text-align: center; color: #7f8c8d; padding: 2rem;">No games found</p>';
-                return;
-            }
-            
-            filteredGames.forEach(game => {
-                const valueInfo = game.currentValue > 0 ? 
-                    `$${game.currentValue.toFixed(2)}` : 
-                    'No value data';
-                
-                const tradeIcon = game.tradeStatus === 'TRADE' ? '🔄' : 
-                                game.tradeStatus === 'SELL' ? '💰' : '';
-                
-                container.innerHTML += `
-                    <div class="result-item">
-                        ${game.photoUrl ? `<img src="${game.photoUrl}" class="game-thumbnail" alt="${game.title}">` : ''}
-                        <div class="result-item-content">
-                            <div class="game-title">${tradeIcon} ${game.title}</div>
-                            <div class="game-location">
-                                Value: ${valueInfo} • 
-                                Location: ${game.location} • 
-                                ${game.tradeStatus ? 'Status: ' + game.tradeStatus : ''}
-                            </div>
-                        </div>
-                        <button class="btn btn-info" onclick="viewGameHistoryById('${game.id}')" style="margin-left: auto;">View</button>
-                        ${game.bggId ? `<button class="btn btn-primary" onclick="refreshSingleGameValue('${game.id}')">↻</button>` : ''}
-                    </div>
-                `;
-            });
-        }
-
-        // Update single game value from list
-        async function refreshSingleGameValue(gameId) {
-            await refreshGameValue(gameId);
-            await loadCollectionValue(); // Reload the list
-        }
-
-        // Update all game values (batch operation)
-        async function updateAllGameValues() {
-            const games = await loadAllGamesWithValues();
-            const gamesWithBgg = games.filter(g => g.bggId);
-            
-            if (gamesWithBgg.length === 0) {
-                showStatus('No games with BGG IDs to update', 'error');
-                return;
-            }
-            
-            const confirmed = confirm(`This will update values for ${gamesWithBgg.length} games. This may take several minutes. Continue?`);
-            if (!confirmed) return;
-            
-            showStatus(`Updating values for ${gamesWithBgg.length} games...`, 'success');
-            
-            let updated = 0;
-            let failed = 0;
-            
-            for (const game of gamesWithBgg) {
-                try {
-                    const marketData = await fetchBGGMarketValue(game.bggId);
-                    if (marketData && marketData.value > 0) {
-                        const historicalHigh = Math.max(marketData.value, game.historicalHigh || 0);
-                        const historicalLow = game.historicalLow > 0 ? 
-                            Math.min(marketData.value, game.historicalLow) : marketData.value;
-                        
-                        await updateGameValue(game.id, marketData.value, historicalHigh, historicalLow);
-                        updated++;
-                    } else {
-                        failed++;
-                    }
-                    
-                    // Update progress
-                    const progress = updated + failed;
-                    if (progress % 5 === 0) {
-                        showStatus(`Progress: ${progress}/${gamesWithBgg.length} games...`, 'success');
-                    }
-                    
-                    // Rate limiting - wait 1 second between requests
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                    
-                } catch (error) {
-                    console.error(`Error updating ${game.title}:`, error);
-                    failed++;
-                }
-            }
-            
-            showStatus(`Update complete! Updated: ${updated}, Failed: ${failed}`, 'success');
-            await loadCollectionValue(); // Reload the display
-        }
-
-        // Export collection value report
-        function exportCollectionValue() {
-            const games = window.collectionGames || [];
-            let csv = 'Game ID,Title,Current Value,Trade Status,Location,BGG ID,Last Updated,Historical High,Historical Low\n';
-            
-            games.forEach(game => {
-                csv += `"${game.id}","${game.title}",${game.currentValue.toFixed(2)},"${game.tradeStatus || ''}","${game.location}","${game.bggId || ''}","${game.valueUpdated || ''}",${game.historicalHigh.toFixed(2)},${game.historicalLow.toFixed(2)}\n`;
-            });
-            
-            // Add summary at the end
-            const totalValue = games.reduce((sum, g) => sum + g.currentValue, 0);
-            const tradeValue = games.filter(g => g.tradeStatus === 'TRADE').reduce((sum, g) => sum + g.currentValue, 0);
-            const sellValue = games.filter(g => g.tradeStatus === 'SELL').reduce((sum, g) => sum + g.currentValue, 0);
-            
-            csv += `\n\nSummary\n`;
-            csv += `Total Collection Value:,${totalValue.toFixed(2)}\n`;
-            csv += `Games for Trade Value:,${tradeValue.toFixed(2)}\n`;
-            csv += `Games for Sale Value:,${sellValue.toFixed(2)}\n`;
-            csv += `Total Trade/Sell Value:,${(tradeValue + sellValue).toFixed(2)}\n`;
-            
-            downloadCSV(csv, `collection_value_${new Date().toISOString().split('T')[0]}.csv`);
-        }
-
-        // Manual value modal functions
-        let currentManualValueGame = null;
         
-        function openManualValueModal(gameId, gameTitle) {
-            currentManualValueGame = { id: gameId, title: gameTitle };
-            document.getElementById('manual-value-game-name').textContent = gameTitle;
-            document.getElementById('manual-value-input').value = '';
-            document.getElementById('manual-value-modal').classList.remove('hidden');
-            document.getElementById('market-data-display').style.display = 'none';
-        }
-        
-        function closeManualValueModal() {
-            document.getElementById('manual-value-modal').classList.add('hidden');
-            currentManualValueGame = null;
-        }
-        
-        async function saveManualValue() {
-            if (!currentManualValueGame) return;
-            
-            const value = parseFloat(document.getElementById('manual-value-input').value);
-            
-            if (isNaN(value) || value < 0) {
-                showStatus('Please enter a valid value', 'error');
-                return;
-            }
-            
-            const gameInfo = await getGameInfo(currentManualValueGame.id);
-            const historicalHigh = Math.max(value, gameInfo?.historicalHigh || 0);
-            const historicalLow = gameInfo?.historicalLow > 0 ? 
-                Math.min(value, gameInfo.historicalLow) : value;
-            
-            const success = await updateGameValue(currentManualValueGame.id, value, historicalHigh, historicalLow);
-            
-            if (success) {
-                showStatus(`Value updated to $${value.toFixed(2)}`, 'success');
-                closeManualValueModal();
-                
-                // Refresh the display if in collection value view
-                if (statsTab === 'value') {
-                    await loadCollectionValue();
-                }
-                
-                // Refresh the game history modal if open
-                if (currentHistoryGameId === currentManualValueGame.id) {
-                    const marketValueElement = document.getElementById('game-market-value');
-                    if (marketValueElement) {
-                        marketValueElement.innerHTML = `$${value.toFixed(2)} <small style="color: #7f8c8d;">(manually entered)</small>`;
-                    }
-                }
-            }
-        }
-        
-        async function fetchMarketDataForModal() {
-            if (!currentManualValueGame) return;
-            
-            const btn = document.getElementById('fetch-market-btn');
-            btn.disabled = true;
-            btn.textContent = '🔄 Fetching...';
-            
-            const gameInfo = await getGameInfo(currentManualValueGame.id);
-            if (!gameInfo?.bggId) {
-                showStatus('No BGG ID for this game', 'error');
-                btn.disabled = false;
-                btn.textContent = '🔄 Fetch Current Geek Market Prices';
-                return;
-            }
-            
-            const marketData = await fetchBGGMarketValue(gameInfo.bggId);
-            
-            if (marketData && marketData.listings > 0) {
-                // Display the data
-                const display = document.getElementById('market-data-display');
-                const content = document.getElementById('market-data-content');
-                
-                content.innerHTML = `
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                        <div>Active Listings: <strong>${marketData.listings}</strong></div>
-                        <div>Average: <strong>$${marketData.value.toFixed(2)}</strong></div>
-                        <div>Lowest: <strong>$${marketData.lowest.toFixed(2)}</strong></div>
-                        <div>Highest: <strong>$${marketData.highest.toFixed(2)}</strong></div>
-                    </div>
-                    <button class="btn btn-primary" onclick="document.getElementById('manual-value-input').value = ${marketData.value.toFixed(2)}" 
-                            style="margin-top: 0.5rem; width: 100%;">
-                        Use Average Price ($${marketData.value.toFixed(2)})
-                    </button>
-                `;
-                
-                display.style.display = 'block';
-            } else {
-                showStatus('No active Geek Market listings found', 'error');
-            }
-            
-            btn.disabled = false;
-            btn.textContent = '🔄 Fetch Current Geek Market Prices';
-        }
-        
-        async function openGeekMarketInNewTab() {
-            if (!currentManualValueGame) return;
-            
-            const gameInfo = await getGameInfo(currentManualValueGame.id);
-            if (gameInfo?.bggId) {
-                window.open(`https://boardgamegeek.com/geekmarket/browse?objecttype=thing&objectid=${gameInfo.bggId}`, '_blank');
-            } else {
-                showStatus('No BGG ID for this game', 'error');
-            }
-        }
-
     </script>
 </body>
 </html>
