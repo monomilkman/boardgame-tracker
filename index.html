@@ -4999,42 +4999,65 @@
         async function fetchBGGMarketValue(bggId) {
             if (!bggId) return null;
             
-            try {
-                // Fetch marketplace data from BGG
-                const response = await fetch(
-                    `${CORS_PROXY}https://boardgamegeek.com/api/geekmarket/products?objectid=${bggId}&objecttype=thing&pageid=1&perPage=50`
-                );
-                
-                if (!response.ok) return null;
-                
-                const data = await response.json();
-                
-                if (!data.products || data.products.length === 0) {
-                    return { value: 0, currency: 'USD', listings: 0 };
+            // Try multiple CORS proxies in case one fails
+            const corsProxies = [
+                'https://cors-anywhere.herokuapp.com/',
+                'https://api.allorigins.win/raw?url=',
+                'https://corsproxy.org/?',
+                ''  // Try without proxy as last resort
+            ];
+            
+            for (const proxy of corsProxies) {
+                try {
+                    console.log(`Trying to fetch BGG value using proxy: ${proxy || 'direct'}`);
+                    
+                    const url = `${proxy}https://boardgamegeek.com/api/geekmarket/products?objectid=${bggId}&objecttype=thing&pageid=1&perPage=50`;
+                    
+                    const response = await fetch(url, {
+                        headers: proxy.includes('cors-anywhere') ? {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        } : {}
+                    });
+                    
+                    if (!response.ok) {
+                        console.log(`Proxy ${proxy || 'direct'} failed with status: ${response.status}`);
+                        continue;
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (!data.products || data.products.length === 0) {
+                        return { value: 0, currency: 'USD', listings: 0 };
+                    }
+                    
+                    // Calculate average price from active listings
+                    const activePrices = data.products
+                        .filter(p => p.price && !p.sold)
+                        .map(p => parseFloat(p.price.replace(/[^0-9.]/g, '')));
+                    
+                    if (activePrices.length === 0) {
+                        return { value: 0, currency: 'USD', listings: 0 };
+                    }
+                    
+                    const avgPrice = activePrices.reduce((a, b) => a + b, 0) / activePrices.length;
+                    
+                    return {
+                        value: Math.round(avgPrice * 100) / 100,
+                        currency: 'USD',
+                        listings: activePrices.length,
+                        lowest: Math.min(...activePrices),
+                        highest: Math.max(...activePrices)
+                    };
+                    
+                } catch (error) {
+                    console.error(`Error with proxy ${proxy}:`, error);
+                    continue;
                 }
-                
-                // Calculate average price from active listings
-                const activePrices = data.products
-                    .filter(p => p.price && !p.sold)
-                    .map(p => parseFloat(p.price.replace(/[^0-9.]/g, '')));
-                
-                if (activePrices.length === 0) {
-                    return { value: 0, currency: 'USD', listings: 0 };
-                }
-                
-                const avgPrice = activePrices.reduce((a, b) => a + b, 0) / activePrices.length;
-                
-                return {
-                    value: Math.round(avgPrice * 100) / 100,
-                    currency: 'USD',
-                    listings: activePrices.length,
-                    lowest: Math.min(...activePrices),
-                    highest: Math.max(...activePrices)
-                };
-            } catch (error) {
-                console.error('Error fetching BGG market value:', error);
-                return null;
             }
+            
+            // All proxies failed
+            console.error('All CORS proxies failed for BGG marketplace');
+            return null;
         }
 
         // Update game value in spreadsheet
