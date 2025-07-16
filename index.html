@@ -851,11 +851,11 @@
         <!-- Advanced Stats Section -->
         <div id="stats-section" class="hidden">
             <div class="tabs">
-                <button class="tab active" onclick="setStatsTab('overview')">Overview</button>
-                <button class="tab" onclick="setStatsTab('trends')">Play Trends</button>
-                <button class="tab" onclick="setStatsTab('ratings')">Ratings</button>
-                <button class="tab" onclick="setStatsTab('sessions')">Session Analysis</button>
-                <button class="tab" onclick="setStatsTab('value')">Collection Value</button>
+                <button class="tab active" onclick="setStatsTab('overview', event)">Overview</button>
+                <button class="tab" onclick="setStatsTab('trends', event)">Play Trends</button>
+                <button class="tab" onclick="setStatsTab('ratings', event)">Ratings</button>
+                <button class="tab" onclick="setStatsTab('sessions', event)">Session Analysis</button>
+                <button class="tab" onclick="setStatsTab('value', event)">Collection Value</button>
             </div>
             
             <div id="stats-overview" class="stats-content">
@@ -5071,7 +5071,7 @@
         }
     
         // Update the stats tab handler
-        function setStatsTab(tab) {
+        function setStatsTab(tab, event) {
             statsTab = tab;
             document.querySelectorAll('#stats-section .tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
