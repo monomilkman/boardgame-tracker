@@ -3630,9 +3630,15 @@
                     contentDiv.appendChild(gameDiv);
                 });
             }
-            
+
+            // ADD THIS LINE
+            console.log('displaySearchResults: resultsDiv hidden status BEFORE unhiding:', resultsDiv.classList.contains('hidden'));
+
             // Make sure results div is visible
             resultsDiv.classList.remove('hidden');
+
+            // ADD THIS LINE
+            console.log('displaySearchResults: resultsDiv hidden status AFTER unhiding:', resultsDiv.classList.contains('hidden'));
         }
         
         // View game history from search results
