@@ -1364,12 +1364,9 @@
                     document.getElementById('scan-section').classList.remove('hidden');
                     updateUIForMode();
                     break;
-                case 'search':
+               case 'search':
                     document.getElementById('search-section').classList.remove('hidden');
                     searchTab = 'all'; // Ensure we start with 'all' tab
-                    
-                    // Reset the search input
-                    document.getElementById('search-input').value = '';
                     
                     // Set the "All Games" tab as active
                     document.querySelectorAll('#search-section .tab').forEach(t => {
@@ -1379,22 +1376,9 @@
                         }
                     });
                     
-                    // Show loading message while games load
-                    const resultsDiv = document.getElementById('results');
-                    const contentDiv = document.getElementById('results-content');
-                    contentDiv.innerHTML = '<h4>Loading games...</h4>';
-                    resultsDiv.classList.remove('hidden');
-                    
-                    loadAllGames().then((games) => {
-                        console.log('Search mode - Games loaded:', games.length);
-                        if (games.length === 0) {
-                            contentDiv.innerHTML = '<h4>No games found in inventory</h4><p style="text-align: center; color: #7f8c8d;">Make sure your Google Sheets is configured and contains game data.</p>';
-                        } else {
-                            performSearch();
-                        }
-                    }).catch(error => {
-                        console.error('Search mode - Error loading games:', error);
-                        contentDiv.innerHTML = '<h4>Error loading games</h4><p style="text-align: center; color: #e74c3c;">Please check your Google Sheets configuration.</p>';
+                    // Load and display all games
+                    loadAllGames().then(() => {
+                        performSearch(); // This will display all games
                     });
                     break;
                 case 'stats':
@@ -1417,9 +1401,15 @@
                     break;
                 case 'bgg':
                     document.getElementById('bgg-section').classList.remove('hidden');
+                    // Clear any previous results
+                    document.getElementById('bgg-results').classList.add('hidden');
                     break;
                 case 'settings':
                     document.getElementById('settings-section').classList.remove('hidden');
+                    // Make sure all sections are visible
+                    document.querySelectorAll('#settings-section .setup-section').forEach(section => {
+                        section.style.display = 'block';
+                    });
                     break;
                 case 'checkout':
                 case 'checkin':
@@ -2345,7 +2335,15 @@
         
         function updatePlayerManageTab() {
             const container = document.getElementById('all-players-list');
+            
+            if (!container) {
+                console.error('all-players-list container not found!');
+                return;
+            }
+            
             container.innerHTML = '';
+            
+            console.log('Updating player manage tab with', allPlayers.length, 'players');
             
             if (allPlayers.length === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No players added yet. Add your first player above!</p>';
@@ -3572,9 +3570,12 @@
             performSearch();
             }
         
-        async function performSearch() {
+       async function performSearch() {
             const query = document.getElementById('search-input').value.toLowerCase();
             const games = await loadAllGames();
+            
+            console.log('performSearch - games loaded:', games.length);
+            console.log('performSearch - search tab:', searchTab);
             
             let filtered = games;
             
@@ -3594,6 +3595,8 @@
                 );
             }
             
+            console.log('performSearch - filtered games:', filtered.length);
+            
             displaySearchResults(filtered);
         }
         
@@ -3601,22 +3604,34 @@
             const resultsDiv = document.getElementById('results');
             const contentDiv = document.getElementById('results-content');
             
-            contentDiv.innerHTML = `<h4>Found ${games.length} games</h4>`;
+            // Clear previous results
+            contentDiv.innerHTML = '';
             
-            games.forEach(game => {
-                const locationText = game.location === 'CHECKED_OUT' ? 'Checked Out' : `Bin: ${game.location}`;
-                contentDiv.innerHTML += `
-                    <div class="result-item">
-                        ${game.photoUrl ? `<img src="${game.photoUrl}" class="game-thumbnail" alt="${game.title}">` : ''}
+            if (!games || games.length === 0) {
+                contentDiv.innerHTML = '<h4>No games found</h4><p style="text-align: center; color: #7f8c8d;">Try adjusting your search or filters.</p>';
+            } else {
+                contentDiv.innerHTML = `<h4>Found ${games.length} games</h4>`;
+                
+                games.forEach(game => {
+                    const locationText = game.location === 'CHECKED_OUT' ? 'Checked Out' : 
+                                        game.location === 'NEW' ? 'Not in bin' : 
+                                        `Bin: ${game.location}`;
+                    
+                    const gameDiv = document.createElement('div');
+                    gameDiv.className = 'result-item';
+                    gameDiv.innerHTML = `
+                        ${game.photoUrl ? `<img src="${game.photoUrl}" class="game-thumbnail" alt="${game.title}" onerror="this.style.display='none'">` : ''}
                         <div class="result-item-content">
                             <div class="game-title">${game.title}</div>
-                            <div class="game-location">ID: ${game.id} • Location: ${locationText}</div>
+                            <div class="game-location">ID: ${game.id} • ${locationText}</div>
                         </div>
                         <button class="btn btn-info" onclick="viewGameHistoryById('${game.id}')" style="margin-left: auto;">View History</button>
-                    </div>
-                `;
-            });
+                    `;
+                    contentDiv.appendChild(gameDiv);
+                });
+            }
             
+            // Make sure results div is visible
             resultsDiv.classList.remove('hidden');
         }
         
@@ -5131,6 +5146,32 @@
             } catch (error) {
                 console.error('Connection error:', error);
             }
+        }
+
+        function debugUI() {
+            console.log('=== UI Debug ===');
+            console.log('Current Mode:', currentMode);
+            console.log('Search Tab:', searchTab);
+            console.log('Games Loaded:', allGames.length);
+            console.log('Players Loaded:', allPlayers.length);
+            
+            // Check visibility of sections
+            const sections = [
+                'scan-section', 'search-section', 'stats-section', 
+                'players-section', 'sessions-section', 'bulk-section', 
+                'bgg-section', 'settings-section', 'results'
+            ];
+            
+            sections.forEach(id => {
+                const elem = document.getElementById(id);
+                if (elem) {
+                    console.log(`${id}:`, elem.classList.contains('hidden') ? 'HIDDEN' : 'VISIBLE');
+                } else {
+                    console.log(`${id}: NOT FOUND`);
+                }
+            });
+            
+            console.log('=== End Debug ===');
         }
         
     </script>
