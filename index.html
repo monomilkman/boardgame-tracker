@@ -5048,9 +5048,11 @@
         function addGeekGroupButton(bggId) {
             const username = localStorage.getItem('bggUsername');
             if (username && bggId) {
+                // You might need to check if Geek Group supports direct game links
+                // For now, this will take them to their collection
                 return `
-                    <button class="btn btn-info" onclick="window.open('https://geekgroup.app/${username}#game-${bggId}', '_blank')">
-                        📊 View on Geek Group
+                    <button class="btn btn-info" onclick="window.open('https://geekgroup.app/users/${username}/collection', '_blank')">
+                        📊 View Collection on Geek Group
                     </button>
                 `;
             }
