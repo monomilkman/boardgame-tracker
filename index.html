@@ -1638,32 +1638,31 @@
                                 
                 // Update action buttons to include trade/sell toggle
                 const actionsHtml = `
-                    const actionsHtml = `
-                        <button class="btn btn-primary" onclick="checkoutGameFromHistory()">Check Out</button>
-                        <button class="btn btn-info" onclick="logPlayFromHistory()">Log Play</button>
-                        ${gameInfo.bggId ? `
-                            <button class="btn btn-info" onclick="window.open('https://boardgamegeek.com/geekmarket/browse?objecttype=thing&objectid=${gameInfo.bggId}', '_blank')">
-                                🛒 Check Geek Market
-                            </button>
-                        ` : ''}
-                        <button class="btn btn-info" onclick="openManualValueModal('${gameInfo.id}', '${gameInfo.title.replace(/'/g, "\\'")}')">
-                            💰 Enter Value
+                    <button class="btn btn-primary" onclick="checkoutGameFromHistory()">Check Out</button>
+                    <button class="btn btn-info" onclick="logPlayFromHistory()">Log Play</button>
+                    ${gameInfo.bggId ? `
+                        <button class="btn btn-info" onclick="window.open('https://boardgamegeek.com/geekmarket/browse?objecttype=thing&objectid=${gameInfo.bggId}', '_blank')">
+                            🛒 Check Geek Market
                         </button>
-                        <button class="btn btn-secondary" onclick="closeGameHistory()">Close</button>
-                    `;
-                
-                // Replace the history-actions div content
-                document.querySelector('.history-actions').innerHTML = actionsHtml;
-                
-                // If BGG ID exists and value is old or missing, fetch fresh value
-                if (gameInfo.bggId && (!gameInfo.valueUpdated || 
-                    (new Date() - new Date(gameInfo.valueUpdated)) > 24 * 60 * 60 * 1000)) {
-                    refreshGameValue(gameInfo.id);
-                }
-
-                // Show the modal
-                document.getElementById('game-history-modal').classList.remove('hidden');
+                    ` : ''}
+                    <button class="btn btn-info" onclick="openManualValueModal('${gameInfo.id}', '${gameInfo.title.replace(/'/g, "\\'")}')">
+                        💰 Enter Value
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeGameHistory()">Close</button>
+                `;
+            
+            // Replace the history-actions div content
+            document.querySelector('.history-actions').innerHTML = actionsHtml;
+            
+            // If BGG ID exists and value is old or missing, fetch fresh value
+            if (gameInfo.bggId && (!gameInfo.valueUpdated || 
+                (new Date() - new Date(gameInfo.valueUpdated)) > 24 * 60 * 60 * 1000)) {
+                refreshGameValue(gameInfo.id);
             }
+
+            // Show the modal
+            document.getElementById('game-history-modal').classList.remove('hidden');
+        }
 
         // Helper functions for trade status display
         function getTradeStatusDisplay(status) {
