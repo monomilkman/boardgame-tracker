@@ -1366,7 +1366,10 @@
                     break;
                 case 'search':
                     document.getElementById('search-section').classList.remove('hidden');
-                    loadAllGames();
+                    searchTab = 'all'; // Ensure we start with 'all' tab
+                    loadAllGames().then(() => {
+                        performSearch();
+                    });
                     break;
                 case 'stats':
                     document.getElementById('stats-section').classList.remove('hidden');
@@ -3526,9 +3529,10 @@
         }
         
         // Search functionality
-        function setSearchTab(tab) {
+       function setSearchTab(tab) {
             searchTab = tab;
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            // Change this line to only select tabs within the search section
+            document.querySelectorAll('#search-section .tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
             performSearch();
         }
