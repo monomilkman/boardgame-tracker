@@ -5058,7 +5058,6 @@
             const appsScriptUrl = localStorage.getItem('appsScriptUrl');
             
             if (!appsScriptUrl) {
-                // If no Apps Script URL, fall back to manual entry
                 console.log('No Apps Script URL configured for Geek Market fetching');
                 return null;
             }
@@ -5066,15 +5065,12 @@
             try {
                 console.log(`Fetching Geek Market prices for BGG ID: ${bggId}`);
                 
-                const response = await fetch(appsScriptUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'fetchGeekMarket',
-                        bggId: bggId
-                    })
+                // Method 1: Use URL parameters instead of JSON body
+                const url = `${appsScriptUrl}?action=fetchGeekMarket&bggId=${bggId}`;
+                
+                const response = await fetch(url, {
+                    method: 'GET',  // Use GET to avoid CORS preflight
+                    redirect: 'follow'
                 });
                 
                 const result = await response.json();
