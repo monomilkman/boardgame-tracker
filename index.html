@@ -4994,8 +4994,8 @@
             // Save the username
             localStorage.setItem('bggUsername', username);
             
-            // Construct Geek Group URL
-            const geekGroupUrl = `https://geekgroup.app/${username}`;
+            // Construct Geek Group URL with correct format
+            const geekGroupUrl = `https://geekgroup.app/users/${username}/collection`;
             
             // Option 1: Open in new tab (recommended)
             window.open(geekGroupUrl, '_blank');
