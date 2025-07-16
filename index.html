@@ -5043,6 +5043,19 @@
                     break;
             }
         }
+
+        // Add a quick link button to game history modal
+        function addGeekGroupButton(bggId) {
+            const username = localStorage.getItem('bggUsername');
+            if (username && bggId) {
+                return `
+                    <button class="btn btn-info" onclick="window.open('https://geekgroup.app/${username}#game-${bggId}', '_blank')">
+                        📊 View on Geek Group
+                    </button>
+                `;
+            }
+            return '';
+        }
         
     </script>
 </body>
