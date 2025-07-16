@@ -1186,6 +1186,7 @@
 
    
     <script>
+    <script>
         // Global variables
         let html5QrcodeScanner = null;
         let currentMode = 'view';
@@ -1211,30 +1212,30 @@
         };
         let currentPlayGame = null;
         let currentRating = 0;
-        
+    
         // Chart.js instances
         let trendsChart = null;
         let ratingsChart = null;
         let sessionChart = null;
         let playerComparisonChart = null;
-        
+    
         // Cache variables
         let gameCache = new Map();
         let cacheTimestamp = 0;
         const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-        
+    
         // Google Sheets API base URL
         const SHEETS_API_BASE = 'https://sheets.googleapis.com/v4/spreadsheets';
-        
+    
         // BoardGameGeek API (via CORS proxy)
         const BGG_API_BASE = 'https://api.geekdo.com/xmlapi2';
         const CORS_PROXY = 'https://corsproxy.io/?';
-        
+    
         // Initialize on load
         window.onload = function() {
             loadSettings();
             initializeRatingStars();
-            
+    
             // Check if QR library loaded
             if (typeof Html5Qrcode === 'undefined') {
                 console.error('Html5Qrcode library failed to load');
@@ -1242,7 +1243,7 @@
             } else {
                 console.log('QR scanner library loaded successfully');
             }
-            
+    
             // Set initial mode without triggering camera
             currentMode = 'view';
             document.querySelectorAll('.mode-btn').forEach(btn => {
@@ -1250,10 +1251,10 @@
                     btn.classList.add('active');
                 }
             });
-            
+    
             // Ensure modal is hidden
             document.getElementById('game-history-modal').classList.add('hidden');
-            
+    
             // Add click handler to modal background to close when clicking outside
             document.getElementById('game-history-modal').addEventListener('click', function(e) {
                 if (e.target === this) {
@@ -1261,7 +1262,7 @@
                 }
             });
         };
-        
+    
         // Initialize rating stars interaction
         function initializeRatingStars() {
             document.querySelectorAll('.star').forEach(star => {
@@ -1274,17 +1275,17 @@
                     highlightStars(rating);
                 });
             });
-            
+    
             document.getElementById('play-rating').addEventListener('mouseleave', function() {
                 highlightStars(currentRating);
             });
         }
-        
+    
         function setRating(rating) {
             currentRating = rating;
             highlightStars(rating);
         }
-        
+    
         function highlightStars(rating) {
             document.querySelectorAll('.star').forEach((star, index) => {
                 if (index < rating) {
@@ -1296,17 +1297,17 @@
                 }
             });
         }
-        
+    
         // Mode management
         function setMode(mode) {
             currentMode = mode;
             document.querySelectorAll('.mode-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
-            
+    
             // Find the button that was clicked and make it active
             document.querySelectorAll('.mode-btn').forEach(btn => {
-                if (btn.querySelector('span:last-child').textContent === 
+                if (btn.querySelector('span:last-child').textContent ===
                     (mode === 'view' ? 'View Bin' :
                      mode === 'history' ? 'Game History' :
                      mode === 'search' ? 'Search' :
@@ -1322,18 +1323,18 @@
                     btn.classList.add('active');
                 }
             });
-            
+    
             // Reset workflow state
             checkoutWorkflow = { gameId: null, gameTitle: null, binId: null, step: 'game' };
             hideWorkflowState();
             hideStatus();
             hideResults();
-            
+    
             // Stop any active scanning
             if (html5QrcodeScanner) {
                 stopScanning();
             }
-            
+    
             // Hide all sections
             document.getElementById('scan-section').classList.add('hidden');
             document.getElementById('play-log-section').classList.add('hidden');
@@ -1344,12 +1345,12 @@
             document.getElementById('bulk-section').classList.add('hidden');
             document.getElementById('bgg-section').classList.add('hidden');
             document.getElementById('settings-section').classList.add('hidden');
-            
+    
             // Preload game data for modes that need it
             if (['play', 'checkout', 'checkin', 'search', 'bulk', 'history'].includes(mode)) {
                 loadAllGames().catch(err => console.log('Preload error:', err));
             }
-            
+    
             // Show relevant sections
             switch(mode) {
                 case 'view':
@@ -1365,9 +1366,9 @@
                     updateUIForMode();
                     break;
                case 'search':
-                    document.getElementById('search-section').classList.remove('hidden');
+                    document.getElementById('search-section').classList.remove('hidden'); // ADDED
                     searchTab = 'all'; // Ensure we start with 'all' tab
-                    
+    
                     // Set the "All Games" tab as active
                     document.querySelectorAll('#search-section .tab').forEach(t => {
                         t.classList.remove('active');
@@ -1375,37 +1376,37 @@
                             t.classList.add('active');
                         }
                     });
-                    
+    
                     // Load and display all games
                     loadAllGames().then(() => {
                         performSearch(); // This will display all games
                     });
                     break;
                 case 'stats':
-                    document.getElementById('stats-section').classList.remove('hidden');
+                    document.getElementById('stats-section').classList.remove('hidden'); // ADDED
                     loadStatistics();
                     break;
                 case 'players':
-                    document.getElementById('players-section').classList.remove('hidden');
+                    document.getElementById('players-section').classList.remove('hidden'); // ADDED
                     loadPlayerStats();
                     break;
                 case 'sessions':
-                    document.getElementById('sessions-section').classList.remove('hidden');
+                    document.getElementById('sessions-section').classList.remove('hidden'); // ADDED
                     loadSessionTemplates().catch(error => {
                         console.error('Error loading session templates:', error);
                     });
                     break;
                 case 'bulk':
-                    document.getElementById('bulk-section').classList.remove('hidden');
+                    document.getElementById('bulk-section').classList.remove('hidden'); // ADDED
                     loadBulkOperations();
                     break;
                 case 'bgg':
-                    document.getElementById('bgg-section').classList.remove('hidden');
+                    document.getElementById('bgg-section').classList.remove('hidden'); // ADDED
                     // Clear any previous results
                     document.getElementById('bgg-results').classList.add('hidden');
                     break;
                 case 'settings':
-                    document.getElementById('settings-section').classList.remove('hidden');
+                    document.getElementById('settings-section').classList.remove('hidden'); // ADDED
                     // Make sure all sections are visible
                     document.querySelectorAll('#settings-section .setup-section').forEach(section => {
                         section.style.display = 'block';
@@ -1418,7 +1419,7 @@
                     break;
             }
         }
-        
+    
         function updateUIForMode() {
             if (currentMode === 'view') {
                 showWorkflowState('Scan a bin QR code to view contents');
@@ -1433,7 +1434,7 @@
             }
             // Don't automatically start scanning
         }
-        
+    
         // Game History Functions
         async function handleGameHistory(data) {
             if (data.type !== 'GAME') {
@@ -1442,63 +1443,63 @@
                 setTimeout(() => startScanning(), 2000);
                 return;
             }
-            
+    
             try {
                 showStatus('Loading game history...', 'success');
-                
+    
                 // Load all necessary data
                 const [gameInfo, plays, travels] = await Promise.all([
                     getGameInfo(data.id),
                     loadEnhancedPlayHistory(),
                     loadTravelHistory()
                 ]);
-                
+    
                 if (!gameInfo) {
                     showStatus('Game not found in inventory', 'error');
                     setTimeout(() => startScanning(), 2000);
                     return;
                 }
-                
+    
                 // Store current game info
                 currentHistoryGameId = data.id;
                 currentHistoryGameInfo = gameInfo;
-                
+    
                 // Display the history modal
                 displayGameHistory(gameInfo, plays, travels);
-                
+    
             } catch (error) {
                 showStatus('Error loading game history: ' + error.message, 'error');
                 setTimeout(() => startScanning(), 3000);
             }
         }
-        
+    
         function displayGameHistory(gameInfo, allPlays, allTravels) {
                 // Make sure we have valid game info
                 if (!gameInfo) {
                     console.error('No game info provided to displayGameHistory');
                     return;
                 }
-                
+    
                 // Filter plays and travels for this game
                 const gamePlays = allPlays.filter(play => play.gameId === gameInfo.id);
                 const gameTravels = allTravels.filter(travel => travel.gameId === gameInfo.id);
-                
+    
                 // Ensure all containers exist and are clear
                 const summaryDiv = document.getElementById('game-stats-summary');
                 const playHistoryDiv = document.getElementById('game-play-history');
                 const travelHistoryDiv = document.getElementById('game-travel-history');
-                
+    
                 if (!summaryDiv || !playHistoryDiv || !travelHistoryDiv) {
                     console.error('Game history modal elements not found');
                     return;
                 }
-                
+    
                 // Calculate statistics
                 const stats = calculateGameStatistics(gamePlays);
-                
+    
                 // Update modal header
                 document.getElementById('game-history-title').textContent = gameInfo.title;
-                
+    
                 // Display statistics summary
                 const statsHtml = `
                     <div class="game-stats-row">
@@ -1527,7 +1528,7 @@
                     </div>
                 `;
                 summaryDiv.innerHTML = statsHtml;
-                
+    
                 // Display play history
                 if (gamePlays.length === 0) {
                     playHistoryDiv.innerHTML = '<div class="no-history">No plays recorded yet</div>';
@@ -1538,12 +1539,12 @@
                         .map(play => {
                             const date = new Date(play.timestamp);
                             let details = [];
-                            
+    
                             if (play.players) details.push(`Players: ${play.players}`);
                             if (play.winner) details.push(`Winner: ${play.winner}`);
                             if (play.rating) details.push(`Rating: ${getStarDisplay(play.rating)}`);
                             if (play.notes) details.push(`Notes: ${play.notes}`);
-                            
+    
                             return `
                                 <div class="play-history-item">
                                     <div class="play-history-date">${date.toLocaleDateString()} ${date.toLocaleTimeString()}</div>
@@ -1551,12 +1552,12 @@
                                 </div>
                             `;
                         }).join('');
-                        
+    
                     if (gamePlays.length > 10) {
                         playHistoryDiv.innerHTML += `<p style="text-align: center; color: #7f8c8d; margin-top: 1rem;">...and ${gamePlays.length - 10} more plays</p>`;
                     }
                 }
-                
+    
                 // Display travel history
                 if (gameTravels.length === 0) {
                     travelHistoryDiv.innerHTML = '<div class="no-history">No location changes recorded yet</div>';
@@ -1567,37 +1568,37 @@
                         toLocation: gameInfo.location,
                         action: 'CURRENT'
                     }];
-                    
+    
                     // Add historical travels
                     travelItems.push(...gameTravels.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)));
-                    
+    
                     travelHistoryDiv.innerHTML = travelItems
                         .slice(0, 10)
                         .map((travel, index) => {
                             const date = new Date(travel.timestamp);
                             const isCurrentLocation = travel.action === 'CURRENT';
-                            
+    
                             return `
                                 <div class="travel-history-item">
                                     <div class="travel-location">
                                         <div class="travel-location-name">${formatLocation(travel.toLocation)}</div>
                                         <div class="travel-date">
-                                            ${isCurrentLocation ? 'Current Location' : 
+                                            ${isCurrentLocation ? 'Current Location' :
                                               travel.action === 'CHECKOUT' ? 'Checked out on ' + date.toLocaleDateString() :
                                               travel.action === 'CHECKIN' ? 'Checked in on ' + date.toLocaleDateString() :
                                               'Moved on ' + date.toLocaleDateString()}
                                         </div>
+                                        ${index < travelItems.length - 1 ? '<div class="travel-arrow">↓</div>' : ''}
                                     </div>
-                                    ${index < travelItems.length - 1 ? '<div class="travel-arrow">↓</div>' : ''}
                                 </div>
                             `;
                         }).join('');
-                        
+    
                     if (gameTravels.length > 9) {
                         travelHistoryDiv.innerHTML += `<p style="text-align: center; color: #7f8c8d; margin-top: 1rem;">...and ${gameTravels.length - 9} more location changes</p>`;
                     }
                 }
-                                
+    
                 // Update action buttons to include trade/sell toggle
                 const actionsHtml = `
                     <button class="btn btn-primary" onclick="checkoutGameFromHistory()">Check Out</button>
@@ -1612,33 +1613,33 @@
                     </button>
                     <button class="btn btn-secondary" onclick="closeGameHistory()">Close</button>
                 `;
-            
+    
             // Replace the history-actions div content
             document.querySelector('.history-actions').innerHTML = actionsHtml;
-            
+    
             // If BGG ID exists and value is old or missing, fetch fresh value
-            if (gameInfo.bggId && (!gameInfo.valueUpdated || 
+            if (gameInfo.bggId && (!gameInfo.valueUpdated ||
                 (new Date() - new Date(gameInfo.valueUpdated)) > 24 * 60 * 60 * 1000)) {
                 refreshGameValue(gameInfo.id);
             }
-
+    
             // Show the modal
             document.getElementById('game-history-modal').classList.remove('hidden');
         }
-
+    
         // Helper functions for trade status display
         function getTradeStatusDisplay(status) {
             if (status === 'TRADE') return '<span style="color: #f39c12;">🔄 Available for Trade</span>';
             if (status === 'SELL') return '<span style="color: #27ae60;">💰 For Sale</span>';
             return '<span style="color: #7f8c8d;">Not for trade/sale</span>';
         }
-
+    
         function getTradeButtonText(status) {
             if (status === 'TRADE') return 'Mark for Sale';
             if (status === 'SELL') return 'Remove from Trade/Sale';
             return 'Mark for Trade';
         }
-
+    
        // Refresh game value from BGG
         async function refreshGameValue(gameId) {
             const gameInfo = await getGameInfo(gameId);
@@ -1646,34 +1647,34 @@
                 showStatus('Cannot fetch value - no BGG ID', 'error');
                 return;
             }
-            
+    
             showStatus('Fetching current market value...', 'success');
-            
+    
             // Check if we're in the game history modal
             const marketValueElement = document.getElementById('game-market-value');
             if (marketValueElement) {
                 marketValueElement.innerHTML = 'Loading...';
             }
-            
+    
             const marketData = await fetchBGGMarketValue(gameInfo.bggId);
             if (marketData && marketData.value > 0) {
                 const historicalHigh = Math.max(marketData.value, gameInfo.historicalHigh || 0);
-                const historicalLow = gameInfo.historicalLow > 0 ? 
+                const historicalLow = gameInfo.historicalLow > 0 ?
                     Math.min(marketData.value, gameInfo.historicalLow) : marketData.value;
-                
+    
                 await updateGameValue(gameId, marketData.value, historicalHigh, historicalLow);
-                
+    
                 // Only update the modal element if it exists
                 if (marketValueElement) {
                     marketValueElement.innerHTML = `
-                        $${marketData.value.toFixed(2)} 
-                        <small style="color: #7f8c8d;">(${marketData.listings} listings, 
+                        $${marketData.value.toFixed(2)}
+                        <small style="color: #7f8c8d;">(${marketData.listings} listings,
                         $${marketData.lowest.toFixed(2)}-$${marketData.highest.toFixed(2)})</small>
                     `;
                 }
-                
+    
                 showStatus('Value updated successfully!', 'success');
-                
+    
                 // Return the market data so calling functions can use it
                 return marketData;
             } else {
@@ -1685,7 +1686,7 @@
                 return null;
             }
         }
-
+    
         // Toggle trade status from game history
         async function toggleGameTradeStatus(gameId) {
             const result = await toggleTradeStatus(gameId);
@@ -1693,18 +1694,18 @@
                 // Update the display
                 document.getElementById('trade-status-display').innerHTML = getTradeStatusDisplay(result);
                 document.getElementById('trade-status-btn').textContent = getTradeButtonText(result);
-                document.getElementById('trade-status-btn').className = 
+                document.getElementById('trade-status-btn').className =
                     `btn ${result === 'TRADE' ? 'btn-secondary' : 'btn-info'}`;
-                
+    
                 showStatus(`Game marked as: ${result || 'Not for trade/sale'}`, 'success');
-                
+    
                 // Update the cached game info
                 if (currentHistoryGameInfo) {
                     currentHistoryGameInfo.tradeStatus = result;
                 }
             }
         }
-            
+    
         function calculateGameStatistics(plays) {
             const stats = {
                 totalPlays: plays.length,
@@ -1713,15 +1714,15 @@
                 avgPlayers: null,
                 lastPlayed: null
             };
-            
+    
             if (plays.length === 0) return stats;
-            
+    
             // Calculate average rating
             const ratings = plays.filter(p => p.rating).map(p => parseInt(p.rating));
             if (ratings.length > 0) {
                 stats.avgRating = ratings.reduce((a, b) => a + b, 0) / ratings.length;
             }
-            
+    
             // Find most frequent winner
             const winners = {};
             plays.forEach(play => {
@@ -1733,7 +1734,7 @@
                 const topWinnerEntry = Object.entries(winners).sort((a, b) => b[1] - a[1])[0];
                 stats.topWinner = `${topWinnerEntry[0]} (${topWinnerEntry[1]} wins)`;
             }
-            
+    
             // Calculate average player count
             const playerCounts = plays
                 .filter(p => p.players)
@@ -1741,16 +1742,16 @@
             if (playerCounts.length > 0) {
                 stats.avgPlayers = playerCounts.reduce((a, b) => a + b, 0) / playerCounts.length;
             }
-            
+    
             // Get last played date
             const sortedPlays = plays.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
             if (sortedPlays.length > 0) {
                 stats.lastPlayed = new Date(sortedPlays[0].timestamp).toLocaleDateString();
             }
-            
+    
             return stats;
         }
-        
+    
         function formatLocation(location) {
             if (location === 'CHECKED_OUT') return 'Checked Out';
             if (location === 'NEW') return 'New (No Bin)';
@@ -1759,70 +1760,71 @@
             }
             return location;
         }
-        
+    
         function closeGameHistory() {
             document.getElementById('game-history-modal').classList.add('hidden');
             currentHistoryGameId = null;
             currentHistoryGameInfo = null;
-            
+    
             // If we're in history mode, update the workflow state
             if (currentMode === 'history') {
                 showWorkflowState('Scan a game QR code to view its history');
             }
             // Don't automatically restart scanning
         }
-        
+    
         function checkoutGameFromHistory() {
             if (!currentHistoryGameInfo || !currentHistoryGameId) {
                 showStatus('No game selected', 'error');
                 return;
             }
-            
+    
             if (currentHistoryGameInfo.location !== 'CHECKED_OUT') {
                 closeGameHistory();
                 setMode('checkout');
                 // Pre-fill the checkout workflow
                 checkoutWorkflow.gameId = currentHistoryGameId;
                 checkoutWorkflow.gameTitle = currentHistoryGameInfo.title;
+                checkoutWorkflow.fromLocation = currentHistoryGameInfo.location;
                 checkoutWorkflow.step = 'bin';
                 showWorkflowState(`Step 2: Now scan the bin QR code you're taking "${currentHistoryGameInfo.title}" FROM`);
             } else {
                 showStatus('This game is already checked out', 'error');
             }
         }
-        
+    
         function logPlayFromHistory() {
             if (!currentHistoryGameInfo || !currentHistoryGameId) {
                 showStatus('No game selected', 'error');
                 return;
             }
-            
+    
             if (currentHistoryGameInfo) {
                 closeGameHistory();
                 setMode('play');
                 showPlayLogForm(currentHistoryGameInfo);
             }
         }
-        
+    
         // Travel History Functions
         async function loadTravelHistory() {
             const spreadsheetId = localStorage.getItem('spreadsheetId');
             const apiKey = localStorage.getItem('apiKey');
-            
+    
             if (!spreadsheetId || !apiKey) {
                 console.log('No spreadsheet ID or API key found for loading travel history');
                 return [];
             }
-            
+    
             try {
                 const response = await fetch(
                     `${SHEETS_API_BASE}/${spreadsheetId}/values/TravelHistory!A:E?key=${apiKey}`
                 );
-                
+    
                 if (response.ok) {
                     const data = await response.json();
                     const rows = data.values || [];
-                    
+    
                     travelHistory = [];
                     for (let i = 1; i < rows.length; i++) {
                         const [timestamp, gameId, fromLocation, toLocation, action] = rows[i];
@@ -1839,7 +1841,7 @@
                     console.log('TravelHistory sheet not found, will be created when first location change is logged');
                     travelHistory = [];
                 }
-                
+    
                 console.log(`Loaded ${travelHistory.length} travel history entries`);
                 return travelHistory;
             } catch (error) {
@@ -1847,11 +1849,11 @@
                 return [];
             }
         }
-        
+    
         async function logLocationChange(gameId, fromLocation, toLocation, action = 'MOVE') {
             const appsScriptUrl = localStorage.getItem('appsScriptUrl');
             const timestamp = new Date().toISOString();
-            
+    
             try {
                 const travelData = [
                     timestamp,      // A: Timestamp
@@ -1860,7 +1862,7 @@
                     toLocation,     // D: To Location
                     action          // E: Action (CHECKOUT/CHECKIN/MOVE)
                 ];
-                
+    
                 if (appsScriptUrl) {
                     await fetch(appsScriptUrl, {
                         method: 'POST',
@@ -1874,21 +1876,21 @@
                             row: travelData
                         })
                     });
-                    
+    
                     return true;
                 }
-                
+    
                 // Otherwise provide manual instruction
                 const csvRow = travelData.map(cell => `"${cell}"`).join(',');
                 console.log('Add this to TravelHistory sheet:', csvRow);
                 return false;
-                
+    
             } catch (error) {
                 console.error('Error logging location change:', error);
                 return false;
             }
         }
-        
+    
         // Updated location change handlers
         async function handleCheckout(data) {
             if (checkoutWorkflow.step === 'game') {
@@ -1896,32 +1898,32 @@
                     showStatus('Please scan a game QR code', 'error');
                     return;
                 }
-                
+    
                 // Verify game exists
                 const gameInfo = await getGameInfo(data.id);
                 if (!gameInfo) {
                     showStatus('Game not found in inventory', 'error');
                     return;
                 }
-                
+    
                 checkoutWorkflow.gameId = data.id;
                 checkoutWorkflow.gameTitle = gameInfo.title;
                 checkoutWorkflow.fromLocation = gameInfo.location;
                 checkoutWorkflow.step = 'bin';
                 showWorkflowState(`Step 2: Now scan the bin QR code you're taking "${gameInfo.title}" FROM`);
-                
+    
             } else if (checkoutWorkflow.step === 'bin') {
                 if (data.type !== 'BIN') {
                     showStatus('Please scan a bin QR code', 'error');
                     return;
                 }
-                
+    
                 checkoutWorkflow.binId = data.id;
-                
+    
                 try {
                     // Update game location
                     await updateGameLocation(checkoutWorkflow.gameId, 'CHECKED_OUT');
-                    
+    
                     // Log the location change
                     await logLocationChange(
                         checkoutWorkflow.gameId,
@@ -1929,18 +1931,18 @@
                         'CHECKED_OUT',
                         'CHECKOUT'
                     );
-                    
+    
                     // Show friendly bin identifier
                     let binDisplay = checkoutWorkflow.binId;
                     if (checkoutWorkflow.binId.length > 20 && !checkoutWorkflow.binId.includes(':')) {
                         binDisplay = 'bin ' + checkoutWorkflow.binId.substring(0, 8) + '...';
                     }
-                    
+    
                     showStatus(`✅ ${checkoutWorkflow.gameTitle} checked out from ${binDisplay}!`, 'success');
-                    
+    
                     // Log this as a play event too
                     await logEnhancedGamePlay(checkoutWorkflow.gameId, '', '', 0, 'Checked out', '');
-                    
+    
                     // Reset workflow
                     checkoutWorkflow = { gameId: null, gameTitle: null, binId: null, step: 'game' };
                     hideWorkflowState();
@@ -1949,39 +1951,39 @@
                 }
             }
         }
-        
+    
         async function handleCheckin(data) {
             if (checkoutWorkflow.step === 'game') {
                 if (data.type !== 'GAME') {
                     showStatus('Please scan a game QR code', 'error');
                     return;
                 }
-                
+    
                 // Verify game exists
                 const gameInfo = await getGameInfo(data.id);
                 if (!gameInfo) {
                     showStatus('Game not found in inventory', 'error');
                     return;
                 }
-                
+    
                 checkoutWorkflow.gameId = data.id;
                 checkoutWorkflow.gameTitle = gameInfo.title;
                 checkoutWorkflow.fromLocation = gameInfo.location;
                 checkoutWorkflow.step = 'bin';
                 showWorkflowState(`Step 2: Now scan the bin QR code you're putting "${gameInfo.title}" INTO`);
-                
+    
             } else if (checkoutWorkflow.step === 'bin') {
                 if (data.type !== 'BIN') {
                     showStatus('Please scan a bin QR code', 'error');
                     return;
                 }
-                
+    
                 checkoutWorkflow.binId = data.id;
-                
+    
                 try {
                     // Update game location
                     await updateGameLocation(checkoutWorkflow.gameId, checkoutWorkflow.binId);
-                    
+    
                     // Log the location change
                     await logLocationChange(
                         checkoutWorkflow.gameId,
@@ -1989,15 +1991,15 @@
                         checkoutWorkflow.binId,
                         'CHECKIN'
                     );
-                    
+    
                     // Show friendly bin identifier
                     let binDisplay = checkoutWorkflow.binId;
                     if (checkoutWorkflow.binId.length > 20 && !checkoutWorkflow.binId.includes(':')) {
                         binDisplay = 'bin ' + checkoutWorkflow.binId.substring(0, 8) + '...';
                     }
-                    
+    
                     showStatus(`✅ ${checkoutWorkflow.gameTitle} checked into ${binDisplay}!`, 'success');
-                    
+    
                     // Reset workflow
                     checkoutWorkflow = { gameId: null, gameTitle: null, binId: null, step: 'game' };
                     hideWorkflowState();
@@ -2006,7 +2008,7 @@
                 }
             }
         }
-        
+    
         // Enhanced play logging
         async function handleLogPlay(data) {
             if (data.type !== 'GAME') {
@@ -2015,22 +2017,22 @@
                 setTimeout(() => startScanning(), 2000);
                 return;
             }
-            
+    
             try {
                 showStatus('Loading game information...', 'success');
                 const gameInfo = await getGameInfo(data.id);
-                
+    
                 if (!gameInfo) {
                     showStatus('Game not found in inventory', 'error');
                     // Restart scanner
                     setTimeout(() => startScanning(), 2000);
                     return;
                 }
-                
+    
                 // Store current game and show enhanced log form
                 currentPlayGame = gameInfo;
                 showPlayLogForm(gameInfo);
-                
+    
             } catch (error) {
                 if (error.message.includes('rate limit')) {
                     showStatus('Too many requests. Please wait 10 seconds and try again.', 'error');
@@ -2041,26 +2043,26 @@
                 setTimeout(() => startScanning(), 3000);
             }
         }
-        
+    
         async function showPlayLogForm(gameInfo) {
             if (!gameInfo) {
                 showStatus('No game information available', 'error');
                 return;
             }
-            
+    
             // Store current game
             currentPlayGame = gameInfo;
-            
+    
             // Hide scan section, show play log form
             document.getElementById('scan-section').classList.add('hidden');
             document.getElementById('play-log-section').classList.remove('hidden');
-            
+    
             // Set game info
             document.getElementById('play-game-info').innerHTML = `
                 <strong>Game:</strong> ${gameInfo.title}<br>
                 <strong>ID:</strong> ${gameInfo.id}
             `;
-            
+    
             // Load session templates
             try {
                 const templates = await loadSessionTemplates();
@@ -2074,14 +2076,14 @@
                 const templateSelect = document.getElementById('play-session-template');
                 templateSelect.innerHTML = '<option value="">No template</option>';
             }
-            
+    
             // Reset form
             document.getElementById('play-players').value = '';
             document.getElementById('play-winner').value = '';
             document.getElementById('play-notes').value = '';
             setRating(0);
         }
-        
+    
         function cancelLogPlay() {
             currentPlayGame = null;
             document.getElementById('play-log-section').classList.add('hidden');
@@ -2089,16 +2091,16 @@
             // Restart scanning
             setTimeout(() => startScanning(), 500);
         }
-        
+    
         async function confirmLogPlay() {
             if (!currentPlayGame) return;
-            
+    
             const players = document.getElementById('play-players').value;
             const winner = document.getElementById('play-winner').value;
             const notes = document.getElementById('play-notes').value;
             const templateId = document.getElementById('play-session-template').value;
             const rating = currentRating;
-            
+    
             // If template selected, load players from template
             let finalPlayers = players;
             if (templateId && !players) {
@@ -2107,7 +2109,7 @@
                     finalPlayers = template.players;
                 }
             }
-            
+    
             try {
                 await logEnhancedGamePlay(currentPlayGame.id, finalPlayers, winner, rating, notes, templateId);
                 showStatus(`Play logged for ${currentPlayGame.title}!`, 'success');
@@ -2116,12 +2118,12 @@
                 showStatus('Error logging play: ' + error.message, 'error');
             }
         }
-        
+    
         async function logEnhancedGamePlay(gameId, players, winner, rating, notes, sessionId = '') {
             const spreadsheetId = localStorage.getItem('spreadsheetId');
             const apiKey = localStorage.getItem('apiKey');
             const appsScriptUrl = localStorage.getItem('appsScriptUrl');
-            
+    
             try {
                 const timestamp = new Date().toLocaleString();
                 const playData = [
@@ -2133,7 +2135,7 @@
                     rating || '',   // F: Rating
                     sessionId       // G: Session ID
                 ];
-                
+    
                 // If Apps Script URL is available, use it
                 if (appsScriptUrl) {
                     const scriptResponse = await fetch(appsScriptUrl, {
@@ -2148,46 +2150,46 @@
                             row: playData
                         })
                     });
-                    
+    
                     return true;
                 }
-                
+    
                 // Otherwise provide manual instruction
                 const csvRow = playData.map(cell => `"${cell}"`).join(',');
                 showStatus(`Copy this play log entry: ${csvRow}`, 'error');
                 console.log('Add this to PlayLog sheet:', csvRow);
                 return false;
-                
+    
             } catch (error) {
                 console.error('Error logging play:', error);
                 throw error;
             }
         }
-        
+    
         // Players Section
         async function loadPlayerStats() {
             console.log('Loading player stats...');
-            
+    
             // Load all data
             await Promise.all([
                 loadAllGames(),
                 loadAllPlayers(),
                 loadEnhancedPlayHistory()
             ]);
-            
+    
             console.log(`Loaded ${allGames.length} games, ${allPlayers.length} players, ${playHistory.length} plays`);
-            
+    
             // Update all player tabs
             updatePlayerManageTab();
             updatePlayerStatsTab();
             updatePlayerCompareTab();
             updatePlayerHistoryTab();
         }
-        
+    
         function setPlayerTab(tab) {
             playerTab = tab;
             document.querySelectorAll('#players-section .tab').forEach(t => t.classList.remove('active'));
-            
+    
             // Find and activate the correct tab button
             document.querySelectorAll('#players-section .tab').forEach(t => {
                 if ((tab === 'manage' && t.textContent === 'Manage Players') ||
@@ -2197,12 +2199,12 @@
                     t.classList.add('active');
                 }
             });
-            
+    
             // Hide all player tab content
             document.querySelectorAll('.player-tab-content').forEach(content => {
                 content.classList.add('hidden');
             });
-            
+    
             // Show selected tab
             switch(tab) {
                 case 'manage':
@@ -2223,25 +2225,25 @@
                     break;
             }
         }
-        
+    
         async function loadAllPlayers() {
             const spreadsheetId = localStorage.getItem('spreadsheetId');
             const apiKey = localStorage.getItem('apiKey');
-            
+    
             if (!spreadsheetId || !apiKey) {
                 console.log('No spreadsheet ID or API key found for loading players');
                 return [];
             }
-            
+    
             try {
                 const response = await fetch(
                     `${SHEETS_API_BASE}/${spreadsheetId}/values/Players!A:C?key=${apiKey}`
                 );
-                
+    
                 if (response.ok) {
                     const data = await response.json();
                     const rows = data.values || [];
-                    
+    
                     allPlayers = [];
                     for (let i = 1; i < rows.length; i++) {
                         const [id, name, email] = rows[i];
@@ -2256,7 +2258,7 @@
                     console.log('Players sheet not found, will be created when first player is added');
                     allPlayers = [];
                 }
-                
+    
                 console.log(`Loaded ${allPlayers.length} players from Players sheet`);
                 return allPlayers;
             } catch (error) {
@@ -2264,29 +2266,29 @@
                 return [];
             }
         }
-        
+    
         async function addNewPlayer() {
             const name = document.getElementById('new-player-name').value.trim();
             const email = document.getElementById('new-player-email').value.trim();
-            
+    
             if (!name) {
                 showStatus('Please enter a player name', 'error');
                 return;
             }
-            
+    
             // Check if player already exists
             const existingPlayer = allPlayers.find(p => p.name.toLowerCase() === name.toLowerCase());
             if (existingPlayer) {
                 showStatus('Player already exists', 'error');
                 return;
             }
-            
+    
             const appsScriptUrl = localStorage.getItem('appsScriptUrl');
             const playerId = 'PLAYER:' + Date.now();
-            
+    
             try {
                 const playerData = [playerId, name, email];
-                
+    
                 if (appsScriptUrl) {
                     await fetch(appsScriptUrl, {
                         method: 'POST',
@@ -2300,63 +2302,63 @@
                             row: playerData
                         })
                     });
-                    
+    
                     showStatus(`Added ${name} to players!`, 'success');
                     document.getElementById('new-player-name').value = '';
                     document.getElementById('new-player-email').value = '';
-                    
+    
                     await loadAllPlayers();
                     updatePlayerManageTab();
                 } else {
                     const csvRow = playerData.map(cell => `"${cell}"`).join(',');
                     showStatus(`Create a "Players" sheet in your Google Sheets with columns: Player ID, Name, Email. Then add: ${csvRow}`, 'error');
                 }
-                
+    
             } catch (error) {
                 showStatus('Error adding player: ' + error.message, 'error');
             }
         }
-        
+    
         async function removePlayer(playerId) {
             if (!confirm('Are you sure you want to remove this player? Their play history will be preserved.')) {
                 return;
             }
-            
+    
             const appsScriptUrl = localStorage.getItem('appsScriptUrl');
-            
+    
             if (!appsScriptUrl) {
                 showStatus('Please enable auto-update to remove players, or delete manually from the Players sheet', 'error');
                 return;
             }
-            
+    
             // This would require more complex Apps Script implementation
             showStatus(`To remove player, delete their row from the Players sheet (ID: ${playerId})`, 'error');
         }
-        
+    
         function updatePlayerManageTab() {
             const container = document.getElementById('all-players-list');
-            
+    
             if (!container) {
                 console.error('all-players-list container not found!');
                 return;
             }
-            
+    
             container.innerHTML = '';
-            
+    
             console.log('Updating player manage tab with', allPlayers.length, 'players');
-            
+    
             if (allPlayers.length === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No players added yet. Add your first player above!</p>';
                 return;
             }
-            
+    
             // Get play statistics for each player
             const playerStats = calculateAllPlayerStats();
-            
+    
             allPlayers.forEach(player => {
                 const stats = playerStats[player.name] || { gamesPlayed: 0, wins: 0 };
                 const winRate = stats.gamesPlayed > 0 ? (stats.wins / stats.gamesPlayed * 100).toFixed(1) : 0;
-                
+    
                 container.innerHTML += `
                     <div class="player-card">
                         <div class="player-card-header">
@@ -2387,19 +2389,19 @@
                 `;
             });
         }
-        
+    
         function updatePlayerStatsTab() {
             const container = document.getElementById('player-stats-list');
             container.innerHTML = '';
-            
+    
             // Combine registered players and players from play history
             const allPlayerNames = new Set();
-            
+    
             // Add registered players
             allPlayers.forEach(player => {
                 allPlayerNames.add(player.name);
             });
-            
+    
             // Add players from play history
             playHistory.forEach(play => {
                 if (play.players) {
@@ -2411,12 +2413,12 @@
                     });
                 }
             });
-            
+    
             if (allPlayerNames.size === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No players found. Add players or log some game plays!</p>';
                 return;
             }
-            
+    
             Array.from(allPlayerNames).sort().forEach(playerName => {
                 const chip = document.createElement('div');
                 chip.className = 'player-chip';
@@ -2425,18 +2427,18 @@
                 container.appendChild(chip);
             });
         }
-        
+    
         function updatePlayerCompareTab() {
             const container = document.getElementById('player-compare-list');
             container.innerHTML = '';
-            
+    
             // Combine all player names
             const allPlayerNames = new Set();
-            
+    
             allPlayers.forEach(player => {
                 allPlayerNames.add(player.name);
             });
-            
+    
             playHistory.forEach(play => {
                 if (play.players) {
                     play.players.split(',').forEach(player => {
@@ -2447,12 +2449,12 @@
                     });
                 }
             });
-            
+    
             if (allPlayerNames.size === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No players found.</p>';
                 return;
             }
-            
+    
             Array.from(allPlayerNames).sort().forEach(playerName => {
                 const chip = document.createElement('div');
                 chip.className = 'player-chip';
@@ -2464,18 +2466,18 @@
                 container.appendChild(chip);
             });
         }
-        
+    
         function updatePlayerHistoryTab() {
             const select = document.getElementById('player-history-select');
             select.innerHTML = '<option value="">Select a player...</option>';
-            
+    
             // Combine all player names
             const allPlayerNames = new Set();
-            
+    
             allPlayers.forEach(player => {
                 allPlayerNames.add(player.name);
             });
-            
+    
             playHistory.forEach(play => {
                 if (play.players) {
                     play.players.split(',').forEach(player => {
@@ -2486,25 +2488,25 @@
                     });
                 }
             });
-            
+    
             Array.from(allPlayerNames).sort().forEach(playerName => {
                 select.innerHTML += `<option value="${playerName}">${playerName}</option>`;
             });
         }
-        
+    
         function viewPlayerDetails(playerName) {
             selectedPlayerForStats = playerName;
             setPlayerTab('stats');
             displayDetailedPlayerStats(playerName);
         }
-        
+    
         function displayDetailedPlayerStats(playerName) {
             const container = document.getElementById('individual-player-stats');
             container.innerHTML = '';
-            
+    
             // Calculate detailed stats for this player
             const stats = calculatePlayerDetailedStats(playerName);
-            
+    
             if (stats.gamesPlayed === 0) {
                 container.innerHTML = `
                     <div class="player-card">
@@ -2514,28 +2516,28 @@
                 `;
                 return;
             }
-            
+    
             const winRate = (stats.wins / stats.gamesPlayed * 100).toFixed(1);
-            const avgRating = stats.ratings.length > 0 
+            const avgRating = stats.ratings.length > 0
                 ? (stats.ratings.reduce((a, b) => a + b, 0) / stats.ratings.length).toFixed(1)
                 : 'N/A';
-            
+    
             const topGames = Object.entries(stats.favoriteGames)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 5)
                 .map(([game, count]) => `${game} (${count} plays)`);
-            
+    
             const topPartners = Object.entries(stats.playPartners)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 5)
                 .map(([partner, count]) => `${partner} (${count} games)`);
-            
+    
             const recentGames = stats.recentPlays.slice(0, 10);
-            
+    
             container.innerHTML = `
                 <div class="player-card">
                     <h3>${playerName}'s Detailed Statistics</h3>
-                    
+    
                     <div class="player-stats-grid" style="margin: 2rem 0;">
                         <div class="player-stat-item">
                             <div class="player-stat-value">${stats.gamesPlayed}</div>
@@ -2562,19 +2564,19 @@
                             <div class="player-stat-label">Current Streak</div>
                         </div>
                     </div>
-                    
+    
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
                         <div>
                             <h4>Favorite Games</h4>
                             ${topGames.length > 0 ? topGames.map(game => `<div style="padding: 0.5rem 0;">${game}</div>`).join('') : '<p style="color: #7f8c8d;">No games played yet</p>'}
                         </div>
-                        
+    
                         <div>
                             <h4>Frequent Play Partners</h4>
                             ${topPartners.length > 0 ? topPartners.map(partner => `<div style="padding: 0.5rem 0;">${partner}</div>`).join('') : '<p style="color: #7f8c8d;">No play partners yet</p>'}
                         </div>
                     </div>
-                    
+    
                     <div style="margin-top: 2rem;">
                         <h4>Recent Games</h4>
                         ${recentGames.length > 0 ? recentGames.map(play => `
@@ -2584,8 +2586,8 @@
                                     <span>${new Date(play.timestamp).toLocaleDateString()}</span>
                                 </div>
                                 <div class="session-history-games">
-                                    ${play.won ? '🏆 Won' : 'Lost'} • 
-                                    ${play.rating ? `Rated ${play.rating}/5` : 'No rating'} • 
+                                    ${play.won ? '🏆 Won' : 'Lost'} •
+                                    ${play.rating ? `Rated ${play.rating}/5` : 'No rating'} •
                                     With: ${play.otherPlayers.join(', ') || 'Solo'}
                                 </div>
                             </div>
@@ -2594,7 +2596,7 @@
                 </div>
             `;
         }
-        
+    
         function calculatePlayerDetailedStats(playerName) {
             const stats = {
                 gamesPlayed: 0,
@@ -2606,26 +2608,26 @@
                 recentPlays: [],
                 streak: 0
             };
-            
+    
             let currentStreak = 0;
             let lastWon = null;
-            
+    
             // Sort plays by date for streak calculation
-            const sortedPlays = [...playHistory].sort((a, b) => 
+            const sortedPlays = [...playHistory].sort((a, b) =>
                 new Date(b.timestamp) - new Date(a.timestamp)
             );
-            
+    
             sortedPlays.forEach(play => {
                 const gamePlayers = play.players ? play.players.split(',').map(p => p.trim()) : [];
-                
+    
                 if (gamePlayers.includes(playerName)) {
                     stats.gamesPlayed++;
-                    
+    
                     const won = play.winner && play.winner.trim() === playerName;
                     if (won) {
                         stats.wins++;
                     }
-                    
+    
                     // Calculate streak
                     if (lastWon === null) {
                         lastWon = won;
@@ -2637,27 +2639,27 @@
                         currentStreak = won ? 1 : -1;
                         lastWon = won;
                     }
-                    
+    
                     // Track unique games
                     stats.uniqueGames.add(play.gameId);
-                    
+    
                     // Track favorite games
                     const game = allGames.find(g => g.id === play.gameId);
                     const gameTitle = game?.title || play.gameId;
                     stats.favoriteGames[gameTitle] = (stats.favoriteGames[gameTitle] || 0) + 1;
-                    
+    
                     // Track play partners
                     gamePlayers.forEach(partner => {
                         if (partner !== playerName) {
                             stats.playPartners[partner] = (stats.playPartners[partner] || 0) + 1;
                         }
                     });
-                    
+    
                     // Track ratings
                     if (play.rating) {
                         stats.ratings.push(parseInt(play.rating));
                     }
-                    
+    
                     // Add to recent plays
                     stats.recentPlays.push({
                         timestamp: play.timestamp,
@@ -2669,25 +2671,25 @@
                     });
                 }
             });
-            
+    
             // Set final streak if not set
             if (stats.streak === 0 && currentStreak !== 0) {
                 stats.streak = currentStreak;
             }
-            
+    
             stats.uniqueGames = stats.uniqueGames.size;
             stats.recentPlays.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            
+    
             return stats;
         }
-        
+    
         function calculateAllPlayerStats() {
             const playerStats = {};
-            
+    
             playHistory.forEach(play => {
                 const gamePlayers = play.players ? play.players.split(',').map(p => p.trim()) : [];
                 const winner = play.winner ? play.winner.trim() : '';
-                
+    
                 gamePlayers.forEach(player => {
                     if (!playerStats[player]) {
                         playerStats[player] = {
@@ -2695,36 +2697,36 @@
                             wins: 0
                         };
                     }
-                    
+    
                     playerStats[player].gamesPlayed++;
                     if (winner === player) {
                         playerStats[player].wins++;
                     }
                 });
             });
-            
+    
             return playerStats;
         }
-        
+    
         async function loadPlayerSessionHistory() {
             const playerName = document.getElementById('player-history-select').value;
             if (!playerName) {
                 document.getElementById('player-session-history').innerHTML = '';
                 return;
             }
-            
+    
             const container = document.getElementById('player-session-history');
             container.innerHTML = '<h4>Loading session history...</h4>';
-            
+    
             // Group plays by session (date)
             const sessionsByDate = {};
-            
+    
             playHistory.forEach(play => {
                 const gamePlayers = play.players ? play.players.split(',').map(p => p.trim()) : [];
-                
+    
                 if (gamePlayers.includes(playerName)) {
                     const date = new Date(play.timestamp).toLocaleDateString();
-                    
+    
                     if (!sessionsByDate[date]) {
                         sessionsByDate[date] = {
                             date: play.timestamp,
@@ -2734,36 +2736,36 @@
                             partners: new Set()
                         };
                     }
-                    
+    
                     const game = allGames.find(g => g.id === play.gameId);
                     const won = play.winner && play.winner.trim() === playerName;
-                    
+    
                     sessionsByDate[date].games.push({
                         title: game?.title || play.gameId,
                         won,
                         rating: play.rating,
                         notes: play.notes
                     });
-                    
+    
                     sessionsByDate[date].totalGames++;
                     if (won) sessionsByDate[date].wins++;
-                    
+    
                     gamePlayers.forEach(p => {
                         if (p !== playerName) sessionsByDate[date].partners.add(p);
                     });
                 }
             });
-            
+    
             // Convert to array and sort by date
-            const sessions = Object.values(sessionsByDate).sort((a, b) => 
+            const sessions = Object.values(sessionsByDate).sort((a, b) =>
                 new Date(b.date) - new Date(a.date)
             );
-            
+    
             if (sessions.length === 0) {
                 container.innerHTML = `<p style="text-align: center; color: #7f8c8d; padding: 2rem;">No session history for ${playerName}</p>`;
                 return;
             }
-            
+    
             container.innerHTML = `
                 <h4>${playerName}'s Session History</h4>
                 <p style="margin: 1rem 0;">Total Sessions: ${sessions.length}</p>
@@ -2776,7 +2778,7 @@
                                 <span>${session.wins}/${session.totalGames} wins (${winRate}%)</span>
                             </div>
                             <div class="session-history-games">
-                                <strong>Games:</strong> ${session.games.map(g => 
+                                <strong>Games:</strong> ${session.games.map(g =>
                                     `${g.title}${g.won ? ' 🏆' : ''}${g.rating ? ` (${g.rating}★)` : ''}`
                                 ).join(', ')}<br>
                                 <strong>Played with:</strong> ${Array.from(session.partners).join(', ') || 'Solo'}
@@ -2786,17 +2788,17 @@
                 }).join('')}
             `;
         }
-        
+    
         function togglePlayerSelection(player) {
             if (selectedPlayers.has(player)) {
                 selectedPlayers.delete(player);
             } else {
                 selectedPlayers.add(player);
             }
-            
+    
             // Update UI
             updatePlayerCompareTab();
-            
+    
             // Update comparison if 2+ players selected
             if (selectedPlayers.size >= 2) {
                 updatePlayerComparison();
@@ -2804,29 +2806,29 @@
                 document.getElementById('player-comparison').classList.add('hidden');
             }
         }
-        
+    
         async function updatePlayerComparison() {
             // Ensure games are loaded
             if (allGames.length === 0) {
                 await loadAllGames();
             }
-            
+    
             const plays = await loadEnhancedPlayHistory();
             const players = Array.from(selectedPlayers);
-            
+    
             document.getElementById('player-comparison').classList.remove('hidden');
-            
+    
             // Calculate head-to-head stats
             const h2hStats = calculateH2HStats(plays, players);
             displayH2HStats(h2hStats);
-            
+    
             // Update comparison chart
             updatePlayerComparisonChart(plays, players);
         }
-        
+    
         function calculateH2HStats(plays, players) {
             const stats = {};
-            
+    
             players.forEach(p1 => {
                 stats[p1] = {};
                 players.forEach(p2 => {
@@ -2835,15 +2837,15 @@
                     }
                 });
             });
-            
+    
             // Count games and wins
             plays.forEach(play => {
                 const gamePlayers = play.players ? play.players.split(',').map(p => p.trim()) : [];
                 const winner = play.winner ? play.winner.trim() : '';
-                
+    
                 // Check if this game includes our selected players
                 const includedPlayers = players.filter(p => gamePlayers.includes(p));
-                
+    
                 if (includedPlayers.length >= 2) {
                     includedPlayers.forEach(p1 => {
                         includedPlayers.forEach(p2 => {
@@ -2857,25 +2859,25 @@
                     });
                 }
             });
-            
+    
             return stats;
         }
-        
+    
         function displayH2HStats(h2hStats) {
             const container = document.getElementById('h2h-stats');
             container.innerHTML = '';
-            
+    
             const players = Object.keys(h2hStats);
-            
+    
             // Create comparison table
             let html = '<table style="width: 100%; border-collapse: collapse;">';
             html += '<tr><th style="padding: 0.5rem; border: 1px solid #ddd;">Player</th>';
-            
+    
             players.forEach(p => {
                 html += `<th style="padding: 0.5rem; border: 1px solid #ddd;">${p}</th>`;
             });
             html += '</tr>';
-            
+    
             players.forEach(p1 => {
                 html += `<tr><th style="padding: 0.5rem; border: 1px solid #ddd; text-align: left;">${p1}</th>`;
                 players.forEach(p2 => {
@@ -2892,26 +2894,26 @@
                 });
                 html += '</tr>';
             });
-            
+    
             html += '</table>';
             container.innerHTML = html;
         }
-        
+    
         function updatePlayerComparisonChart(plays, players) {
             const ctx = document.getElementById('player-comparison-chart').getContext('2d');
-            
+    
             // Calculate games played by month
             const monthlyData = {};
-            
+    
             plays.forEach(play => {
                 const date = new Date(play.timestamp);
                 const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-                
+    
                 if (!monthlyData[monthKey]) {
                     monthlyData[monthKey] = {};
                     players.forEach(p => monthlyData[monthKey][p] = 0);
                 }
-                
+    
                 const gamePlayers = play.players ? play.players.split(',').map(p => p.trim()) : [];
                 players.forEach(p => {
                     if (gamePlayers.includes(p)) {
@@ -2919,7 +2921,7 @@
                     }
                 });
             });
-            
+    
             const labels = Object.keys(monthlyData).sort();
             const datasets = players.map((player, index) => ({
                 label: player,
@@ -2928,11 +2930,11 @@
                 backgroundColor: `hsla(${index * 360 / players.length}, 70%, 50%, 0.2)`,
                 tension: 0.1
             }));
-            
+    
             if (playerComparisonChart) {
                 playerComparisonChart.destroy();
             }
-            
+    
             playerComparisonChart = new Chart(ctx, {
                 type: 'line',
                 data: { labels, datasets },
@@ -2957,21 +2959,21 @@
                 }
             });
         }
-        
+    
         // Session templates
         async function loadSessionTemplates() {
             const spreadsheetId = localStorage.getItem('spreadsheetId');
             const apiKey = localStorage.getItem('apiKey');
-            
+    
             try {
                 const response = await fetch(
                     `${SHEETS_API_BASE}/${spreadsheetId}/values/SessionTemplates!A:D?key=${apiKey}`
                 );
-                
+    
                 if (response.ok) {
                     const data = await response.json();
                     const rows = data.values || [];
-                    
+    
                     sessionTemplates = [];
                     for (let i = 1; i < rows.length; i++) {
                         const [id, name, players, notes] = rows[i];
@@ -2985,10 +2987,10 @@
                     console.error('Error loading session templates:', response.status);
                     sessionTemplates = [];
                 }
-                
+    
                 displaySessionTemplates();
                 return sessionTemplates;
-                
+    
             } catch (error) {
                 console.error('Error loading session templates:', error);
                 sessionTemplates = [];
@@ -2996,16 +2998,16 @@
                 return [];
             }
         }
-        
+    
         function displaySessionTemplates() {
             const container = document.getElementById('session-templates-list');
             container.innerHTML = '';
-            
+    
             if (sessionTemplates.length === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No templates created yet. Create your first template above!</p>';
                 return;
             }
-            
+    
             sessionTemplates.forEach(template => {
                 container.innerHTML += `
                     <div class="session-template">
@@ -3019,23 +3021,23 @@
                 `;
             });
         }
-        
+    
         async function createSessionTemplate() {
             const name = document.getElementById('template-name').value;
             const players = document.getElementById('template-players').value;
             const notes = document.getElementById('template-notes').value;
-            
+    
             if (!name || !players) {
                 showStatus('Please enter template name and players', 'error');
                 return;
             }
-            
+    
             const appsScriptUrl = localStorage.getItem('appsScriptUrl');
             const templateId = 'TEMPLATE:' + Date.now();
-            
+    
             try {
                 const templateData = [templateId, name, players, notes];
-                
+    
                 if (appsScriptUrl) {
                     await fetch(appsScriptUrl, {
                         method: 'POST',
@@ -3049,51 +3051,51 @@
                             row: templateData
                         })
                     });
-                    
+    
                     showStatus('Template created successfully!', 'success');
                     document.getElementById('template-name').value = '';
                     document.getElementById('template-players').value = '';
                     document.getElementById('template-notes').value = '';
-                    
+    
                     await loadSessionTemplates();
                 } else {
                     const csvRow = templateData.map(cell => `"${cell}"`).join(',');
                     showStatus(`Create a "SessionTemplates" sheet in your Google Sheets with columns: Template ID, Template Name, Regular Players, Notes. Then add: ${csvRow}`, 'error');
                 }
-                
+    
             } catch (error) {
                 showStatus('Error creating template: ' + error.message, 'error');
             }
         }
-        
+    
         async function deleteSessionTemplate(templateId) {
             // This would require more complex Apps Script implementation
             showStatus('Delete template ' + templateId + ' manually from the SessionTemplates sheet', 'error');
         }
-        
+    
         // Enhanced play history loading
         async function loadEnhancedPlayHistory() {
             const spreadsheetId = localStorage.getItem('spreadsheetId');
             const apiKey = localStorage.getItem('apiKey');
-            
+    
             if (!spreadsheetId || !apiKey) {
                 console.log('No spreadsheet ID or API key found');
                 return [];
             }
-            
+    
             try {
                 const response = await fetch(
                     `${SHEETS_API_BASE}/${spreadsheetId}/values/PlayLog!A:G?key=${apiKey}`
                 );
-                
+    
                 const data = await response.json();
                 const rows = data.values || [];
-                
+    
                 console.log(`Loaded ${rows.length - 1} play history entries from PlayLog sheet`);
                 if (rows.length > 1) {
                     console.log('PlayLog sample row:', rows[1]);
                 }
-                
+    
                 playHistory = [];
                 for (let i = 1; i < rows.length; i++) {
                     const [timestamp, gameId, players, notes, winner, rating, sessionId] = rows[i];
@@ -3107,19 +3109,19 @@
                         sessionId: sessionId || ''
                     });
                 }
-                
+    
                 // Debug: Show a sample of play history
                 if (playHistory.length > 0) {
                     console.log('Sample play history entry:', playHistory[0]);
                 }
-                
+    
                 return playHistory;
             } catch (error) {
                 console.error('Error loading play history:', error);
                 return [];
             }
         }
-        
+    
         // Trends chart
         function updateTrendsChart() {
             if (!playHistory || playHistory.length === 0) {
@@ -3131,15 +3133,15 @@
                 ctx.fillText('No play history data available', ctx.canvas.width / 2, ctx.canvas.height / 2);
                 return;
             }
-            
+    
             const period = document.getElementById('trends-period').value;
             const ctx = document.getElementById('trends-chart').getContext('2d');
-            
+    
             // Calculate date range
             const endDate = new Date();
             let startDate = new Date();
             let groupBy = 'day';
-            
+    
             switch(period) {
                 case 'week':
                     startDate.setDate(endDate.getDate() - 7);
@@ -3158,14 +3160,14 @@
                     groupBy = 'month';
                     break;
             }
-            
+    
             // Group plays by period
             const playData = {};
             playHistory.forEach(play => {
                 const playDate = new Date(play.timestamp);
                 if (playDate >= startDate && playDate <= endDate) {
                     let key;
-                    
+    
                     if (groupBy === 'day') {
                         key = playDate.toISOString().split('T')[0];
                     } else if (groupBy === 'week') {
@@ -3175,18 +3177,18 @@
                     } else {
                         key = `${playDate.getFullYear()}-${String(playDate.getMonth() + 1).padStart(2, '0')}`;
                     }
-                    
+    
                     playData[key] = (playData[key] || 0) + 1;
                 }
             });
-            
+    
             const labels = Object.keys(playData).sort();
             const data = labels.map(label => playData[label]);
-            
+    
             if (trendsChart) {
                 trendsChart.destroy();
             }
-            
+    
             trendsChart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -3220,19 +3222,19 @@
                 }
             });
         }
-        
+    
         // Ratings display
         async function updateRatingsDisplay() {
             const plays = await loadEnhancedPlayHistory();
-            
+    
             // Ensure games are loaded
             if (allGames.length === 0) {
                 await loadAllGames();
             }
-            
+    
             // Calculate average ratings per game
             const gameRatings = {};
-            
+    
             plays.forEach(play => {
                 if (play.rating) {
                     if (!gameRatings[play.gameId]) {
@@ -3241,7 +3243,7 @@
                     gameRatings[play.gameId].push(parseInt(play.rating));
                 }
             });
-            
+    
             // Calculate averages and sort
             const averageRatings = Object.entries(gameRatings).map(([gameId, ratings]) => {
                 const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
@@ -3253,11 +3255,11 @@
                     ratingCount: ratings.length
                 };
             }).sort((a, b) => b.avgRating - a.avgRating);
-            
+    
             // Display top rated games
             const container = document.getElementById('top-rated-list');
             container.innerHTML = '';
-            
+    
             if (averageRatings.length === 0) {
                 container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No ratings recorded yet</p>';
             } else {
@@ -3267,7 +3269,7 @@
                             <div class="result-item-content">
                                 <div class="game-title">${game.title}</div>
                                 <div class="game-location">
-                                    ${getStarDisplay(game.avgRating)} 
+                                    ${getStarDisplay(game.avgRating)}
                                     (${game.avgRating.toFixed(1)}/5 from ${game.ratingCount} ratings)
                                 </div>
                             </div>
@@ -3275,11 +3277,11 @@
                     `;
                 });
             }
-            
+    
             // Create rating distribution chart
             updateRatingDistributionChart();
         }
-        
+    
         function getStarDisplay(rating) {
             let stars = '';
             for (let i = 1; i <= 5; i++) {
@@ -3287,23 +3289,23 @@
             }
             return stars;
         }
-        
+    
         function updateRatingDistributionChart() {
             const ctx = document.getElementById('ratings-distribution').getContext('2d');
-            
+    
             // Count ratings
             const ratingCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
-            
+    
             playHistory.forEach(play => {
                 if (play.rating) {
                     ratingCounts[play.rating]++;
                 }
             });
-            
+    
             if (ratingsChart) {
                 ratingsChart.destroy();
             }
-            
+    
             ratingsChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -3341,20 +3343,20 @@
                 }
             });
         }
-        
+    
         // Session analysis
         async function updateSessionAnalysis() {
             const plays = await loadEnhancedPlayHistory();
-            
+    
             if (plays.length === 0) {
                 const container = document.getElementById('session-stats');
                 container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No play sessions recorded yet</p>';
                 return;
             }
-            
+    
             // Group plays by day
             const sessionsByDay = {};
-            
+    
             plays.forEach(play => {
                 const date = new Date(play.timestamp).toISOString().split('T')[0];
                 if (!sessionsByDay[date]) {
@@ -3362,7 +3364,7 @@
                 }
                 sessionsByDay[date].push(play);
             });
-            
+    
             // Calculate session statistics
             const sessionStats = Object.entries(sessionsByDay).map(([date, plays]) => {
                 const uniqueGames = new Set(plays.map(p => p.gameId)).size;
@@ -3372,7 +3374,7 @@
                         play.players.split(',').forEach(p => uniquePlayers.add(p.trim()));
                     }
                 });
-                
+    
                 return {
                     date,
                     gameCount: plays.length,
@@ -3381,7 +3383,7 @@
                     duration: plays.length // Approximate based on game count
                 };
             }).sort((a, b) => new Date(b.date) - new Date(a.date));
-            
+    
             // Display session stats
             const container = document.getElementById('session-stats');
             container.innerHTML = `
@@ -3389,7 +3391,7 @@
                 <p><strong>Average Games per Session:</strong> ${(sessionStats.reduce((sum, s) => sum + s.gameCount, 0) / sessionStats.length).toFixed(1)}</p>
                 <p><strong>Most Popular Day:</strong> ${getMostPopularDay(sessionStats)}</p>
             `;
-            
+    
             // Recent sessions
             container.innerHTML += '<h4 style="margin-top: 2rem;">Recent Sessions</h4>';
             sessionStats.slice(0, 5).forEach(session => {
@@ -3404,25 +3406,25 @@
                     </div>
                 `;
             });
-            
+    
             // Update session chart
             updateSessionChart(sessionStats);
         }
-        
+    
         function getMostPopularDay(sessionStats) {
             const dayCounts = {};
             sessionStats.forEach(session => {
                 const day = new Date(session.date).toLocaleDateString('en-US', { weekday: 'long' });
                 dayCounts[day] = (dayCounts[day] || 0) + 1;
             });
-            
+    
             return Object.entries(dayCounts)
                 .sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
         }
-        
+    
         function updateSessionChart(sessionStats) {
             const ctx = document.getElementById('session-chart').getContext('2d');
-            
+    
             // Group by month
             const monthlyData = {};
             sessionStats.forEach(session => {
@@ -3433,13 +3435,13 @@
                 monthlyData[month].sessions++;
                 monthlyData[month].games += session.gameCount;
             });
-            
+    
             const labels = Object.keys(monthlyData).sort();
-            
+    
             if (sessionChart) {
                 sessionChart.destroy();
             }
-            
+    
             sessionChart = new Chart(ctx, {
                 type: 'bar',
                 data: {
@@ -3488,20 +3490,19 @@
                             }
                         }
                     }
-                }
-            });
+                });
         }
-        
+    
         // Export enhanced player statistics
         function exportPlayerStats() {
             const playerStats = {};
-            
+    
             // Calculate comprehensive player statistics
             playHistory.forEach(play => {
                 const gamePlayers = play.players ? play.players.split(',').map(p => p.trim()) : [];
                 const winner = play.winner ? play.winner.trim() : '';
                 const game = allGames.find(g => g.id === play.gameId);
-                
+    
                 gamePlayers.forEach(player => {
                     if (!playerStats[player]) {
                         playerStats[player] = {
@@ -3513,18 +3514,18 @@
                             partners: {}
                         };
                     }
-                    
+    
                     playerStats[player].gamesPlayed++;
                     if (winner === player) {
                         playerStats[player].wins++;
                     }
                     playerStats[player].uniqueGames.add(play.gameId);
                     playerStats[player].playDates.push(play.timestamp);
-                    
+    
                     if (play.rating) {
                         playerStats[player].ratings.push(parseInt(play.rating));
                     }
-                    
+    
                     // Track play partners
                     gamePlayers.forEach(partner => {
                         if (partner !== player) {
@@ -3533,31 +3534,31 @@
                     });
                 });
             });
-            
+    
             // Create CSV
             let csv = 'Player,Games Played,Wins,Win Rate,Unique Games,First Play,Last Play,Avg Rating Given,Most Frequent Partner\n';
-            
+    
             Object.entries(playerStats).forEach(([player, stats]) => {
                 const winRate = stats.gamesPlayed > 0 ? (stats.wins / stats.gamesPlayed * 100).toFixed(1) : 0;
-                const avgRating = stats.ratings.length > 0 
+                const avgRating = stats.ratings.length > 0
                     ? (stats.ratings.reduce((a, b) => a + b, 0) / stats.ratings.length).toFixed(1)
                     : 'N/A';
                 const firstPlay = stats.playDates.length > 0 ? new Date(Math.min(...stats.playDates.map(d => new Date(d)))).toLocaleDateString() : '';
                 const lastPlay = stats.playDates.length > 0 ? new Date(Math.max(...stats.playDates.map(d => new Date(d)))).toLocaleDateString() : '';
                 const topPartner = Object.entries(stats.partners).sort((a, b) => b[1] - a[1])[0];
-                
+    
                 csv += `"${player}",${stats.gamesPlayed},${stats.wins},${winRate}%,${stats.uniqueGames.size},"${firstPlay}","${lastPlay}",${avgRating},"${topPartner ? topPartner[0] : 'N/A'}"\n`;
             });
-            
+    
             downloadCSV(csv, 'player_statistics.csv');
         }
-        
+    
         // Search functionality
        function setSearchTab(tab) {
             searchTab = tab;
             // Remove active class from all search tabs
             document.querySelectorAll('#search-section .tab').forEach(t => t.classList.remove('active'));
-            
+    
             // Find and activate the clicked tab
             document.querySelectorAll('#search-section .tab').forEach(t => {
                 if ((tab === 'all' && t.textContent === 'All Games') ||
@@ -3566,57 +3567,57 @@
                     t.classList.add('active');
                 }
             });
-            
+    
             performSearch();
             }
-        
+    
        async function performSearch() {
             const query = document.getElementById('search-input').value.toLowerCase();
             const games = await loadAllGames();
-            
+    
             console.log('performSearch - games loaded:', games.length);
             console.log('performSearch - search tab:', searchTab);
-            
+    
             let filtered = games;
-            
+    
             // Filter by tab
             if (searchTab === 'available') {
                 filtered = games.filter(g => g.location !== 'CHECKED_OUT');
             } else if (searchTab === 'checked-out') {
                 filtered = games.filter(g => g.location === 'CHECKED_OUT');
             }
-            
+    
             // Filter by search query
             if (query) {
-                filtered = filtered.filter(g => 
+                filtered = filtered.filter(g =>
                     g.title.toLowerCase().includes(query) ||
                     g.id.toLowerCase().includes(query) ||
                     (g.bggId && g.bggId.toLowerCase().includes(query))
                 );
             }
-            
+    
             console.log('performSearch - filtered games:', filtered.length);
-            
+    
             displaySearchResults(filtered);
         }
-        
+    
         function displaySearchResults(games) {
             const resultsDiv = document.getElementById('results');
             const contentDiv = document.getElementById('results-content');
-            
+    
             // Clear previous results
             contentDiv.innerHTML = '';
-            
+    
             if (!games || games.length === 0) {
                 contentDiv.innerHTML = '<h4>No games found</h4><p style="text-align: center; color: #7f8c8d;">Try adjusting your search or filters.</p>';
             } else {
                 contentDiv.innerHTML = `<h4>Found ${games.length} games</h4>`;
-                
+    
                 games.forEach(game => {
-                    const locationText = game.location === 'CHECKED_OUT' ? 'Checked Out' : 
-                                        game.location === 'NEW' ? 'Not in bin' : 
+                    const locationText = game.location === 'CHECKED_OUT' ? 'Checked Out' :
+                                        game.location === 'NEW' ? 'Not in bin' :
                                         `Bin: ${game.location}`;
-                    
+    
                     const gameDiv = document.createElement('div');
                     gameDiv.className = 'result-item';
                     gameDiv.innerHTML = `
@@ -3630,11 +3631,11 @@
                     contentDiv.appendChild(gameDiv);
                 });
             }
-            
+    
             // Make sure results div is visible
             resultsDiv.classList.remove('hidden');
         }
-        
+    
         // View game history from search results
         async function viewGameHistoryById(gameId) {
             try {
@@ -3643,43 +3644,43 @@
                     loadEnhancedPlayHistory(),
                     loadTravelHistory()
                 ]);
-                
+    
                 if (!gameInfo) {
                     showStatus('Game not found', 'error');
                     return;
                 }
-                
+    
                 currentHistoryGameId = gameId;
                 currentHistoryGameInfo = gameInfo;
                 displayGameHistory(gameInfo, plays, travels);
-                
+    
             } catch (error) {
                 showStatus('Error loading game history: ' + error.message, 'error');
             }
         }
-        
+    
         // Statistics functionality
         async function loadStatistics() {
             console.log('Loading statistics...');
-            
+    
             const games = await loadAllGames();
             const plays = await loadEnhancedPlayHistory();
-            
+    
             console.log(`Stats: ${games.length} games, ${plays.length} plays`);
-            
+    
             // Calculate stats
             const totalGames = games.length;
             const totalPlays = plays.length;
             const checkedOut = games.filter(g => g.location === 'CHECKED_OUT').length;
-            
+    
             // Count plays per game
             const playCounts = {};
             plays.forEach(play => {
                 playCounts[play.gameId] = (playCounts[play.gameId] || 0) + 1;
             });
-            
+    
             const uniquePlayed = Object.keys(playCounts).length;
-            
+    
             // Calculate average players
             let totalPlayers = 0;
             let gamesWithPlayers = 0;
@@ -3691,21 +3692,21 @@
                 }
             });
             const avgPlayers = gamesWithPlayers > 0 ? (totalPlayers / gamesWithPlayers).toFixed(1) : 0;
-            
+    
             // Update stats display
             document.getElementById('total-games').textContent = totalGames;
             document.getElementById('total-plays').textContent = totalPlays;
             document.getElementById('unique-played').textContent = uniquePlayed;
             document.getElementById('avg-players').textContent = avgPlayers;
-            
+    
             // Most played games
             const mostPlayed = Object.entries(playCounts)
                 .sort((a, b) => b[1] - a[1])
                 .slice(0, 10);
-            
+    
             const mostPlayedDiv = document.getElementById('most-played-list');
             mostPlayedDiv.innerHTML = '';
-            
+    
             if (mostPlayed.length === 0) {
                 mostPlayedDiv.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No games have been played yet</p>';
             } else {
@@ -3724,12 +3725,12 @@
                     }
                 }
             }
-            
+    
             // Never played games
             const neverPlayed = games.filter(g => !playCounts[g.id]);
             const neverPlayedDiv = document.getElementById('never-played-list');
             neverPlayedDiv.innerHTML = '';
-            
+    
             if (neverPlayed.length === 0) {
                 neverPlayedDiv.innerHTML = '<p style="text-align: center; color: #7f8c8d;">All games have been played!</p>';
             } else {
@@ -3743,35 +3744,35 @@
                         </div>
                     `;
                 });
-                
+    
                 if (neverPlayed.length > 10) {
                     neverPlayedDiv.innerHTML += `<p style="text-align: center; color: #7f8c8d; margin-top: 1rem;">...and ${neverPlayed.length - 10} more</p>`;
                 }
             }
         }
-        
+    
         // Bulk operations
         async function loadBulkOperations() {
             const games = await loadAllGames();
             const bins = await loadAllBins();
-            
+    
             // Populate bin selector
             const binSelect = document.getElementById('bulk-bin-select');
             binSelect.innerHTML = '<option value="">Select destination bin...</option>';
             bins.forEach(bin => {
                 binSelect.innerHTML += `<option value="${bin.id}">${bin.description || bin.id}</option>`;
             });
-            
+    
             // Display games with checkboxes
             displayBulkGames(games);
         }
-        
+    
         function displayBulkGames(games) {
             const resultsDiv = document.getElementById('results');
             const contentDiv = document.getElementById('results-content');
-            
+    
             contentDiv.innerHTML = '<h4>Select games for bulk operations</h4>';
-            
+    
             games.forEach(game => {
                 const checked = selectedGames.has(game.id) ? 'checked' : '';
                 contentDiv.innerHTML += `
@@ -3784,11 +3785,11 @@
                     </div>
                 `;
             });
-            
+    
             resultsDiv.classList.remove('hidden');
             updateBulkActions();
         }
-        
+    
         function toggleGameSelection(gameId) {
             if (selectedGames.has(gameId)) {
                 selectedGames.delete(gameId);
@@ -3797,48 +3798,48 @@
             }
             updateBulkActions();
         }
-        
+    
         function updateBulkActions() {
             const count = selectedGames.size;
             document.getElementById('selected-count').textContent = `${count} games selected`;
-            
+    
             if (count > 0) {
                 document.getElementById('bulk-actions').classList.remove('hidden');
             } else {
                 document.getElementById('bulk-actions').classList.add('hidden');
             }
         }
-        
+    
         function selectAllGames() {
             allGames.forEach(game => selectedGames.add(game.id));
             displayBulkGames(allGames);
         }
-        
+    
         function deselectAllGames() {
             selectedGames.clear();
             displayBulkGames(allGames);
         }
-        
+    
         async function bulkMove() {
             const binId = document.getElementById('bulk-bin-select').value;
             if (!binId) {
                 showStatus('Please select a destination bin', 'error');
                 return;
             }
-            
+    
             const appsScriptUrl = localStorage.getItem('appsScriptUrl');
-            
+    
             showStatus(`Moving ${selectedGames.size} games...`, 'success');
-            
+    
             let moved = 0;
             let failed = 0;
-            
+    
             for (const gameId of selectedGames) {
                 try {
                     // Get current location
                     const gameInfo = await getGameInfo(gameId);
                     const fromLocation = gameInfo ? gameInfo.location : 'Unknown';
-                    
+    
                     const result = await updateGameLocation(gameId, binId);
                     if (result) {
                         // Log location change
@@ -3851,39 +3852,39 @@
                     failed++;
                 }
             }
-            
+    
             if (failed > 0 && !appsScriptUrl) {
                 showStatus(`Moved ${moved} games. ${failed} require manual update due to API limits.`, 'error');
             } else {
                 showStatus(`Successfully moved ${selectedGames.size} games!`, 'success');
             }
-            
+    
             selectedGames.clear();
             loadBulkOperations();
         }
-        
+    
         async function bulkCheckout() {
             const appsScriptUrl = localStorage.getItem('appsScriptUrl');
-            
+    
             showStatus(`Checking out ${selectedGames.size} games...`, 'success');
-            
+    
             let checkedOut = 0;
             let failed = 0;
-            
+    
             for (const gameId of selectedGames) {
                 try {
                     // Get current location
                     const gameInfo = await getGameInfo(gameId);
                     const fromLocation = gameInfo ? gameInfo.location : 'Unknown';
-                    
+    
                     const locationResult = await updateGameLocation(gameId, 'CHECKED_OUT');
                     const playResult = await logEnhancedGamePlay(gameId, '', '', 0, 'Bulk checkout', '');
-                    
+    
                     if (locationResult) {
                         // Log location change
                         await logLocationChange(gameId, fromLocation, 'CHECKED_OUT', 'CHECKOUT');
                     }
-                    
+    
                     if (locationResult && playResult) {
                         checkedOut++;
                     } else {
@@ -3893,17 +3894,17 @@
                     failed++;
                 }
             }
-            
+    
             if (failed > 0 && !appsScriptUrl) {
                 showStatus(`Checked out ${checkedOut} games. ${failed} require manual update due to API limits.`, 'error');
             } else {
                 showStatus(`Successfully checked out ${selectedGames.size} games!`, 'success');
             }
-            
+    
             selectedGames.clear();
             loadBulkOperations();
         }
-        
+    
         // BGG Integration
         async function searchBGG() {
             const query = document.getElementById('bgg-search').value;
@@ -3911,34 +3912,34 @@
                 showStatus('Please enter a game name to search', 'error');
                 return;
             }
-            
+    
             showStatus('Searching BoardGameGeek...', 'success');
-            
+    
             try {
                 const response = await fetch(`${CORS_PROXY}${BGG_API_BASE}/search?query=${encodeURIComponent(query)}&type=boardgame`);
                 const text = await response.text();
-                
+    
                 // Parse XML response
                 const parser = new DOMParser();
                 const xml = parser.parseFromString(text, 'text/xml');
                 const items = xml.querySelectorAll('item');
-                
+    
                 const results = Array.from(items).slice(0, 10).map(item => ({
                     id: item.getAttribute('id'),
                     name: item.querySelector('name[type="primary"]')?.getAttribute('value') || '',
                     year: item.querySelector('yearpublished')?.getAttribute('value') || ''
                 }));
-                
+    
                 displayBGGResults(results);
             } catch (error) {
                 showStatus('Error searching BGG: ' + error.message, 'error');
             }
         }
-        
+    
         function displayBGGResults(results) {
             const resultsDiv = document.getElementById('bgg-results');
             resultsDiv.innerHTML = '<h4>BoardGameGeek Search Results</h4>';
-            
+    
             results.forEach(game => {
                 resultsDiv.innerHTML += `
                     <div class="result-item">
@@ -3950,42 +3951,42 @@
                     </div>
                 `;
             });
-            
+    
             resultsDiv.classList.remove('hidden');
         }
-        
+    
         async function importBGGGame(bggId, name) {
             const gameId = `GAME:BGG${bggId}`;
             showStatus(`Importing ${name}...`, 'success');
-            
+    
             try {
                 // Fetch detailed game info from BGG
                 const response = await fetch(`${CORS_PROXY}${BGG_API_BASE}/thing?id=${bggId}`);
                 const text = await response.text();
-                
+    
                 // Parse XML response
                 const parser = new DOMParser();
                 const xml = parser.parseFromString(text, 'text/xml');
                 const item = xml.querySelector('item');
-                
+    
                 const thumbnail = item.querySelector('thumbnail')?.textContent || '';
-                
+    
                 // Check if game already exists
                 const existingGames = await loadAllGames();
                 const exists = existingGames.some(g => g.bggId === bggId || g.id === gameId);
-                
+    
                 if (exists) {
                     showStatus('Game already exists in your collection', 'error');
                     return;
                 }
-                
+    
                 // Ask for bin location
                 const bins = await loadAllBins();
                 let binOptions = '<option value="NEW">Add to inventory (no bin)</option>';
                 bins.forEach(bin => {
                     binOptions += `<option value="${bin.id}">${bin.description || bin.id}</option>`;
                 });
-                
+    
                 const resultsDiv = document.getElementById('bgg-results');
                 resultsDiv.innerHTML = `
                     <h4>Import Game Details</h4>
@@ -4002,17 +4003,17 @@
                     </select>
                     <button class="btn btn-primary" onclick="confirmSingleGameImport('${gameId}', '${name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}', '${bggId}', '${thumbnail}')" style="width: 100%;">Add to Collection</button>
                 `;
-                
+    
             } catch (error) {
                 showStatus('Error fetching game details: ' + error.message, 'error');
             }
         }
-        
+    
         async function confirmSingleGameImport(gameId, name, bggId, thumbnail) {
             const binId = document.getElementById('import-game-bin').value;
             const location = binId === 'NEW' ? 'NEW' : binId;
             const appsScriptUrl = localStorage.getItem('appsScriptUrl');
-            
+    
             try {
                 // Create game data
                 const gameData = [
@@ -4022,11 +4023,11 @@
                     bggId,       // BGG ID
                     thumbnail    // Photo URL
                 ];
-                
+    
                 // If Apps Script is available, use it
                 if (appsScriptUrl) {
                     showStatus('Adding game to collection...', 'success');
-                    
+    
                     await fetch(appsScriptUrl, {
                         method: 'POST',
                         mode: 'no-cors',
@@ -4039,16 +4040,16 @@
                             row: gameData
                         })
                     });
-                    
+    
                     showStatus(`Successfully added ${name} to your collection!`, 'success');
                     document.getElementById('bgg-results').innerHTML = '';
                     document.getElementById('bgg-search').value = '';
                     return;
                 }
-                
+    
                 // Otherwise, show copy instructions
                 const csvRow = gameData.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',');
-                
+    
                 // Display copy instructions
                 const resultsDiv = document.getElementById('bgg-results');
                 resultsDiv.innerHTML = `
@@ -4064,37 +4065,37 @@
                     <textarea style="width: 100%; height: 60px; margin: 0.5rem 0; font-family: monospace; font-size: 0.8rem;" readonly>${csvRow}</textarea>
                     <button class="btn btn-primary" onclick="copySingleGameData()" style="width: 100%;">Copy to Clipboard</button>
                 `;
-                
+    
                 // Store for copy function
                 window.singleGameCSV = csvRow;
-                
+    
             } catch (error) {
                 showStatus('Error preparing game data: ' + error.message, 'error');
             }
         }
-        
+    
         function copySingleGameData() {
             const textarea = document.querySelector('#bgg-results textarea');
             textarea.select();
             document.execCommand('copy');
             showStatus('Game data copied! Paste it into the first empty row of your Games sheet.', 'success');
         }
-        
+    
         async function importBGGCollection() {
             const username = document.getElementById('bgg-username').value;
             if (!username) {
                 showStatus('Please enter a BGG username', 'error');
                 return;
             }
-            
+    
             showStatus(`Loading collection for ${username}...`, 'success');
-            
+    
             try {
                 // BGG API requires a retry mechanism as it returns 202 while processing
                 let response;
                 let attempts = 0;
                 const maxAttempts = 10;
-                
+    
                 do {
                     response = await fetch(`${CORS_PROXY}${BGG_API_BASE}/collection?username=${username}&own=1`);
                     if (response.status === 202) {
@@ -4103,26 +4104,26 @@
                         attempts++;
                     }
                 } while (response.status === 202 && attempts < maxAttempts);
-                
+    
                 if (response.status === 202) {
                     showStatus('BGG is taking too long to process. Please try again.', 'error');
                     return;
                 }
-                
+    
                 const text = await response.text();
-                
+    
                 // Parse XML response
                 const parser = new DOMParser();
                 const xml = parser.parseFromString(text, 'text/xml');
                 const items = xml.querySelectorAll('item');
-                
+    
                 if (items.length === 0) {
                     showStatus('No games found in collection', 'error');
                     return;
                 }
-                
+    
                 showStatus(`Found ${items.length} games. Importing...`, 'success');
-                
+    
                 // Display import options
                 const resultsDiv = document.getElementById('bgg-results');
                 resultsDiv.innerHTML = `
@@ -4133,33 +4134,33 @@
                     </select>
                     <button class="btn btn-primary" onclick="confirmBGGImport('${username.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')" style="width: 100%;">Confirm Import</button>
                 `;
-                
+    
                 // Load existing bins
                 const bins = await loadAllBins();
                 const binSelect = document.getElementById('import-bin-select');
                 bins.forEach(bin => {
                     binSelect.innerHTML += `<option value="${bin.id}">${bin.description || bin.id}</option>`;
                 });
-                
+    
                 resultsDiv.classList.remove('hidden');
-                
+    
             } catch (error) {
                 showStatus('Error loading collection: ' + error.message, 'error');
             }
         }
-        
+    
         async function confirmBGGImport(username) {
             const binId = document.getElementById('import-bin-select').value;
             const appsScriptUrl = localStorage.getItem('appsScriptUrl');
-            
+    
             showStatus('Preparing import data...', 'success');
-            
+    
             try {
                 // Fetch collection again
                 let response;
                 let attempts = 0;
                 const maxAttempts = 10;
-                
+    
                 do {
                     response = await fetch(`${CORS_PROXY}${BGG_API_BASE}/collection?username=${username}&own=1`);
                     if (response.status === 202) {
@@ -4167,32 +4168,32 @@
                         attempts++;
                     }
                 } while (response.status === 202 && attempts < maxAttempts);
-                
+    
                 const text = await response.text();
                 const parser = new DOMParser();
                 const xml = parser.parseFromString(text, 'text/xml');
                 const items = xml.querySelectorAll('item');
-                
+    
                 // Get existing games to check for duplicates
                 const existingGames = await loadAllGames();
                 const existingBGGIds = new Set(existingGames.map(g => g.bggId).filter(id => id));
-                
+    
                 let imported = 0;
                 let skipped = 0;
                 const importData = [];
-                
+    
                 // Process each game
                 for (const item of items) {
                     const bggId = item.getAttribute('objectid');
                     const name = item.querySelector('name').textContent;
                     const thumbnail = item.querySelector('thumbnail')?.textContent || '';
-                    
+    
                     // Check if already exists
                     if (existingBGGIds.has(bggId)) {
                         skipped++;
                         continue;
                     }
-                    
+    
                     // Create row data for spreadsheet
                     importData.push([
                         `GAME:BGG${bggId}`,  // Game ID
@@ -4203,21 +4204,21 @@
                     ]);
                     imported++;
                 }
-                
+    
                 if (importData.length === 0) {
                     showStatus('No new games to import (all games already in collection)', 'error');
                     return;
                 }
-                
+    
                 // If Apps Script is available, use it for automatic import
                 if (appsScriptUrl) {
                     showStatus(`Importing ${importData.length} games automatically...`, 'success');
-                    
+    
                     // Import in batches to avoid timeout
                     const batchSize = 10;
                     for (let i = 0; i < importData.length; i += batchSize) {
                         const batch = importData.slice(i, i + batchSize);
-                        
+    
                         for (const gameData of batch) {
                             await fetch(appsScriptUrl, {
                                 method: 'POST',
@@ -4232,21 +4233,21 @@
                                 })
                             });
                         }
-                        
+    
                         const progress = Math.min(i + batchSize, importData.length);
                         showStatus(`Imported ${progress} of ${importData.length} games...`, 'success');
                     }
-                    
+    
                     showStatus(`Import complete! Added ${imported} games. ${skipped} duplicates skipped.`, 'success');
                     document.getElementById('bgg-results').classList.add('hidden');
                     return;
                 }
-                
+    
                 // Otherwise, generate CSV for manual import
-                let csvContent = importData.map(row => 
+                let csvContent = importData.map(row =>
                     row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')
                 ).join('\n');
-                
+    
                 // Display import instructions
                 const resultsDiv = document.getElementById('bgg-results');
                 resultsDiv.innerHTML = `
@@ -4264,22 +4265,22 @@
                     <button class="btn btn-primary" onclick="copyImportData()" style="width: 100%;">Copy Data to Clipboard</button>
                     <button class="btn btn-secondary" onclick="downloadImportCSV('${username}_games.csv')" style="width: 100%; margin-top: 0.5rem;">Download as CSV</button>
                 `;
-                
+    
                 // Store data for download function
                 window.importCSVContent = csvContent;
-                
+    
             } catch (error) {
                 showStatus('Error preparing import: ' + error.message, 'error');
             }
         }
-        
+    
         function copyImportData() {
             const textarea = document.getElementById('import-data');
             textarea.select();
             document.execCommand('copy');
             showStatus('Data copied to clipboard! Now paste it into your Google Sheet.', 'success');
         }
-        
+    
         function downloadImportCSV(filename) {
             const csvContent = window.importCSVContent;
             const blob = new Blob([csvContent], { type: 'text/csv' });
@@ -4293,31 +4294,31 @@
             document.body.removeChild(a);
             showStatus('CSV file downloaded!', 'success');
         }
-        
+    
         // Export functions
         function exportPlayHistory() {
             const plays = playHistory;
             let csv = 'Timestamp,Game ID,Game Title,Players,Notes,Winner,Rating,Session ID\n';
-            
+    
             plays.forEach(play => {
                 const game = allGames.find(g => g.id === play.gameId);
                 csv += `"${play.timestamp}","${play.gameId}","${game?.title || ''}","${play.players || ''}","${play.notes || ''}","${play.winner || ''}","${play.rating || ''}","${play.sessionId || ''}"\n`;
             });
-            
+    
             downloadCSV(csv, 'play_history.csv');
         }
-        
+    
         function exportInventory() {
             const games = allGames;
             let csv = 'Game ID,Title,Current Location,BGG ID,Photo URL\n';
-            
+    
             games.forEach(game => {
                 csv += `"${game.id}","${game.title}","${game.location}","${game.bggId || ''}","${game.photoUrl || ''}"\n`;
             });
-            
+    
             downloadCSV(csv, 'game_inventory.csv');
         }
-        
+    
         function downloadCSV(csv, filename) {
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = window.URL.createObjectURL(blob);
@@ -4329,31 +4330,31 @@
             a.click();
             document.body.removeChild(a);
         }
-        
+    
         // Data loading functions
         async function loadAllGames() {
             const spreadsheetId = localStorage.getItem('spreadsheetId');
             const apiKey = localStorage.getItem('apiKey');
-            
+    
             if (!spreadsheetId || !apiKey) {
                 console.error('No spreadsheet ID or API key found for loading games');
                 showStatus('Please configure Google Sheets settings first', 'error');
                 return [];
             }
-            
+    
             // Check if we have recent cached data
             const now = Date.now();
             if (allGames.length > 0 && gameCache.size > 0 && (now - cacheTimestamp) < CACHE_DURATION) {
                 console.log('Using cached games data');
                 return allGames;
             }
-            
+    
             try {
                 console.log('Fetching games from Google Sheets...');
                 const response = await fetch(
                     `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:E?key=${apiKey}`
                 );
-                
+    
                 if (response.status === 429) {
                     // If rate limited and we have cached data, use it
                     if (allGames.length > 0) {
@@ -4363,22 +4364,22 @@
                     }
                     throw new Error('API rate limit exceeded. Please wait and try again.');
                 }
-                
+    
                 if (!response.ok) {
                     console.error('Failed to load games:', response.status, response.statusText);
                     throw new Error(`Failed to load games: ${response.status}`);
                 }
-                
+    
                 const data = await response.json();
                 const rows = data.values || [];
-                
+    
                 console.log('Games sheet raw data:', rows.length, 'rows');
-                
+    
                 // Clear caches
                 allGames = [];
                 gameCache.clear();
                 cacheTimestamp = now;
-                
+    
                 for (let i = 1; i < rows.length; i++) {
                     const [gameId, title, location, bggId, photoUrl] = rows[i];
                     const game = {
@@ -4391,7 +4392,7 @@
                     allGames.push(game);
                     gameCache.set(gameId, game);
                 }
-                
+    
                 console.log(`Loaded ${allGames.length} games from spreadsheet`);
                 return allGames;
             } catch (error) {
@@ -4400,23 +4401,23 @@
                 return allGames; // Return cached data if available
             }
         }
-        
+    
         async function loadAllBins() {
             const spreadsheetId = localStorage.getItem('spreadsheetId');
             const apiKey = localStorage.getItem('apiKey');
-            
+    
             if (!spreadsheetId || !apiKey) {
                 return [];
             }
-            
+    
             try {
                 const response = await fetch(
                     `${SHEETS_API_BASE}/${spreadsheetId}/values/Bins!A:B?key=${apiKey}`
                 );
-                
+    
                 const data = await response.json();
                 const rows = data.values || [];
-                
+    
                 allBins = [];
                 for (let i = 1; i < rows.length; i++) {
                     const [binId, description] = rows[i];
@@ -4425,18 +4426,18 @@
                         description: description || ''
                     });
                 }
-                
+    
                 return allBins;
             } catch (error) {
                 console.error('Error loading bins:', error);
                 return [];
             }
         }
-        
+    
         async function loadPlayHistory() {
             return loadEnhancedPlayHistory();
         }
-        
+    
         // QR Code processing
         function processManualQR() {
             const input = document.getElementById('manual-qr-input').value.trim();
@@ -4444,16 +4445,16 @@
                 showStatus('Please enter a QR code value', 'error');
                 return;
             }
-            
+    
             console.log('Processing manual QR entry:', input);
-            
+    
             // Process it as if it was scanned
             onScanSuccess(input, null);
-            
+    
             // Clear the input
             document.getElementById('manual-qr-input').value = '';
         }
-        
+    
         // QR Code Scanning
         function startScanning() {
             // Check if library is loaded
@@ -4462,18 +4463,18 @@
                 console.error('Html5Qrcode library not found');
                 return;
             }
-            
+    
             console.log('Starting camera scan...');
             showStatus('Initializing camera...', 'success');
-            
-            const config = { 
-                fps: 10, 
+    
+            const config = {
+                fps: 10,
                 qrbox: { width: 250, height: 250 },
                 aspectRatio: 1.0
             };
-            
+    
             html5QrcodeScanner = new Html5Qrcode("reader");
-            
+    
             html5QrcodeScanner.start(
                 { facingMode: "environment" },
                 config,
@@ -4500,7 +4501,7 @@
                 showStatus(errorMsg, 'error');
             });
         }
-        
+    
         function stopScanning() {
             if (html5QrcodeScanner) {
                 html5QrcodeScanner.stop().then(() => {
@@ -4509,23 +4510,23 @@
                 }).catch(err => console.error('Error stopping camera:', err));
             }
         }
-        
+    
         function onScanSuccess(decodedText, decodedResult) {
             // Stop the scanner immediately to prevent multiple scans
             if (html5QrcodeScanner) {
                 html5QrcodeScanner.stop().catch(err => console.log('Stop error:', err));
             }
-            
+    
             // Parse QR code data
             const data = parseQRCode(decodedText);
-            
+    
             if (!data) {
                 showStatus('Invalid QR code format: ' + decodedText, 'error');
                 // Restart scanner after error
                 setTimeout(() => startScanning(), 2000);
                 return;
             }
-            
+    
             // Handle based on current mode
             switch (currentMode) {
                 case 'view':
@@ -4545,23 +4546,23 @@
                     break;
             }
         }
-        
+    
         function parseQRCode(text) {
             // Handle multiple QR code formats
             text = text.trim();
             console.log('Parsing QR code:', text);
-            
+    
             // Format 0: Google Drive URLs - Extract folder ID
             if (text.includes('drive.google.com')) {
                 // Extract folder ID from various Google Drive URL formats
                 let folderId = null;
-                
+    
                 // Format: https://drive.google.com/drive/folders/FOLDER_ID
                 const folderMatch = text.match(/\/folders\/([a-zA-Z0-9-_]+)/);
                 if (folderMatch) {
                     folderId = folderMatch[1];
                 }
-                
+    
                 // Format: https://drive.google.com/open?id=FOLDER_ID
                 if (!folderId) {
                     const openMatch = text.match(/[?&]id=([a-zA-Z0-9-_]+)/);
@@ -4569,7 +4570,7 @@
                         folderId = openMatch[1];
                     }
                 }
-                
+    
                 if (folderId) {
                     return {
                         type: 'BIN',
@@ -4578,7 +4579,7 @@
                     };
                 }
             }
-            
+    
             // Format 1: "TYPE:ID" (e.g., "BIN:001" or "GAME:BGG123")
             if (text.includes(':')) {
                 const parts = text.split(':');
@@ -4589,7 +4590,7 @@
                     id: text.toUpperCase()
                 };
             }
-            
+    
             // Format 2: "Bin 001" or "bin 001" (space-separated)
             const spaceMatch = text.match(/^(bin|game)\s+(.+)$/i);
             if (spaceMatch) {
@@ -4598,7 +4599,7 @@
                     id: spaceMatch[1].toUpperCase() + ':' + spaceMatch[2]
                 };
             }
-            
+    
             // Format 3: Just numbers like "001" - assume it's a bin
             if (/^\d+$/.test(text)) {
                 return {
@@ -4606,7 +4607,7 @@
                     id: 'BIN:' + text.padStart(3, '0')
                 };
             }
-            
+    
             // Format 4: "Bin001" or "Game001" (no space or separator)
             const noSpaceMatch = text.match(/^(bin|game)(\d+)$/i);
             if (noSpaceMatch) {
@@ -4615,7 +4616,7 @@
                     id: noSpaceMatch[1].toUpperCase() + ':' + noSpaceMatch[2].padStart(3, '0')
                 };
             }
-            
+    
             // Format 5: Other URL formats
             if (text.includes('http')) {
                 // Extract any numbers or identifiers from URL
@@ -4627,12 +4628,12 @@
                     };
                 }
             }
-            
+    
             // If no format matches, return null
             console.log('QR code format not recognized');
             return null;
         }
-        
+    
         // Mode Handlers
         async function handleViewBin(data) {
             if (data.type !== 'BIN') {
@@ -4641,15 +4642,15 @@
                 setTimeout(() => startScanning(), 2000);
                 return;
             }
-            
+    
             showStatus('Loading bin contents...', 'success');
-            
+    
             try {
                 const [games, binInfo] = await Promise.all([
                     getGamesInBin(data.id),
                     getBinInfo(data.id)
                 ]);
-                
+    
                 displayBinContents(data.id, games, binInfo);
                 // Don't automatically restart scanning
             } catch (error) {
@@ -4658,29 +4659,29 @@
                 setTimeout(() => startScanning(), 2000);
             }
         }
-        
+    
         // Google Sheets Integration
         async function getGamesInBin(binId) {
             const spreadsheetId = localStorage.getItem('spreadsheetId');
             const apiKey = localStorage.getItem('apiKey');
-            
+    
             if (!spreadsheetId || !apiKey) {
                 throw new Error('Please configure Google Sheets settings');
             }
-            
+    
             try {
                 // Fetch all games from the Games sheet
                 const response = await fetch(
                     `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:E?key=${apiKey}`
                 );
-                
+    
                 if (!response.ok) {
                     throw new Error(`API Error: ${response.status}`);
                 }
-                
+    
                 const data = await response.json();
                 const rows = data.values || [];
-                
+    
                 // Skip header row and filter games in this bin
                 const gamesInBin = [];
                 for (let i = 1; i < rows.length; i++) {
@@ -4695,14 +4696,14 @@
                         });
                     }
                 }
-                
+    
                 return gamesInBin;
             } catch (error) {
                 console.error('Error fetching games:', error);
                 throw error;
             }
         }
-        
+    
         async function getGameInfo(gameId) {
             // Check cache first
             const now = Date.now();
@@ -4710,30 +4711,30 @@
                 console.log('Using cached game info for:', gameId);
                 return gameCache.get(gameId);
             }
-            
+    
             const spreadsheetId = localStorage.getItem('spreadsheetId');
             const apiKey = localStorage.getItem('apiKey');
-            
+    
             try {
                 const response = await fetch(
                     `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:E?key=${apiKey}`
                 );
-                
+    
                 if (response.status === 429) {
                     throw new Error('API rate limit exceeded. Please wait a moment and try again.');
                 }
-                
+    
                 if (!response.ok) {
                     throw new Error(`API Error: ${response.status}`);
                 }
-                
+    
                 const data = await response.json();
                 const rows = data.values || [];
-                
+    
                 // Clear and rebuild cache
                 gameCache.clear();
                 cacheTimestamp = now;
-                
+    
                 // Cache all games while we're at it
                 for (let i = 1; i < rows.length; i++) {
                     const game = {
@@ -4745,37 +4746,37 @@
                     };
                     gameCache.set(game.id, game);
                 }
-                
+    
                 // Return the requested game
                 return gameCache.get(gameId) || null;
-                
+    
             } catch (error) {
                 console.error('Error fetching game info:', error);
-                
+    
                 // If we have cached data, use it even if expired
                 if (gameCache.has(gameId)) {
                     console.log('Using expired cache due to API error');
                     return gameCache.get(gameId);
                 }
-                
+    
                 throw error;
             }
         }
-        
+    
         async function updateGameLocation(gameId, newLocation) {
             const spreadsheetId = localStorage.getItem('spreadsheetId');
             const apiKey = localStorage.getItem('apiKey');
             const appsScriptUrl = localStorage.getItem('appsScriptUrl');
-            
+    
             try {
                 // First, find which row contains this game
                 const response = await fetch(
                     `${SHEETS_API_BASE}/${spreadsheetId}/values/Games!A:A?key=${apiKey}`
                 );
-                
+    
                 const data = await response.json();
                 const gameIds = data.values || [];
-                
+    
                 let rowIndex = -1;
                 for (let i = 1; i < gameIds.length; i++) {
                     if (gameIds[i][0] === gameId) {
@@ -4783,11 +4784,11 @@
                         break;
                     }
                 }
-                
+    
                 if (rowIndex === -1) {
                     throw new Error(`Game ${gameId} not found`);
                 }
-                
+    
                 // If Apps Script URL is available, use it
                 if (appsScriptUrl) {
                     const scriptResponse = await fetch(appsScriptUrl, {
@@ -4804,33 +4805,33 @@
                             value: newLocation
                         })
                     });
-                    
+    
                     return true;
                 }
-                
+    
                 // Otherwise provide manual instruction
                 const gameInfo = await getGameInfo(gameId);
                 showStatus(`Please update row ${rowIndex} in your Games sheet: Change location of "${gameInfo.title}" to "${newLocation}"`, 'error');
                 return false;
-                
+    
             } catch (error) {
                 console.error('Error updating game location:', error);
                 throw error;
             }
         }
-        
+    
         async function getBinInfo(binId) {
             const spreadsheetId = localStorage.getItem('spreadsheetId');
             const apiKey = localStorage.getItem('apiKey');
-            
+    
             try {
                 const response = await fetch(
                     `${SHEETS_API_BASE}/${spreadsheetId}/values/Bins!A:B?key=${apiKey}`
                 );
-                
+    
                 const data = await response.json();
                 const rows = data.values || [];
-                
+    
                 // Find the bin
                 for (let i = 1; i < rows.length; i++) {
                     if (rows[i][0] === binId) {
@@ -4840,57 +4841,57 @@
                         };
                     }
                 }
-                
+    
                 return null;
             } catch (error) {
                 console.error('Error fetching bin info:', error);
                 throw error;
             }
         }
-        
+    
         // UI Helper Functions
         function showStatus(message, type) {
             const statusDiv = document.getElementById('status-message');
             statusDiv.textContent = message;
             statusDiv.className = `status-message status-${type}`;
             statusDiv.classList.remove('hidden');
-            
+    
             setTimeout(() => {
                 statusDiv.classList.add('hidden');
             }, 5000);
         }
-        
+    
         function showWorkflowState(message) {
             const stateDiv = document.getElementById('workflow-state');
             stateDiv.textContent = message;
             stateDiv.classList.remove('hidden');
         }
-        
+    
         function hideWorkflowState() {
             document.getElementById('workflow-state').classList.add('hidden');
         }
-        
+    
         function hideStatus() {
             document.getElementById('status-message').classList.add('hidden');
         }
-        
+    
         function hideResults() {
             document.getElementById('results').classList.add('hidden');
         }
-        
+    
         function displayBinContents(binId, games, binInfo) {
             const resultsDiv = document.getElementById('results');
             const contentDiv = document.getElementById('results-content');
-            
+    
             // For Google Drive IDs, show a shortened version
             let displayId = binId;
             if (binId.length > 20 && !binId.includes(':')) {
                 displayId = 'Bin ' + binId.substring(0, 8) + '...';
             }
-            
+    
             const binDesc = binInfo ? binInfo.description : 'No description';
             contentDiv.innerHTML = `<h4>📦 ${displayId}</h4><p style="color: #7f8c8d; margin-bottom: 1rem;">${binDesc}</p>`;
-            
+    
             if (games.length === 0) {
                 contentDiv.innerHTML += '<p style="text-align: center; color: #95a5a6; padding: 2rem;">No games currently in this bin</p>';
             } else {
@@ -4908,14 +4909,14 @@
                     `;
                 });
             }
-            
+    
             resultsDiv.classList.remove('hidden');
         }
-        
+    
         function displayGamePlayInfo(gameInfo) {
             const resultsDiv = document.getElementById('results');
             const contentDiv = document.getElementById('results-content');
-            
+    
             contentDiv.innerHTML = `
                 <h4>🎮 Game Played</h4>
                 <div class="result-item">
@@ -4927,30 +4928,30 @@
                     </div>
                 </div>
             `;
-            
+    
             resultsDiv.classList.remove('hidden');
         }
-        
+    
         // Settings Management
         function saveSettings() {
             const spreadsheetId = document.getElementById('spreadsheet-id').value;
             const apiKey = document.getElementById('api-key').value;
-            
+    
             if (spreadsheetId && apiKey) {
                 localStorage.setItem('spreadsheetId', spreadsheetId);
                 localStorage.setItem('apiKey', apiKey);
                 showStatus('Settings saved successfully!', 'success');
-                
+    
                 // Test the connection
                 testConnection();
             } else {
                 showStatus('Please fill in all settings', 'error');
             }
         }
-        
+    
         function savePhotoSettings() {
             const photoFolderId = document.getElementById('photo-folder-id').value;
-            
+    
             if (photoFolderId) {
                 localStorage.setItem('photoFolderId', photoFolderId);
                 showStatus('Photo settings saved successfully!', 'success');
@@ -4958,16 +4959,16 @@
                 showStatus('Please enter a folder ID', 'error');
             }
         }
-        
+    
         async function testConnection() {
             try {
                 const spreadsheetId = localStorage.getItem('spreadsheetId');
                 const apiKey = localStorage.getItem('apiKey');
-                
+    
                 const response = await fetch(
                     `${SHEETS_API_BASE}/${spreadsheetId}?key=${apiKey}`
                 );
-                
+    
                 if (response.ok) {
                     showStatus('✅ Successfully connected to Google Sheets!', 'success');
                 } else {
@@ -4977,89 +4978,89 @@
                 showStatus('❌ Connection error: ' + error.message, 'error');
             }
         }
-        
+    
         function saveAppsScriptUrl() {
             const scriptUrl = document.getElementById('apps-script-url').value;
-            
+    
             if (scriptUrl) {
                 localStorage.setItem('appsScriptUrl', scriptUrl);
                 showStatus('Apps Script URL saved! Automatic updates are now enabled.', 'success');
-                
+    
                 // Update header to show auto-update is enabled
                 const header = document.querySelector('h1');
                 header.innerHTML = '🎲 BoardGame Collection Manager <span style="font-size: 0.7rem; background: #27ae60; padding: 0.2rem 0.5rem; border-radius: 4px; margin-left: 0.5rem;">Auto-Update Enabled</span>';
             } else {
                 localStorage.removeItem('appsScriptUrl');
                 showStatus('Apps Script URL removed', 'success');
-                
+    
                 // Remove auto-update indicator
                 const header = document.querySelector('h1');
                 header.innerHTML = '🎲 BoardGame Collection Manager';
             }
         }
-        
+    
         function loadSettings() {
             // Pre-fill with user's credentials
             const savedSpreadsheetId = localStorage.getItem('spreadsheetId');
             const savedApiKey = localStorage.getItem('apiKey');
             const savedPhotoFolderId = localStorage.getItem('photoFolderId');
             const savedAppsScriptUrl = localStorage.getItem('appsScriptUrl');
-            
+    
             // Always show the credentials in the fields
             document.getElementById('spreadsheet-id').value = savedSpreadsheetId || '1jf1ub1x0y6oal1So5rUHVANip5WeoAaoQgDyEOPS3fM';
             document.getElementById('api-key').value = savedApiKey || 'AIzaSyDMvS1WL5kEjfSgq2V1uKmlfvJIwSPfpqo';
             document.getElementById('photo-folder-id').value = savedPhotoFolderId || '';
             document.getElementById('apps-script-url').value = savedAppsScriptUrl || '';
-            
+    
             // Show first-time notice if credentials are not yet saved
             if (!savedSpreadsheetId || !savedApiKey) {
                 document.getElementById('first-time-notice').style.display = 'block';
             }
-            
+    
             // Update header to show if automatic updates are enabled
             if (savedAppsScriptUrl) {
                 const header = document.querySelector('h1');
                 header.innerHTML = '🎲 BoardGame Collection Manager <span style="font-size: 0.7rem; background: #27ae60; padding: 0.2rem 0.5rem; border-radius: 4px; margin-left: 0.5rem;">Auto-Update Enabled</span>';
             }
         }
-        
+    
         // Geek Group Integration Functions
         function saveGeekGroupUsername() {
             const username = document.getElementById('geekgroup-username').value.trim();
-            
+    
             if (!username) {
                 showStatus('Please enter your BGG username', 'error');
                 return;
             }
-            
+    
             localStorage.setItem('bggUsername', username);
             showStatus('BGG username saved!', 'success');
         }
-        
+    
         function loadGeekGroupUsername() {
             const savedUsername = localStorage.getItem('bggUsername');
             if (savedUsername) {
                 document.getElementById('geekgroup-username').value = savedUsername;
             }
         }
-        
+    
         function openGeekGroup() {
             const username = document.getElementById('geekgroup-username').value.trim();
-            
+    
             if (!username) {
                 showStatus('Please enter your BGG username first', 'error');
                 return;
             }
-            
+    
             // Save the username
             localStorage.setItem('bggUsername', username);
-            
+    
             // Construct Geek Group URL with correct format
             const geekGroupUrl = `https://geekgroup.app/users/${username}/collection`;
-            
+    
             // Option 1: Open in new tab (recommended)
             window.open(geekGroupUrl, '_blank');
-            
+    
             // Option 2: Try to embed (uncomment if Geek Group allows iframes)
             /*
             const iframeContainer = document.getElementById('geekgroup-iframe-container');
@@ -5068,18 +5069,18 @@
             iframeContainer.style.display = 'block';
             */
         }
-        
+    
         // Update the stats tab handler
         function setStatsTab(tab) {
             statsTab = tab;
             document.querySelectorAll('#stats-section .tab').forEach(t => t.classList.remove('active'));
             event.target.classList.add('active');
-            
+    
             // Hide all stats content
             document.querySelectorAll('.stats-content').forEach(content => {
                 content.classList.add('hidden');
             });
-            
+    
             // Show selected content
             switch(tab) {
                 case 'overview':
@@ -5103,7 +5104,7 @@
                     break;
             }
         }
-
+    
         // Add a quick link button to game history modal
         function addGeekGroupButton(bggId) {
             const username = localStorage.getItem('bggUsername');
@@ -5118,25 +5119,25 @@
             }
             return '';
         }
-
+    
         async function testGoogleSheetsConnection() {
             const spreadsheetId = localStorage.getItem('spreadsheetId');
             const apiKey = localStorage.getItem('apiKey');
-            
+    
             console.log('Spreadsheet ID:', spreadsheetId);
             console.log('API Key:', apiKey ? 'Set' : 'Not set');
-            
+    
             if (!spreadsheetId || !apiKey) {
                 console.error('Missing credentials!');
                 return;
             }
-            
+    
             try {
                 const response = await fetch(
                     `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Games!A1:E1?key=${apiKey}`
                 );
                 console.log('API Response Status:', response.status);
-                
+    
                 if (response.ok) {
                     const data = await response.json();
                     console.log('Headers:', data.values?.[0]);
@@ -5147,21 +5148,21 @@
                 console.error('Connection error:', error);
             }
         }
-
+    
         function debugUI() {
             console.log('=== UI Debug ===');
             console.log('Current Mode:', currentMode);
             console.log('Search Tab:', searchTab);
             console.log('Games Loaded:', allGames.length);
             console.log('Players Loaded:', allPlayers.length);
-            
+    
             // Check visibility of sections
             const sections = [
-                'scan-section', 'search-section', 'stats-section', 
-                'players-section', 'sessions-section', 'bulk-section', 
+                'scan-section', 'search-section', 'stats-section',
+                'players-section', 'sessions-section', 'bulk-section',
                 'bgg-section', 'settings-section', 'results'
             ];
-            
+    
             sections.forEach(id => {
                 const elem = document.getElementById(id);
                 if (elem) {
@@ -5170,10 +5171,9 @@
                     console.log(`${id}: NOT FOUND`);
                 }
             });
-            
+    
             console.log('=== End Debug ===');
-        }
-        
+        }  
     </script>
 </body>
 </html>
