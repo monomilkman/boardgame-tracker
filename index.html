@@ -1329,6 +1329,8 @@
         window.onload = function() {
             loadSettings();
             initializeRatingStars();
+            initializeEditRatingStars();
+
             
             // NEW: Handle NFC tag URL parameters
             const urlParams = new URLSearchParams(window.location.search);
@@ -1433,6 +1435,36 @@
         
         function highlightStars(rating) {
             document.querySelectorAll('.star').forEach((star, index) => {
+                if (index < rating) {
+                    star.textContent = '★';
+                    star.classList.add('filled');
+                } else {
+                    star.textContent = '☆';
+                    star.classList.remove('filled');
+                }
+            });
+        }
+
+        // Initialize edit rating stars - add this to your window.onload function
+        function initializeEditRatingStars() {
+            document.querySelectorAll('#edit-log-rating .star').forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    setEditRating(rating);
+                });
+                star.addEventListener('mouseover', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    highlightEditStars(rating);
+                });
+            });
+            
+            document.getElementById('edit-log-rating').addEventListener('mouseleave', function() {
+                highlightEditStars(currentEditRating);
+            });
+        }
+        
+        function highlightEditStars(rating) {
+            document.querySelectorAll('#edit-log-rating .star').forEach((star, index) => {
                 if (index < rating) {
                     star.textContent = '★';
                     star.classList.add('filled');
@@ -5836,46 +5868,68 @@
             
             const appsScriptUrl = localStorage.getItem('appsScriptUrl');
             
-            if (!appsScriptUrl) {
-                showStatus('Please enable auto-update to edit play logs', 'error');
-                return;
-            }
-            
             try {
-                // Get original timestamp (we'll keep it unchanged)
+                // Get original log for timestamp
                 const result = await loadPlayLogs();
                 const originalLog = result.logs.find(l => l.logId === logId);
                 
-                const updatedData = [
-                    originalLog.timestamp,  // Keep original timestamp
-                    gameId,
-                    players,
-                    notes,
-                    winner,
-                    rating || '',
-                    originalLog.sessionId || ''
-                ];
+                if (!originalLog) {
+                    showStatus('Original log not found', 'error');
+                    return;
+                }
                 
-                const response = await fetch(appsScriptUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'updatePlayLog',
-                        logId: logId,
-                        updatedData: updatedData
-                    })
-                });
-                
-                const updateResult = await response.json();
-                
-                if (updateResult.status === 'success') {
-                    showStatus('Play log updated successfully!', 'success');
+                if (appsScriptUrl) {
+                    const updatedData = [
+                        originalLog.timestamp,  // Keep original timestamp
+                        gameId,
+                        players,
+                        notes,
+                        winner,
+                        rating || '',
+                        originalLog.sessionId || ''
+                    ];
+                    
+                    const response = await fetch(appsScriptUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        // Note: no headers section for no-cors mode
+                        body: JSON.stringify({
+                            action: 'updatePlayLog',
+                            logId: logId,
+                            updatedData: updatedData
+                        })
+                    });
+                    
+                    showStatus('Play log update sent! Refresh to see changes.', 'success');
                     closeEditPlayLogModal();
-                    displayPlayLogs(currentPlayLogsPage);
+                    
+                    // Reload logs after a short delay
+                    setTimeout(() => {
+                        displayPlayLogs(currentPlayLogsPage);
+                    }, 1000);
+                    
                 } else {
-                    showStatus('Error updating play log: ' + updateResult.message, 'error');
+                    // Manual update instruction
+                    const rowData = [
+                        logId,
+                        originalLog.timestamp,
+                        gameId,
+                        players,
+                        notes,
+                        winner,
+                        rating || '',
+                        originalLog.sessionId || ''
+                    ];
+                    
+                    const csvRow = rowData.map(cell => `"${cell}"`).join(',');
+                    
+                    showStatus('Manual update required. Find the log with ID ' + logId + ' in your PlayLog sheet and replace the row with this data:', 'error');
+                    console.log('Replace row with:', csvRow);
+                    
+                    // Copy to clipboard
+                    navigator.clipboard.writeText(csvRow).then(() => {
+                        alert('Row data copied to clipboard! Find log ID ' + logId + ' in your PlayLog sheet and replace that row.');
+                    });
                 }
                 
             } catch (error) {
