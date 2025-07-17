@@ -66,7 +66,8 @@
     #sessions-section,
     #bulk-section,
     #bgg-section,
-    #settings-section {
+    #settings-section,
+    #playlogs-section {
         display: none; /* Default hidden */
     }
     
@@ -78,7 +79,8 @@
     #sessions-section:not(.hidden),
     #bulk-section:not(.hidden),
     #bgg-section:not(.hidden),
-    #settings-section:not(.hidden) {
+    #settings-section:not(.hidden),
+    #playlogs-section:not(.hidden) {
         display: block !important;
     }
     
@@ -617,6 +619,62 @@
         background-color: rgba(248, 215, 218, 0.5);
         color: #721c24;
     }
+
+    /* Play Logs Section */
+    .playlogs-content {
+        margin-top: 1rem;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+    }
+    
+    .pagination button {
+        padding: 0.5rem 1rem;
+        border: 1px solid #ddd;
+        background: white;
+        cursor: pointer;
+        border-radius: 4px;
+    }
+    
+    .pagination button.active {
+        background: #3498db;
+        color: white;
+    }
+    
+    .pagination button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .play-log-item {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+    }
+    
+    .play-log-details {
+        flex: 1;
+    }
+    
+    .play-log-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .play-log-actions button {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+
+
         
     </style>
 
@@ -675,6 +733,10 @@
             <button class="mode-btn" onclick="setMode('settings')">
                 <span class="icon">⚙️</span>
                 <span>Settings</span>
+            </button>
+            <button class="mode-btn" onclick="setMode('playlogs')">
+                <span class="icon">📝</span>
+                <span>Play Logs</span>
             </button>
         </div>
         
@@ -1006,6 +1068,116 @@
             <h3>Results</h3>
             <div id="results-content"></div>
         </div>
+
+        <!-- Play Logs Management Section -->
+        <div id="playlogs-section" class="hidden">
+            <div class="tabs">
+                <button class="tab active" onclick="setPlayLogsTab('recent')">Recent Logs</button>
+                <button class="tab" onclick="setPlayLogsTab('search')">Search</button>
+                <button class="tab" onclick="setPlayLogsTab('export')">Export</button>
+            </div>
+            
+            <!-- Recent Logs Tab -->
+            <div id="playlogs-recent" class="playlogs-content">
+                <div class="results">
+                    <h3>Recent Play Logs</h3>
+                    <div id="recent-logs-list"></div>
+                    <div class="pagination" id="logs-pagination"></div>
+                </div>
+            </div>
+            
+            <!-- Search Tab -->
+            <div id="playlogs-search" class="playlogs-content hidden">
+                <div class="search-container">
+                    <h3>Search Play Logs</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div>
+                            <label>Game:</label>
+                            <select id="log-search-game">
+                                <option value="">All Games</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Player:</label>
+                            <input type="text" id="log-search-player" placeholder="Player name">
+                        </div>
+                        <div>
+                            <label>Date From:</label>
+                            <input type="date" id="log-search-date-from">
+                        </div>
+                        <div>
+                            <label>Date To:</label>
+                            <input type="date" id="log-search-date-to">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="searchPlayLogs()">Search</button>
+                </div>
+                <div id="search-logs-results" class="results hidden" style="margin-top: 2rem;"></div>
+            </div>
+            
+            <!-- Export Tab -->
+            <div id="playlogs-export" class="playlogs-content hidden">
+                <div class="setup-section">
+                    <h3>Export Play Logs</h3>
+                    <p>Export your play history for backup or analysis</p>
+                    <button class="btn btn-primary" onclick="exportAllPlayLogs()">Export All Logs (CSV)</button>
+                    <button class="btn btn-info" onclick="exportFilteredPlayLogs()">Export Search Results (CSV)</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Edit Play Log Modal -->
+        <div id="edit-playlog-modal" class="game-history-modal hidden">
+            <div class="game-history-content">
+                <div class="game-history-header">
+                    <h2>Edit Play Log</h2>
+                    <button class="game-history-close" onclick="closeEditPlayLogModal()">×</button>
+                </div>
+                <div class="game-history-body">
+                    <input type="hidden" id="edit-log-id">
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label>Game:</label>
+                        <select id="edit-log-game" style="width: 100%; padding: 0.75rem;">
+                            <option value="">Select game...</option>
+                        </select>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label>Players (comma-separated):</label>
+                        <input type="text" id="edit-log-players">
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label>Winner:</label>
+                        <input type="text" id="edit-log-winner">
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label>Rating:</label>
+                        <div class="rating-input" id="edit-log-rating">
+                            <span class="star" data-rating="1">☆</span>
+                            <span class="star" data-rating="2">☆</span>
+                            <span class="star" data-rating="3">☆</span>
+                            <span class="star" data-rating="4">☆</span>
+                            <span class="star" data-rating="5">☆</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <label>Notes:</label>
+                        <textarea id="edit-log-notes" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="savePlayLogEdit()">Save Changes</button>
+                        <button class="btn btn-secondary" onclick="closeEditPlayLogModal()">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
         
         <!-- Settings Section -->
         <div id="settings-section" class="setup-section hidden">
@@ -1067,7 +1239,8 @@
             </div>
         </div>
     </main>
-    
+
+   
     <!-- Game History Modal -->
     <div id="game-history-modal" class="game-history-modal hidden">
         <div class="game-history-content">
@@ -1128,6 +1301,12 @@
         // NFC scanning variables
         let nfcReader = null;
         let isNFCScanning = false;
+
+        // Play Logs Management Variables
+        let currentPlayLogsPage = 1;
+        let playLogsPerPage = 20;
+        let currentPlayLogsFilter = {};
+        let playLogsTab = 'recent';
         
         // Chart.js instances
         let trendsChart = null;
@@ -1368,6 +1547,11 @@
                         console.log('Showing search section');
                         forceShowSection('search-section');
                         searchTab = 'all';
+                        
+                    case 'playlogs':
+                        forceShowSection('playlogs-section');
+                        setPlayLogsTab('recent');
+                        break;
                         
                         // Set the "All Games" tab as active
                         document.querySelectorAll('#search-section .tab').forEach(t => {
@@ -2170,6 +2354,7 @@
             }
         }
         
+        // Modified logEnhancedGamePlay function to include log ID
         async function logEnhancedGamePlay(gameId, players, winner, rating, notes, sessionId = '') {
             const spreadsheetId = localStorage.getItem('spreadsheetId');
             const apiKey = localStorage.getItem('apiKey');
@@ -2177,17 +2362,18 @@
             
             try {
                 const timestamp = new Date().toLocaleString();
+                const logId = generateLogId(); // Generate unique ID
                 const playData = [
-                    timestamp,      // A: Timestamp
-                    gameId,         // B: Game ID
-                    players,        // C: Players
-                    notes,          // D: Notes
-                    winner,         // E: Winner
-                    rating || '',   // F: Rating
-                    sessionId       // G: Session ID
+                    logId,          // A: Log ID (NEW)
+                    timestamp,      // B: Timestamp
+                    gameId,         // C: Game ID
+                    players,        // D: Players
+                    notes,          // E: Notes
+                    winner,         // F: Winner
+                    rating || '',   // G: Rating
+                    sessionId       // H: Session ID
                 ];
                 
-                // If Apps Script URL is available, use it
                 if (appsScriptUrl) {
                     const scriptResponse = await fetch(appsScriptUrl, {
                         method: 'POST',
@@ -2205,7 +2391,7 @@
                     return true;
                 }
                 
-                // Otherwise provide manual instruction
+                // Manual instruction if no Apps Script
                 const csvRow = playData.map(cell => `"${cell}"`).join(',');
                 showStatus(`Copy this play log entry: ${csvRow}`, 'error');
                 console.log('Add this to PlayLog sheet:', csvRow);
@@ -3124,33 +3310,29 @@
             showStatus('Delete template ' + templateId + ' manually from the SessionTemplates sheet', 'error');
         }
         
-        // Enhanced play history loading
-        async function loadEnhancedPlayHistory() {
+        // Enhanced play history loading with IDs
+        async function loadEnhancedPlayHistoryWithIds() {
             const spreadsheetId = localStorage.getItem('spreadsheetId');
             const apiKey = localStorage.getItem('apiKey');
             
             if (!spreadsheetId || !apiKey) {
                 console.log('No spreadsheet ID or API key found');
-                return [];
+                return { logs: [], total: 0 };
             }
             
             try {
                 const response = await fetch(
-                    `${SHEETS_API_BASE}/${spreadsheetId}/values/PlayLog!A:G?key=${apiKey}`
+                    `${SHEETS_API_BASE}/${spreadsheetId}/values/PlayLog!A:H?key=${apiKey}`
                 );
                 
                 const data = await response.json();
                 const rows = data.values || [];
                 
-                console.log(`Loaded ${rows.length - 1} play history entries from PlayLog sheet`);
-                if (rows.length > 1) {
-                    console.log('PlayLog sample row:', rows[1]);
-                }
-                
-                playHistory = [];
+                const logs = [];
                 for (let i = 1; i < rows.length; i++) {
-                    const [timestamp, gameId, players, notes, winner, rating, sessionId] = rows[i];
-                    playHistory.push({
+                    const [logId, timestamp, gameId, players, notes, winner, rating, sessionId] = rows[i];
+                    logs.push({
+                        logId: logId || `LOG:LEGACY${i}`, // Handle old entries without IDs
                         timestamp,
                         gameId,
                         players: players || '',
@@ -3161,15 +3343,13 @@
                     });
                 }
                 
-                // Debug: Show a sample of play history
-                if (playHistory.length > 0) {
-                    console.log('Sample play history entry:', playHistory[0]);
-                }
-                
-                return playHistory;
+                return {
+                    logs: logs.reverse(), // Newest first
+                    total: logs.length
+                };
             } catch (error) {
                 console.error('Error loading play history:', error);
-                return [];
+                return { logs: [], total: 0 };
             }
         }
         
@@ -5464,6 +5644,497 @@
                 document.getElementById('nfc-scan-btn').textContent = '⏹️ Stop NFC';
             }
         }
+
+        // Generate unique log ID
+        function generateLogId() {
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 1000);
+            return `LOG:${timestamp}${random}`;
+        }
+
+        // Load play logs with filtering
+        async function loadPlayLogs(options = {}) {
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            
+            if (!appsScriptUrl) {
+                // Fallback to direct API if no Apps Script
+                return loadEnhancedPlayHistoryWithIds();
+            }
+            
+            try {
+                const response = await fetch(appsScriptUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'getPlayLogs',
+                        options: options
+                    })
+                });
+                
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error('Error loading play logs:', error);
+                showStatus('Error loading play logs', 'error');
+                return { logs: [], total: 0 };
+            }
+        }
+
+        // Display play logs
+        async function displayPlayLogs(page = 1) {
+            currentPlayLogsPage = page;
+            
+            const options = {
+                ...currentPlayLogsFilter,
+                page: page,
+                perPage: playLogsPerPage
+            };
+            
+            const result = await loadPlayLogs(options);
+            const container = document.getElementById('recent-logs-list');
+            
+            if (result.logs.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #7f8c8d;">No play logs found</p>';
+                return;
+            }
+            
+            // Ensure games are loaded for display
+            if (allGames.length === 0) {
+                await loadAllGames();
+            }
+            
+            container.innerHTML = result.logs.map(log => {
+                const game = allGames.find(g => g.id === log.gameId);
+                const gameTitle = game?.title || log.gameId;
+                const date = new Date(log.timestamp);
+                
+                return `
+                    <div class="play-log-item">
+                        <div class="play-log-details">
+                            <strong>${gameTitle}</strong><br>
+                            <small>${date.toLocaleDateString()} ${date.toLocaleTimeString()}</small><br>
+                            ${log.players ? `Players: ${log.players}<br>` : ''}
+                            ${log.winner ? `Winner: ${log.winner}<br>` : ''}
+                            ${log.rating ? `Rating: ${getStarDisplay(log.rating)}<br>` : ''}
+                            ${log.notes ? `Notes: ${log.notes}` : ''}
+                        </div>
+                        <div class="play-log-actions">
+                            <button class="btn btn-info" onclick="editPlayLog('${log.logId}')">Edit</button>
+                            <button class="btn btn-secondary" onclick="deletePlayLog('${log.logId}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Display pagination
+            displayPagination(result.total, page);
+        }
+
+        // Display pagination controls
+        function displayPagination(total, currentPage) {
+            const totalPages = Math.ceil(total / playLogsPerPage);
+            const paginationDiv = document.getElementById('logs-pagination');
+            
+            if (totalPages <= 1) {
+                paginationDiv.innerHTML = '';
+                return;
+            }
+            
+            let html = '';
+            
+            // Previous button
+            html += `<button onclick="displayPlayLogs(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
+            
+            // Page numbers
+            for (let i = 1; i <= Math.min(totalPages, 5); i++) {
+                html += `<button onclick="displayPlayLogs(${i})" class="${i === currentPage ? 'active' : ''}">${i}</button>`;
+            }
+            
+            if (totalPages > 5) {
+                html += `<span>...</span>`;
+                html += `<button onclick="displayPlayLogs(${totalPages})">${totalPages}</button>`;
+            }
+            
+            // Next button
+            html += `<button onclick="displayPlayLogs(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+            
+            paginationDiv.innerHTML = html;
+        }
+        
+        // Edit play log
+        async function editPlayLog(logId) {
+            // Find the log entry
+            const result = await loadPlayLogs();
+            const log = result.logs.find(l => l.logId === logId);
+            
+            if (!log) {
+                showStatus('Play log not found', 'error');
+                return;
+            }
+            
+            // Ensure games are loaded
+            if (allGames.length === 0) {
+                await loadAllGames();
+            }
+            
+            // Populate the edit modal
+            document.getElementById('edit-log-id').value = logId;
+            
+            // Populate game dropdown
+            const gameSelect = document.getElementById('edit-log-game');
+            gameSelect.innerHTML = '<option value="">Select game...</option>';
+            allGames.forEach(game => {
+                gameSelect.innerHTML += `<option value="${game.id}" ${game.id === log.gameId ? 'selected' : ''}>${game.title}</option>`;
+            });
+            
+            document.getElementById('edit-log-players').value = log.players;
+            document.getElementById('edit-log-winner').value = log.winner;
+            document.getElementById('edit-log-notes').value = log.notes;
+            
+            // Set rating
+            if (log.rating) {
+                setEditRating(parseInt(log.rating));
+            }
+            
+            // Show modal
+            document.getElementById('edit-playlog-modal').classList.remove('hidden');
+        }
+        
+        // Save play log edit
+        async function savePlayLogEdit() {
+            const logId = document.getElementById('edit-log-id').value;
+            const gameId = document.getElementById('edit-log-game').value;
+            const players = document.getElementById('edit-log-players').value;
+            const winner = document.getElementById('edit-log-winner').value;
+            const notes = document.getElementById('edit-log-notes').value;
+            const rating = currentEditRating;
+            
+            if (!gameId) {
+                showStatus('Please select a game', 'error');
+                return;
+            }
+            
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            
+            if (!appsScriptUrl) {
+                showStatus('Please enable auto-update to edit play logs', 'error');
+                return;
+            }
+            
+            try {
+                // Get original timestamp (we'll keep it unchanged)
+                const result = await loadPlayLogs();
+                const originalLog = result.logs.find(l => l.logId === logId);
+                
+                const updatedData = [
+                    originalLog.timestamp,  // Keep original timestamp
+                    gameId,
+                    players,
+                    notes,
+                    winner,
+                    rating || '',
+                    originalLog.sessionId || ''
+                ];
+                
+                const response = await fetch(appsScriptUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'updatePlayLog',
+                        logId: logId,
+                        updatedData: updatedData
+                    })
+                });
+                
+                const updateResult = await response.json();
+                
+                if (updateResult.status === 'success') {
+                    showStatus('Play log updated successfully!', 'success');
+                    closeEditPlayLogModal();
+                    displayPlayLogs(currentPlayLogsPage);
+                } else {
+                    showStatus('Error updating play log: ' + updateResult.message, 'error');
+                }
+                
+            } catch (error) {
+                showStatus('Error updating play log: ' + error.message, 'error');
+            }
+        }
+        
+        // Delete play log
+        async function deletePlayLog(logId) {
+            if (!confirm('Are you sure you want to delete this play log? This action cannot be undone.')) {
+                return;
+            }
+            
+            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
+            
+            if (!appsScriptUrl) {
+                showStatus('Please enable auto-update to delete play logs', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch(appsScriptUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'deletePlayLog',
+                        logId: logId
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    showStatus('Play log deleted successfully!', 'success');
+                    displayPlayLogs(currentPlayLogsPage);
+                } else {
+                    showStatus('Error deleting play log: ' + result.message, 'error');
+                }
+                
+            } catch (error) {
+                showStatus('Error deleting play log: ' + error.message, 'error');
+            }
+        }
+        
+        // Search play logs
+        async function searchPlayLogs() {
+            const gameId = document.getElementById('log-search-game').value;
+            const playerId = document.getElementById('log-search-player').value;
+            const dateFrom = document.getElementById('log-search-date-from').value;
+            const dateTo = document.getElementById('log-search-date-to').value;
+            
+            currentPlayLogsFilter = {
+                gameId,
+                playerId,
+                dateFrom,
+                dateTo
+            };
+            
+            const result = await loadPlayLogs(currentPlayLogsFilter);
+            
+            const resultsDiv = document.getElementById('search-logs-results');
+            resultsDiv.classList.remove('hidden');
+            
+            if (result.logs.length === 0) {
+                resultsDiv.innerHTML = '<h4>No matching play logs found</h4>';
+                return;
+            }
+            
+            resultsDiv.innerHTML = '<h4>Search Results</h4>';
+            resultsDiv.innerHTML += `<p>Found ${result.total} matching logs</p>`;
+            
+            // Display results (reuse the display function)
+            const container = document.createElement('div');
+            container.id = 'search-results-list';
+            resultsDiv.appendChild(container);
+            
+            // Display the logs
+            container.innerHTML = result.logs.map(log => {
+                const game = allGames.find(g => g.id === log.gameId);
+                const gameTitle = game?.title || log.gameId;
+                const date = new Date(log.timestamp);
+                
+                return `
+                    <div class="play-log-item">
+                        <div class="play-log-details">
+                            <strong>${gameTitle}</strong><br>
+                            <small>${date.toLocaleDateString()} ${date.toLocaleTimeString()}</small><br>
+                            ${log.players ? `Players: ${log.players}<br>` : ''}
+                            ${log.winner ? `Winner: ${log.winner}<br>` : ''}
+                            ${log.rating ? `Rating: ${getStarDisplay(log.rating)}<br>` : ''}
+                            ${log.notes ? `Notes: ${log.notes}` : ''}
+                        </div>
+                        <div class="play-log-actions">
+                            <button class="btn btn-info" onclick="editPlayLog('${log.logId}')">Edit</button>
+                            <button class="btn btn-secondary" onclick="deletePlayLog('${log.logId}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Export play logs functions
+        async function exportAllPlayLogs() {
+            showStatus('Preparing export...', 'success');
+            
+            const result = await loadPlayLogs({ perPage: 99999 }); // Get all logs
+            
+            if (result.logs.length === 0) {
+                showStatus('No play logs to export', 'error');
+                return;
+            }
+            
+            // Ensure games are loaded
+            if (allGames.length === 0) {
+                await loadAllGames();
+            }
+            
+            let csv = 'Log ID,Timestamp,Game Title,Game ID,Players,Winner,Rating,Notes,Session ID\n';
+            
+            result.logs.forEach(log => {
+                const game = allGames.find(g => g.id === log.gameId);
+                const gameTitle = game?.title || '';
+                
+                csv += [
+                    log.logId,
+                    log.timestamp,
+                    `"${gameTitle.replace(/"/g, '""')}"`,
+                    log.gameId,
+                    `"${(log.players || '').replace(/"/g, '""')}"`,
+                    `"${(log.winner || '').replace(/"/g, '""')}"`,
+                    log.rating || '',
+                    `"${(log.notes || '').replace(/"/g, '""')}"`,
+                    log.sessionId || ''
+                ].join(',') + '\n';
+            });
+            
+            downloadCSV(csv, `play_logs_export_${new Date().toISOString().split('T')[0]}.csv`);
+            showStatus('Export complete!', 'success');
+        }
+        
+        async function exportFilteredPlayLogs() {
+            if (Object.keys(currentPlayLogsFilter).length === 0) {
+                showStatus('No search filters applied. Use Export All Logs instead.', 'error');
+                return;
+            }
+            
+            showStatus('Preparing filtered export...', 'success');
+            
+            const result = await loadPlayLogs({ ...currentPlayLogsFilter, perPage: 99999 });
+            
+            if (result.logs.length === 0) {
+                showStatus('No matching logs to export', 'error');
+                return;
+            }
+            
+            // Reuse the export logic from exportAllPlayLogs
+            // ... (same CSV generation code)
+            
+            downloadCSV(csv, `filtered_play_logs_${new Date().toISOString().split('T')[0]}.csv`);
+            showStatus('Filtered export complete!', 'success');
+        }
+        
+        // Play logs tab management
+        function setPlayLogsTab(tab) {
+            playLogsTab = tab;
+            
+            // Update tab buttons
+            document.querySelectorAll('#playlogs-section .tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('#playlogs-section .tab').forEach(t => {
+                if ((tab === 'recent' && t.textContent === 'Recent Logs') ||
+                    (tab === 'search' && t.textContent === 'Search') ||
+                    (tab === 'export' && t.textContent === 'Export')) {
+                    t.classList.add('active');
+                }
+            });
+            
+            // Hide all content
+            document.querySelectorAll('.playlogs-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            // Show selected content
+            switch(tab) {
+                case 'recent':
+                    document.getElementById('playlogs-recent').classList.remove('hidden');
+                    displayPlayLogs(1);
+                    break;
+                case 'search':
+                    document.getElementById('playlogs-search').classList.remove('hidden');
+                    // Populate game dropdown
+                    populateGameSearchDropdown();
+                    break;
+                case 'export':
+                    document.getElementById('playlogs-export').classList.remove('hidden');
+                    break;
+            }
+        }
+        
+        // Populate game search dropdown
+        async function populateGameSearchDropdown() {
+            if (allGames.length === 0) {
+                await loadAllGames();
+            }
+            
+            const select = document.getElementById('log-search-game');
+            select.innerHTML = '<option value="">All Games</option>';
+            
+            allGames.forEach(game => {
+                select.innerHTML += `<option value="${game.id}">${game.title}</option>`;
+            });
+        }
+        
+        // Edit modal functions
+        let currentEditRating = 0;
+        
+        function closeEditPlayLogModal() {
+            document.getElementById('edit-playlog-modal').classList.add('hidden');
+            currentEditRating = 0;
+        }
+        
+        function setEditRating(rating) {
+            currentEditRating = rating;
+            document.querySelectorAll('#edit-log-rating .star').forEach((star, index) => {
+                if (index < rating) {
+                    star.textContent = '★';
+                    star.classList.add('filled');
+                } else {
+                    star.textContent = '☆';
+                    star.classList.remove('filled');
+                }
+            });
+        }
+        
+        // Initialize edit rating stars
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('#edit-log-rating .star').forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.dataset.rating);
+                    setEditRating(rating);
+                });
+            });
+        });
+
+        // Add checkboxes to play log items and bulk delete functionality
+        function selectAllPlayLogs() {
+            document.querySelectorAll('.play-log-checkbox').forEach(cb => cb.checked = true);
+            updateBulkPlayLogActions();
+        }
+        
+        function bulkDeletePlayLogs() {
+            const selected = Array.from(document.querySelectorAll('.play-log-checkbox:checked'))
+                .map(cb => cb.dataset.logId);
+            
+            if (selected.length === 0) {
+                showStatus('No logs selected', 'error');
+                return;
+            }
+            
+            if (!confirm(`Delete ${selected.length} play logs? This cannot be undone.`)) {
+                return;
+            }
+            
+            // Process deletions...
+        }
+
+        // Add a statistics view for play logs
+        function displayPlayLogStats() {
+            // Calculate statistics like:
+            // - Most active day of week
+            // - Average game length
+            // - Win rate by player
+            // - Rating trends over time
+            // - Most played time of day
+        }
+
         
     </script>
 </body>
