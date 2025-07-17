@@ -12,732 +12,596 @@
             document.write('<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"><\/script>');
         }
     </script>
+    
     <style>
-        #search-section, #stats-section, #players-section, 
-        #sessions-section, #bulk-section, #bgg-section, #settings-section {
-            min-height: 100px;
-        }
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
-            min-height: 100vh;
-        }
-        
-        header {
-            background-color: #2c3e50;
-            color: white;
-            padding: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        
-        h1 {
-            font-size: 1.5rem;
-            text-align: center;
-        }
-        
-        main {
-            padding: 1rem;
-            max-width: 800px;
-            margin: 0 auto;
-            width: 100%;
-        }
-        
-        /* CRITICAL: Force hidden to work */
-        .hidden {
-            display: none !important;
-            visibility: hidden !important;
-            height: 0 !important;
-            overflow: hidden !important;
-        }
-        
-        /* CRITICAL: Force sections to display when not hidden */
-        main > div:not(.hidden):not(.mode-selector) {
-            display: block !important;
-        }
-        
+    /* ===== RESET & BASE STYLES ===== */
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+    
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: #f5f5f5;
+        color: #333;
+        min-height: 100vh;
+    }
+    
+    /* ===== LAYOUT STRUCTURE ===== */
+    header {
+        background-color: #2c3e50;
+        color: white;
+        padding: 1rem;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+        text-align: center;
+    }
+    
+    main {
+        padding: 1rem;
+        max-width: 800px;
+        margin: 0 auto;
+        width: 100%;
+        min-height: calc(100vh - 100px);
+    }
+    
+    /* ===== VISIBILITY CONTROLS - MOST IMPORTANT ===== */
+    .hidden {
+        display: none !important;
+    }
+    
+    /* Ensure all sections can be visible when not hidden */
+    #scan-section,
+    #play-log-section,
+    #search-section,
+    #stats-section,
+    #players-section,
+    #sessions-section,
+    #bulk-section,
+    #bgg-section,
+    #settings-section {
+        display: none; /* Default hidden */
+    }
+    
+    #scan-section:not(.hidden),
+    #play-log-section:not(.hidden),
+    #search-section:not(.hidden),
+    #stats-section:not(.hidden),
+    #players-section:not(.hidden),
+    #sessions-section:not(.hidden),
+    #bulk-section:not(.hidden),
+    #bgg-section:not(.hidden),
+    #settings-section:not(.hidden) {
+        display: block !important;
+    }
+    
+    /* ===== MODE SELECTOR ===== */
+    .mode-selector {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .mode-btn {
+        padding: 0.75rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        background-color: #ecf0f1;
+        color: #2c3e50;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .mode-btn .icon {
+        font-size: 1.2rem;
+    }
+    
+    .mode-btn.active {
+        background-color: #3498db;
+        color: white;
+    }
+    
+    .mode-btn:hover:not(.active) {
+        background-color: #bdc3c7;
+    }
+    
+    /* ===== COMMON CONTAINERS ===== */
+    .scan-container,
+    .search-container,
+    .setup-section {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 1rem;
+    }
+    
+    /* ===== QR SCANNER ===== */
+    #reader {
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+    
+    /* ===== BUTTONS ===== */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .btn {
+        flex: 1;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .btn-primary {
+        background-color: #27ae60;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: #229954;
+    }
+    
+    .btn-secondary {
+        background-color: #e74c3c;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #c0392b;
+    }
+    
+    .btn-info {
+        background-color: #3498db;
+        color: white;
+    }
+    
+    .btn-info:hover {
+        background-color: #2980b9;
+    }
+    
+    /* ===== RESULTS DISPLAY ===== */
+    .results {
+        background: white;
+        border-radius: 12px;
+        padding: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-top: 1rem;
+    }
+    
+    .result-item {
+        padding: 0.75rem;
+        border-bottom: 1px solid #ecf0f1;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .result-item:last-child {
+        border-bottom: none;
+    }
+    
+    .result-item input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .result-item-content {
+        flex: 1;
+    }
+    
+    .game-title {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    
+    .game-location {
+        font-size: 0.875rem;
+        color: #7f8c8d;
+        margin-top: 0.25rem;
+    }
+    
+    .game-thumbnail {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+    
+    /* ===== STATUS MESSAGES ===== */
+    .status-message {
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        text-align: center;
+        font-weight: 500;
+    }
+    
+    .status-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+    
+    .status-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+    
+    /* ===== WORKFLOW STATE ===== */
+    .workflow-state {
+        background: #fff3cd;
+        border: 1px solid #ffeeba;
+        color: #856404;
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        text-align: center;
+    }
+    
+    /* ===== SETUP INSTRUCTIONS ===== */
+    .setup-instructions {
+        background: #e8f4f8;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+        font-size: 0.875rem;
+        line-height: 1.6;
+    }
+    
+    /* ===== SEARCH ===== */
+    .search-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+    
+    /* ===== STATS ===== */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: #3498db;
+    }
+    
+    .stat-label {
+        color: #7f8c8d;
+        margin-top: 0.5rem;
+    }
+    
+    /* ===== TABS ===== */
+    .tabs {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        border-bottom: 2px solid #ecf0f1;
+    }
+    
+    .tab {
+        padding: 0.5rem 1rem;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        cursor: pointer;
+        font-weight: 600;
+        color: #7f8c8d;
+        transition: all 0.3s;
+    }
+    
+    .tab.active {
+        background-color: #3498db !important;
+        color: white !important;
+    }
+    
+    /* ===== PLAYERS ===== */
+    .player-select {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 1rem 0;
+    }
+    
+    .player-chip {
+        background: #e8f4f8;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.3s;
+        border: 2px solid transparent;
+    }
+    
+    .player-chip.selected {
+        background: #3498db;
+        color: white;
+        border-color: #2980b9;
+    }
+    
+    .player-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin: 1rem 0;
+        position: relative;
+    }
+    
+    .player-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .player-card h4 {
+        margin: 0;
+        color: #2c3e50;
+    }
+    
+    .player-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .player-stat-item {
+        text-align: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .player-stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #3498db;
+    }
+    
+    .player-stat-label {
+        font-size: 0.875rem;
+        color: #7f8c8d;
+        margin-top: 0.25rem;
+    }
+    
+    /* ===== FORMS ===== */
+    input[type="text"],
+    input[type="email"],
+    select,
+    textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* ===== RATING STARS ===== */
+    .rating-input {
+        display: flex;
+        gap: 0.25rem;
+        margin: 0.5rem 0;
+    }
+    
+    .star {
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #ddd;
+    }
+    
+    .star.filled {
+        color: #f1c40f;
+    }
+    
+    /* ===== CHART CONTAINERS ===== */
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin: 2rem 0;
+    }
+    
+    /* ===== SESSION TEMPLATE ===== */
+    .session-template {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 0.5rem 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    /* ===== HISTORY ITEMS ===== */
+    .session-history-item {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 0.5rem 0;
+    }
+    
+    .session-history-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+    
+    .session-history-games {
+        font-size: 0.875rem;
+        color: #7f8c8d;
+    }
+    
+    /* ===== GAME HISTORY MODAL ===== */
+    .game-history-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        padding: 1rem;
+        overflow-y: auto;
+    }
+    
+    .game-history-modal:not(.hidden) {
+        display: flex;
+    }
+    
+    .game-history-content {
+        background: white;
+        border-radius: 12px;
+        max-width: 600px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+    }
+    
+    .game-history-header {
+        background: #2c3e50;
+        color: white;
+        padding: 1.5rem;
+        border-radius: 12px 12px 0 0;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .game-history-header h2 {
+        margin: 0;
+        font-size: 1.5rem;
+    }
+    
+    .game-history-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+    
+    .game-history-body {
+        padding: 1.5rem;
+    }
+    
+    .history-section {
+        margin-bottom: 2rem;
+    }
+    
+    .history-section h3 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .play-history-item,
+    .travel-history-item {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+    }
+    
+    .play-history-item {
+        border-left: 4px solid #3498db;
+    }
+    
+    /* ===== BULK ACTIONS ===== */
+    .bulk-actions {
+        background: #ecf0f1;
+        padding: 1rem;
+        border-radius: 8px;
+        margin: 1rem 0;
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    
+    /* ===== TRADE INDICATORS ===== */
+    .trade-indicator {
+        display: inline-block;
+        padding: 0.2rem 0.5rem;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+    
+    .trade-indicator.trade {
+        background: #f39c12;
+        color: white;
+    }
+    
+    .trade-indicator.sell {
+        background: #27ae60;
+        color: white;
+    }
+    
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 600px) {
         .mode-selector {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .mode-btn {
-            padding: 0.75rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            background-color: #ecf0f1;
-            color: #2c3e50;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.25rem;
-        }
-        
-        .mode-btn .icon {
-            font-size: 1.2rem;
-        }
-        
-        .mode-btn.active {
-            background-color: #3498db;
-            color: white;
-        }
-        
-        .mode-btn:hover:not(.active) {
-            background-color: #bdc3c7;
-        }
-        
-        .scan-container {
-            background: white;
-            border-radius: 12px;
-            padding: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 1rem;
-        }
-        
-        #reader {
-            width: 100%;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1rem;
-        }
-        
-        .btn {
-            flex: 1;
-            padding: 0.75rem;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary {
-            background-color: #27ae60;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: #229954;
-        }
-        
-        .btn-secondary {
-            background-color: #e74c3c;
-            color: white;
-        }
-        
-        .btn-secondary:hover {
-            background-color: #c0392b;
-        }
-        
-        .btn-info {
-            background-color: #3498db;
-            color: white;
-        }
-        
-        .btn-info:hover {
-            background-color: #2980b9;
-        }
-        
-        .results {
-            background: white;
-            border-radius: 12px;
-            padding: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-top: 1rem;
-        }
-        
-        .result-item {
-            padding: 0.75rem;
-            border-bottom: 1px solid #ecf0f1;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .result-item:last-child {
-            border-bottom: none;
-        }
-        
-        .result-item input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
-        }
-        
-        .result-item-content {
-            flex: 1;
-        }
-        
-        .game-title {
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .game-location {
-            font-size: 0.875rem;
-            color: #7f8c8d;
-            margin-top: 0.25rem;
-        }
-        
-        .game-thumbnail {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-        
-        .status-message {
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            text-align: center;
-            font-weight: 500;
-        }
-        
-        .status-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .status-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .workflow-state {
-            background: #fff3cd;
-            border: 1px solid #ffeeba;
-            color: #856404;
-            padding: 0.75rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            text-align: center;
-        }
-        
-        .setup-section {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-top: 1rem;
-        }
-        
-        .setup-section h3 {
-            margin-bottom: 1rem;
-            color: #2c3e50;
-        }
-        
-        .setup-section input, .setup-section select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-        }
-        
-        .setup-instructions {
-            background: #e8f4f8;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-            font-size: 0.875rem;
-            line-height: 1.6;
-        }
-        
-        .search-container {
-            background: white;
-            border-radius: 12px;
-            padding: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 1rem;
-        }
-        
-        .search-input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 1rem;
+            grid-template-columns: repeat(2, 1fr);
         }
         
         .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #3498db;
-        }
-        
-        .stat-label {
-            color: #7f8c8d;
-            margin-top: 0.5rem;
-        }
-        
-        .bulk-actions {
-            background: #ecf0f1;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        
-        .tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            border-bottom: 2px solid #ecf0f1;
-        }
-        
-        .tab {
-            padding: 0.5rem 1rem;
-            background: none;
-            border: none;
-            border-bottom: 2px solid transparent;
-            cursor: pointer;
-            font-weight: 600;
-            color: #7f8c8d;
-            transition: all 0.3s;
-        }
-        
-        .tab.active {
-            background-color: #3498db !important;
-            color: white !important;
-        }
-        
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-        }
-        
-        .file-input-wrapper input[type=file] {
-            position: absolute;
-            left: -9999px;
-        }
-        
-        .file-input-label {
-            padding: 0.5rem 1rem;
-            background-color: #3498db;
-            color: white;
-            border-radius: 6px;
-            cursor: pointer;
-            display: inline-block;
-            font-size: 0.875rem;
-        }
-        
-        /* New styles for advanced features */
-        .player-select {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin: 1rem 0;
-        }
-        
-        .player-chip {
-            background: #e8f4f8;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-        
-        .player-chip.selected {
-            background: #3498db;
-            color: white;
-            border-color: #2980b9;
-        }
-        
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin: 2rem 0;
-        }
-        
-        .session-template {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 0.5rem 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .rating-input {
-            display: flex;
-            gap: 0.25rem;
-            margin: 0.5rem 0;
-        }
-        
-        .star {
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #ddd;
-        }
-        
-        .star.filled {
-            color: #f1c40f;
-        }
-        
-        .player-stats-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin: 1rem 0;
-        }
-        
-        .win-rate-bar {
-            height: 20px;
-            background: #ecf0f1;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 0.5rem 0;
-        }
-        
-        .win-rate-fill {
-            height: 100%;
-            background: #27ae60;
-            transition: width 0.3s;
-        }
-        
-        .player-tab-content {
-            margin-top: 1rem;
-        }
-        
-        .player-card {
-            background: white;
-            border-radius: 12px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin: 1rem 0;
-            position: relative;
-        }
-        
-        .player-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        
-        .player-card h4 {
-            margin: 0;
-            color: #2c3e50;
-        }
-        
-        .player-card-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .player-card-actions button {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.875rem;
-        }
-        
-        .player-stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .player-stat-item {
-            text-align: center;
-            padding: 1rem;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        
-        .player-stat-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #3498db;
-        }
-        
-        .player-stat-label {
-            font-size: 0.875rem;
-            color: #7f8c8d;
-            margin-top: 0.25rem;
-        }
-        
-        .session-history-item {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 0.5rem 0;
-        }
-        
-        .session-history-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-        }
-        
-        .session-history-games {
-            font-size: 0.875rem;
-            color: #7f8c8d;
-        }
-        
-        /* New styles for game history feature */
-        .game-history-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: none; /* Changed from flex to none */
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            padding: 1rem;
-            overflow-y: auto;
-        }
-        
-        /* Add this new rule to show the modal when not hidden */
-        .game-history-modal:not(.hidden) {
-            display: flex;
+            grid-template-columns: 1fr;
         }
         
         .game-history-content {
-            background: white;
-            border-radius: 12px;
-            max-width: 600px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
+            margin: 0.5rem;
         }
-        
-        .game-history-header {
-            background: #2c3e50;
-            color: white;
-            padding: 1.5rem;
-            border-radius: 12px 12px 0 0;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        
-        .game-history-header h2 {
-            margin: 0;
-            font-size: 1.5rem;
-        }
-        
-        .game-history-close {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-        
-        .game-history-body {
-            padding: 1.5rem;
-        }
-        
-        .history-section {
-            margin-bottom: 2rem;
-        }
-        
-        .history-section h3 {
-            color: #2c3e50;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .history-section-icon {
-            font-size: 1.2rem;
-        }
-        
-        .play-history-item {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 0.75rem;
-            border-left: 4px solid #3498db;
-        }
-        
-        .play-history-date {
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 0.5rem;
-        }
-        
-        .play-history-details {
-            font-size: 0.875rem;
-            color: #7f8c8d;
-            line-height: 1.5;
-        }
-        
-        .travel-history-item {
-            background: #f8f9fa;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .travel-arrow {
-            color: #3498db;
-            font-size: 1.5rem;
-        }
-        
-        .travel-location {
-            flex: 1;
-        }
-        
-        .travel-location-name {
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .travel-date {
-            font-size: 0.875rem;
-            color: #7f8c8d;
-        }
-        
-        .game-stats-summary {
-            background: #e8f4f8;
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-bottom: 1.5rem;
-        }
-        
-        .game-stats-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-        }
-        
-        .game-stats-label {
-            color: #7f8c8d;
-        }
-        
-        .game-stats-value {
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        .no-history {
-            text-align: center;
-            color: #7f8c8d;
-            padding: 2rem;
-        }
-        
-        .history-actions {
-            display: flex;
-            gap: 0.5rem;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid #ecf0f1;
-        }
-        
-        @media (max-width: 600px) {
-            .mode-selector {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .game-history-content {
-                margin: 0.5rem;
-            }
-        }
-
-        /* Trade/Sell indicators */
-        .trade-indicator {
-            display: inline-block;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-left: 0.5rem;
-        }
-
-        .trade-indicator.trade {
-            background: #f39c12;
-            color: white;
-        }
-
-        .trade-indicator.sell {
-            background: #27ae60;
-            color: white;
-        }
-
-        /* Value display styling */
-        .value-display {
-            font-weight: 600;
-            color: #27ae60;
-        }
-
-        .value-outdated {
-            color: #7f8c8d;
-            font-style: italic;
-        }
-
-        /* Market data styling */
-        .market-info {
-            font-size: 0.875rem;
-            color: #7f8c8d;
-            margin-top: 0.25rem;
-        }
-
-
+    }
     </style>
+
 </head>
 <body>
     <header>
