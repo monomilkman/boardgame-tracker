@@ -1182,13 +1182,13 @@
                 
                 // Check if settings are configured for modes that need them
                 const needsSettings = ['search', 'players', 'sessions', 'bulk', 'stats', 'play', 'checkout', 'checkin', 'history'];
-                if (needsSettings.includes(mode) && mode !== 'settings') {  // Don't check settings for settings mode!
+                if (needsSettings.includes(mode) && mode !== 'settings') {
                     const spreadsheetId = localStorage.getItem('spreadsheetId');
                     const apiKey = localStorage.getItem('apiKey');
                     
                     if (!spreadsheetId || !apiKey) {
                         showStatus('Please configure Google Sheets settings first!', 'error');
-                        setMode('settings');  // Redirect to settings
+                        setMode('settings');
                         return;
                     }
                 }
@@ -1228,17 +1228,21 @@
                     stopScanning();
                 }
                 
-                // Hide all sections
+                // Hide all sections - FORCE hide with inline styles
                 console.log('Hiding all sections...');
-                document.getElementById('scan-section').classList.add('hidden');
-                document.getElementById('play-log-section').classList.add('hidden');
-                document.getElementById('search-section').classList.add('hidden');
-                document.getElementById('stats-section').classList.add('hidden');
-                document.getElementById('players-section').classList.add('hidden');
-                document.getElementById('sessions-section').classList.add('hidden');
-                document.getElementById('bulk-section').classList.add('hidden');
-                document.getElementById('bgg-section').classList.add('hidden');
-                document.getElementById('settings-section').classList.add('hidden');
+                const allSections = [
+                    'scan-section', 'play-log-section', 'search-section', 
+                    'stats-section', 'players-section', 'sessions-section', 
+                    'bulk-section', 'bgg-section', 'settings-section'
+                ];
+                
+                allSections.forEach(id => {
+                    const elem = document.getElementById(id);
+                    if (elem) {
+                        elem.classList.add('hidden');
+                        elem.style.display = 'none';
+                    }
+                });
                 
                 // Preload game data for modes that need it
                 if (['play', 'checkout', 'checkin', 'search', 'bulk', 'history'].includes(mode)) {
@@ -1246,28 +1250,28 @@
                     loadAllGames().catch(err => console.log('Preload error:', err));
                 }
                 
-                // Show relevant sections
+                // Show relevant sections using forceShowSection
                 console.log('Showing section for mode:', mode);
                 switch(mode) {
                     case 'view':
-                        document.getElementById('scan-section').classList.remove('hidden');
+                        forceShowSection('scan-section');
                         updateUIForMode();
                         break;
                         
                     case 'history':
-                        document.getElementById('scan-section').classList.remove('hidden');
+                        forceShowSection('scan-section');
                         updateUIForMode();
                         break;
                         
                     case 'play':
-                        document.getElementById('scan-section').classList.remove('hidden');
+                        forceShowSection('scan-section');
                         updateUIForMode();
                         break;
                         
                     case 'search':
                         console.log('Showing search section');
-                        document.getElementById('search-section').classList.remove('hidden');
-                        searchTab = 'all'; // Ensure we start with 'all' tab
+                        forceShowSection('search-section');
+                        searchTab = 'all';
                         
                         // Set the "All Games" tab as active
                         document.querySelectorAll('#search-section .tab').forEach(t => {
@@ -1280,7 +1284,7 @@
                         // Load and display all games
                         loadAllGames().then(() => {
                             console.log('Games loaded, performing search');
-                            performSearch(); // This will display all games
+                            performSearch();
                         }).catch(err => {
                             console.error('Error loading games for search:', err);
                             showStatus('Error loading games: ' + err.message, 'error');
@@ -1289,7 +1293,7 @@
                         
                     case 'stats':
                         console.log('Showing stats section');
-                        document.getElementById('stats-section').classList.remove('hidden');
+                        forceShowSection('stats-section');
                         loadStatistics().catch(err => {
                             console.error('Error loading statistics:', err);
                             showStatus('Error loading statistics: ' + err.message, 'error');
@@ -1298,7 +1302,7 @@
                         
                     case 'players':
                         console.log('Showing players section');
-                        document.getElementById('players-section').classList.remove('hidden');
+                        forceShowSection('players-section');
                         loadPlayerStats().catch(err => {
                             console.error('Error loading player stats:', err);
                             showStatus('Error loading players: ' + err.message, 'error');
@@ -1307,7 +1311,7 @@
                         
                     case 'sessions':
                         console.log('Showing sessions section');
-                        document.getElementById('sessions-section').classList.remove('hidden');
+                        forceShowSection('sessions-section');
                         loadSessionTemplates().catch(error => {
                             console.error('Error loading session templates:', error);
                             showStatus('Error loading sessions: ' + error.message, 'error');
@@ -1316,7 +1320,7 @@
                         
                     case 'bulk':
                         console.log('Showing bulk section');
-                        document.getElementById('bulk-section').classList.remove('hidden');
+                        forceShowSection('bulk-section');
                         loadBulkOperations().catch(err => {
                             console.error('Error loading bulk operations:', err);
                             showStatus('Error loading bulk operations: ' + err.message, 'error');
@@ -1325,15 +1329,14 @@
                         
                     case 'bgg':
                         console.log('Showing BGG section');
-                        document.getElementById('bgg-section').classList.remove('hidden');
-                        // Clear any previous results
+                        forceShowSection('bgg-section');
                         document.getElementById('bgg-results').classList.add('hidden');
                         break;
                         
                     case 'settings':
                         console.log('Showing settings section');
-                        document.getElementById('settings-section').classList.remove('hidden');
-                        // Make sure all sections are visible
+                        forceShowSection('settings-section');
+                        // Make sure all subsections are visible
                         document.querySelectorAll('#settings-section .setup-section').forEach(section => {
                             section.style.display = 'block';
                         });
@@ -1341,7 +1344,7 @@
                         
                     case 'checkout':
                     case 'checkin':
-                        document.getElementById('scan-section').classList.remove('hidden');
+                        forceShowSection('scan-section');
                         updateUIForMode();
                         break;
                         
@@ -5177,6 +5180,18 @@
                     });
                 }
             });
+        }
+
+        function forceShowSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.classList.remove('hidden');
+                section.style.display = 'block';
+                section.style.visibility = 'visible';
+                section.style.opacity = '1';
+                section.style.height = 'auto';
+                section.style.overflow = 'visible';
+            }
         }
         
     </script>
