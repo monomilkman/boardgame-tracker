@@ -5946,14 +5946,13 @@
                 // Reload logs immediately
                 await displayPlayLogs(currentPlayLogsPage);
                 
-            } catch (error) {
+             } catch (error) {
                 showStatus('Error deleting play log: ' + error.message, 'error');
                 console.error('Delete error:', error);
             }
-        }
-
+        }    // <-- Line 5923: This closes the deletePlayLog function
         
-        // Search play logs
+        // Search play logs  <-- Line 5956: Next function starts here
         async function searchPlayLogs() {
             const gameId = document.getElementById('log-search-game').value;
             const playerId = document.getElementById('log-search-player').value;
