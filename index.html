@@ -1126,59 +1126,6 @@
             </div>
         </div>
         
-        <!-- Edit Play Log Modal -->
-        <div id="edit-playlog-modal" class="game-history-modal hidden">
-            <div class="game-history-content">
-                <div class="game-history-header">
-                    <h2>Edit Play Log</h2>
-                    <button class="game-history-close" onclick="closeEditPlayLogModal()">×</button>
-                </div>
-                <div class="game-history-body">
-                    <input type="hidden" id="edit-log-id">
-                    
-                    <div style="margin-bottom: 1rem;">
-                        <label>Game:</label>
-                        <select id="edit-log-game" style="width: 100%; padding: 0.75rem;">
-                            <option value="">Select game...</option>
-                        </select>
-                    </div>
-                    
-                    <div style="margin-bottom: 1rem;">
-                        <label>Players (comma-separated):</label>
-                        <input type="text" id="edit-log-players">
-                    </div>
-                    
-                    <div style="margin-bottom: 1rem;">
-                        <label>Winner:</label>
-                        <input type="text" id="edit-log-winner">
-                    </div>
-                    
-                    <div style="margin-bottom: 1rem;">
-                        <label>Rating:</label>
-                        <div class="rating-input" id="edit-log-rating">
-                            <span class="star" data-rating="1">☆</span>
-                            <span class="star" data-rating="2">☆</span>
-                            <span class="star" data-rating="3">☆</span>
-                            <span class="star" data-rating="4">☆</span>
-                            <span class="star" data-rating="5">☆</span>
-                        </div>
-                    </div>
-                    
-                    <div style="margin-bottom: 1rem;">
-                        <label>Notes:</label>
-                        <textarea id="edit-log-notes" rows="3"></textarea>
-                    </div>
-                    
-                    <div class="action-buttons">
-                        <button class="btn btn-primary" onclick="savePlayLogEdit()">Save Changes</button>
-                        <button class="btn btn-secondary" onclick="closeEditPlayLogModal()">Cancel</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        
         <!-- Settings Section -->
         <div id="settings-section" class="setup-section hidden">
             <h3>⚙️ Google Sheets Setup</h3>
@@ -1265,6 +1212,57 @@
                     <button class="btn btn-primary" onclick="checkoutGameFromHistory()">Check Out</button>
                     <button class="btn btn-info" onclick="logPlayFromHistory()">Log Play</button>
                     <button class="btn btn-secondary" onclick="closeGameHistory()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Play Log Modal -->
+    <div id="edit-playlog-modal" class="game-history-modal hidden">
+        <div class="game-history-content">
+            <div class="game-history-header">
+                <h2>Edit Play Log</h2>
+                <button class="game-history-close" onclick="closeEditPlayLogModal()">×</button>
+            </div>
+            <div class="game-history-body">
+                <input type="hidden" id="edit-log-id">
+                
+                <div style="margin-bottom: 1rem;">
+                    <label>Game:</label>
+                    <select id="edit-log-game" style="width: 100%; padding: 0.75rem;">
+                        <option value="">Select game...</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label>Players (comma-separated):</label>
+                    <input type="text" id="edit-log-players">
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label>Winner:</label>
+                    <input type="text" id="edit-log-winner">
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label>Rating:</label>
+                    <div class="rating-input" id="edit-log-rating">
+                        <span class="star" data-rating="1">☆</span>
+                        <span class="star" data-rating="2">☆</span>
+                        <span class="star" data-rating="3">☆</span>
+                        <span class="star" data-rating="4">☆</span>
+                        <span class="star" data-rating="5">☆</span>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label>Notes:</label>
+                    <textarea id="edit-log-notes" rows="3"></textarea>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" onclick="savePlayLogEdit()">Save Changes</button>
+                    <button class="btn btn-secondary" onclick="closeEditPlayLogModal()">Cancel</button>
                 </div>
             </div>
         </div>
