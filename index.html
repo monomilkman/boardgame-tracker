@@ -1187,36 +1187,6 @@
         </div>
     </main>
 
-   
-    <!-- Game History Modal -->
-    <div id="game-history-modal" class="game-history-modal hidden">
-        <div class="game-history-content">
-            <div class="game-history-header">
-                <h2 id="game-history-title">Game History</h2>
-                <button class="game-history-close" onclick="closeGameHistory()">×</button>
-            </div>
-            <div class="game-history-body">
-                <div id="game-stats-summary" class="game-stats-summary"></div>
-                
-                <div class="history-section">
-                    <h3><span class="history-section-icon">🎮</span> Play History</h3>
-                    <div id="game-play-history"></div>
-                </div>
-                
-                <div class="history-section">
-                    <h3><span class="history-section-icon">📍</span> Travel History</h3>
-                    <div id="game-travel-history"></div>
-                </div>
-                
-                <div class="history-actions">
-                    <button class="btn btn-primary" onclick="checkoutGameFromHistory()">Check Out</button>
-                    <button class="btn btn-info" onclick="logPlayFromHistory()">Log Play</button>
-                    <button class="btn btn-secondary" onclick="closeGameHistory()">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Edit Play Log Modal -->
     <div id="edit-playlog-modal" class="game-history-modal hidden">
         <div class="game-history-content">
@@ -1268,6 +1238,36 @@
         </div>
     </div>
 
+    <!-- Game History Modal -->
+    <div id="game-history-modal" class="game-history-modal hidden">
+        <div class="game-history-content">
+            <div class="game-history-header">
+                <h2 id="game-history-title">Game History</h2>
+                <button class="game-history-close" onclick="closeGameHistory()">×</button>
+            </div>
+            <div class="game-history-body">
+                <div id="game-stats-summary" class="game-stats-summary"></div>
+                
+                <div class="history-section">
+                    <h3><span class="history-section-icon">🎮</span> Play History</h3>
+                    <div id="game-play-history"></div>
+                </div>
+                
+                <div class="history-section">
+                    <h3><span class="history-section-icon">📍</span> Travel History</h3>
+                    <div id="game-travel-history"></div>
+                </div>
+                
+                <div class="history-actions">
+                    <button class="btn btn-primary" onclick="checkoutGameFromHistory()">Check Out</button>
+                    <button class="btn btn-info" onclick="logPlayFromHistory()">Log Play</button>
+                    <button class="btn btn-secondary" onclick="closeGameHistory()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
    
     <script>
         // Global variables
