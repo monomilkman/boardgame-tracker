@@ -5916,12 +5916,6 @@
                 console.error('Update error:', error);
             }
         }
-
-                
-            } catch (error) {
-                showStatus('Error updating play log: ' + error.message, 'error');
-            }
-        }
         
         // Delete play log - Updated version
         async function deletePlayLog(logId) {
@@ -5957,6 +5951,7 @@
                 console.error('Delete error:', error);
             }
         }
+
         
         // Search play logs
         async function searchPlayLogs() {
