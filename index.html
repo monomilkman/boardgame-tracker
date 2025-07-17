@@ -5852,7 +5852,7 @@
             document.getElementById('edit-playlog-modal').classList.remove('hidden');
         }
         
-        // Save play log edit
+        // Save play log edit - Updated version
         async function savePlayLogEdit() {
             const logId = document.getElementById('edit-log-id').value;
             const gameId = document.getElementById('edit-log-game').value;
@@ -5868,6 +5868,11 @@
             
             const appsScriptUrl = localStorage.getItem('appsScriptUrl');
             
+            if (!appsScriptUrl) {
+                showStatus('Please configure Apps Script URL in settings', 'error');
+                return;
+            }
+            
             try {
                 // Get original log for timestamp
                 const result = await loadPlayLogs();
@@ -5878,66 +5883,47 @@
                     return;
                 }
                 
-                if (appsScriptUrl) {
-                    const updatedData = [
-                        originalLog.timestamp,  // Keep original timestamp
-                        gameId,
-                        players,
-                        notes,
-                        winner,
-                        rating || '',
-                        originalLog.sessionId || ''
-                    ];
-                    
-                    const response = await fetch(appsScriptUrl, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        // Note: no headers section for no-cors mode
-                        body: JSON.stringify({
-                            action: 'updatePlayLog',
-                            logId: logId,
-                            updatedData: updatedData
-                        })
-                    });
-                    
-                    showStatus('Play log update sent! Refresh to see changes.', 'success');
-                    closeEditPlayLogModal();
-                    
-                    // Reload logs after a short delay
-                    setTimeout(() => {
-                        displayPlayLogs(currentPlayLogsPage);
-                    }, 1000);
-                    
-                } else {
-                    // Manual update instruction
-                    const rowData = [
-                        logId,
-                        originalLog.timestamp,
-                        gameId,
-                        players,
-                        notes,
-                        winner,
-                        rating || '',
-                        originalLog.sessionId || ''
-                    ];
-                    
-                    const csvRow = rowData.map(cell => `"${cell}"`).join(',');
-                    
-                    showStatus('Manual update required. Find the log with ID ' + logId + ' in your PlayLog sheet and replace the row with this data:', 'error');
-                    console.log('Replace row with:', csvRow);
-                    
-                    // Copy to clipboard
-                    navigator.clipboard.writeText(csvRow).then(() => {
-                        alert('Row data copied to clipboard! Find log ID ' + logId + ' in your PlayLog sheet and replace that row.');
-                    });
-                }
+                const updatedData = [
+                    originalLog.timestamp,  // Keep original timestamp
+                    gameId,
+                    players,
+                    notes,
+                    winner,
+                    rating || '',
+                    originalLog.sessionId || ''
+                ];
+                
+                // Use URLSearchParams for better compatibility
+                const params = new URLSearchParams();
+                params.append('action', 'updatePlayLog');
+                params.append('logId', logId);
+                params.append('updatedData', JSON.stringify(updatedData));
+                
+                // Send as form data
+                await fetch(appsScriptUrl, {
+                    method: 'POST',
+                    body: params
+                });
+                
+                showStatus('Play log updated successfully!', 'success');
+                closeEditPlayLogModal();
+                
+                // Reload logs immediately
+                await displayPlayLogs(currentPlayLogsPage);
+                
+            } catch (error) {
+                showStatus('Error updating play log: ' + error.message, 'error');
+                console.error('Update error:', error);
+            }
+        }
+
                 
             } catch (error) {
                 showStatus('Error updating play log: ' + error.message, 'error');
             }
         }
         
-        // Delete play log
+        // Delete play log - Updated version
         async function deletePlayLog(logId) {
             if (!confirm('Are you sure you want to delete this play log? This action cannot be undone.')) {
                 return;
@@ -5946,33 +5932,29 @@
             const appsScriptUrl = localStorage.getItem('appsScriptUrl');
             
             if (!appsScriptUrl) {
-                showStatus('Please enable auto-update to delete play logs', 'error');
+                showStatus('Please configure Apps Script URL in settings', 'error');
                 return;
             }
             
             try {
-                const response = await fetch(appsScriptUrl, {
+                // Use URLSearchParams
+                const params = new URLSearchParams();
+                params.append('action', 'deletePlayLog');
+                params.append('logId', logId);
+                
+                await fetch(appsScriptUrl, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'deletePlayLog',
-                        logId: logId
-                    })
+                    body: params
                 });
                 
-                const result = await response.json();
+                showStatus('Play log deleted successfully!', 'success');
                 
-                if (result.status === 'success') {
-                    showStatus('Play log deleted successfully!', 'success');
-                    displayPlayLogs(currentPlayLogsPage);
-                } else {
-                    showStatus('Error deleting play log: ' + result.message, 'error');
-                }
+                // Reload logs immediately
+                await displayPlayLogs(currentPlayLogsPage);
                 
             } catch (error) {
                 showStatus('Error deleting play log: ' + error.message, 'error');
+                console.error('Delete error:', error);
             }
         }
         
