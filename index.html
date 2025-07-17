@@ -5193,6 +5193,22 @@
                 section.style.overflow = 'visible';
             }
         }
+
+        function forceDisplaySection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (!section) {
+                console.log(`Section ${sectionId} not found!`);
+                return;
+            }
+            
+            // Remove all possible hiding
+            section.classList.remove('hidden');
+            section.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; height: auto !important; width: 100% !important; position: static !important; left: 0 !important; top: 0 !important; background: yellow !important; border: 3px solid red !important; padding: 20px !important;';
+            
+            // Log what we see
+            console.log(`${sectionId} computed display:`, window.getComputedStyle(section).display);
+            console.log(`${sectionId} has content:`, section.innerHTML.substring(0, 100));
+        }
         
     </script>
 </body>
