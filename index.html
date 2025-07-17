@@ -1573,11 +1573,14 @@
             // Replace the history-actions div content
             document.querySelector('.history-actions').innerHTML = actionsHtml;
             
+           // Comment out the automatic value refresh for now
+            /*
             // If BGG ID exists and value is old or missing, fetch fresh value
             if (gameInfo.bggId && (!gameInfo.valueUpdated || 
                 (new Date() - new Date(gameInfo.valueUpdated)) > 24 * 60 * 60 * 1000)) {
                 refreshGameValue(gameInfo.id);
             }
+            */
 
             // Show the modal
             document.getElementById('game-history-modal').classList.remove('hidden');
