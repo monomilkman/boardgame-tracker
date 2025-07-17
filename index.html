@@ -3323,16 +3323,24 @@
                     `${SHEETS_API_BASE}/${spreadsheetId}/values/PlayLog!A:H?key=${apiKey}`
                 );
                 
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+                
                 const data = await response.json();
                 const rows = data.values || [];
                 
                 const logs = [];
                 for (let i = 1; i < rows.length; i++) {
                     const [logId, timestamp, gameId, players, notes, winner, rating, sessionId] = rows[i];
+                    
+                    // Skip if no timestamp (empty row)
+                    if (!timestamp) continue;
+                    
                     logs.push({
                         logId: logId || `LOG:LEGACY${i}`, // Handle old entries without IDs
-                        timestamp,
-                        gameId,
+                        timestamp: timestamp || '',
+                        gameId: gameId || '',
                         players: players || '',
                         notes: notes || '',
                         winner: winner || '',
@@ -5652,27 +5660,39 @@
 
         // Load play logs with filtering
         async function loadPlayLogs(options = {}) {
-            const appsScriptUrl = localStorage.getItem('appsScriptUrl');
-            
-            if (!appsScriptUrl) {
-                // Fallback to direct API if no Apps Script
-                return loadEnhancedPlayHistoryWithIds();
-            }
-            
             try {
-                const response = await fetch(appsScriptUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'getPlayLogs',
-                        options: options
-                    })
-                });
+                // Load all logs first
+                const allLogsResult = await loadEnhancedPlayHistoryWithIds();
+                let logs = allLogsResult.logs;
                 
-                const result = await response.json();
-                return result;
+                // Apply client-side filtering
+                if (options.gameId) {
+                    logs = logs.filter(log => log.gameId === options.gameId);
+                }
+                if (options.playerId) {
+                    logs = logs.filter(log => log.players && log.players.includes(options.playerId));
+                }
+                if (options.dateFrom) {
+                    logs = logs.filter(log => new Date(log.timestamp) >= new Date(options.dateFrom));
+                }
+                if (options.dateTo) {
+                    logs = logs.filter(log => new Date(log.timestamp) <= new Date(options.dateTo));
+                }
+                
+                // Apply pagination
+                const page = options.page || 1;
+                const perPage = options.perPage || 20;
+                const start = (page - 1) * perPage;
+                const paginatedLogs = logs.slice(start, start + perPage);
+                
+                return {
+                    status: 'success',
+                    logs: paginatedLogs,
+                    total: logs.length,
+                    page: page,
+                    totalPages: Math.ceil(logs.length / perPage)
+                };
+                
             } catch (error) {
                 console.error('Error loading play logs:', error);
                 showStatus('Error loading play logs', 'error');
