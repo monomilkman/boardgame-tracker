@@ -600,6 +600,24 @@
             margin: 0.5rem;
         }
     }
+
+    /* ===== NFC STATUS ===== */
+    #nfc-status {
+        padding: 0.5rem;
+        border-radius: 6px;
+        transition: all 0.3s;
+    }
+    
+    #nfc-status.status-success {
+        background-color: rgba(212, 237, 218, 0.5);
+        color: #155724;
+    }
+    
+    #nfc-status.status-error {
+        background-color: rgba(248, 215, 218, 0.5);
+        color: #721c24;
+    }
+        
     </style>
 
 </head>
@@ -668,9 +686,23 @@
                 <button class="btn btn-secondary" onclick="stopScanning()">Stop</button>
             </div>
             <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #ecf0f1;">
-                <p style="text-align: center; color: #7f8c8d; margin-bottom: 0.5rem;">Or enter QR code manually:</p>
-                <input type="text" id="manual-qr-input" placeholder="Enter QR code text (e.g., BIN:001)" style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;" onkeypress="if(event.key==='Enter')processManualQR()">
-                <button class="btn btn-primary" onclick="processManualQR()" style="margin-top: 0.5rem; width: 100%;">Process Manual Entry</button>
+                <p style="text-align: center; color: #7f8c8d; margin-bottom: 0.5rem;">Other scanning options:</p>
+                
+                <!-- Manual entry -->
+                <input type="text" id="manual-qr-input" placeholder="Enter code manually (e.g., BIN:001)" 
+                       style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px;" 
+                       onkeypress="if(event.key==='Enter')processManualQR()">
+                
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                    <button class="btn btn-primary" onclick="processManualQR()" style="flex: 1;">
+                        ⌨️ Process Manual Entry
+                    </button>
+                    <button id="nfc-scan-btn" class="btn btn-info" onclick="toggleNFCScanning()" style="flex: 1; display: none;">
+                        📡 Scan NFC Tag
+                    </button>
+                </div>
+                
+                <div id="nfc-status" style="margin-top: 0.5rem; text-align: center; font-size: 0.875rem;"></div>
             </div>
         </div>
         
@@ -1091,7 +1123,11 @@
             step: 'game' // 'game' or 'bin'
         };
         let currentPlayGame = null;
-        let currentRating = 0;
+       let currentRating = 0;
+        
+        // NFC scanning variables
+        let nfcReader = null;
+        let isNFCScanning = false;
         
         // Chart.js instances
         let trendsChart = null;
@@ -1112,9 +1148,51 @@
         const CORS_PROXY = 'https://corsproxy.io/?';
         
         // Initialize on load
+        // Initialize on load
         window.onload = function() {
             loadSettings();
             initializeRatingStars();
+            
+            // NEW: Handle NFC tag URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const scanData = urlParams.get('scan');
+            
+            if (scanData) {
+                console.log('Processing NFC scan from URL:', scanData);
+                
+                // Show status message
+                showStatus('Processing NFC tag...', 'success');
+                
+                // Process after a short delay to ensure page is ready
+                setTimeout(() => {
+                    // Parse the data
+                    const data = parseQRCode(scanData);
+                    
+                    if (data) {
+                        // Set appropriate mode based on scan type
+                        if (data.type === 'BIN') {
+                            setMode('view');
+                            // Process the bin view
+                            handleViewBin(data);
+                        } else if (data.type === 'GAME') {
+                            // Ask user what they want to do
+                            const action = confirm('Game scanned! OK for History, Cancel for Log Play');
+                            if (action) {
+                                setMode('history');
+                                handleGameHistory(data);
+                            } else {
+                                setMode('play');
+                                handleLogPlay(data);
+                            }
+                        }
+                    } else {
+                        showStatus('Invalid NFC tag data', 'error');
+                    }
+                }, 500);
+                
+                // Clean up the URL
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
             
             // Check if QR library loaded
             if (typeof Html5Qrcode === 'undefined') {
@@ -1139,6 +1217,16 @@
             document.getElementById('game-history-modal').addEventListener('click', function(e) {
                 if (e.target === this) {
                     closeGameHistory();
+                }
+            });
+            
+            // Check for NFC support
+            checkNFCSupport().then(supported => {
+                if (supported) {
+                    const nfcBtn = document.getElementById('nfc-scan-btn');
+                    if (nfcBtn) {
+                        nfcBtn.style.display = 'block';
+                    }
                 }
             });
         };
@@ -1229,6 +1317,11 @@
                 // Stop any active scanning
                 if (html5QrcodeScanner) {
                     stopScanning();
+                }
+                
+                // Stop NFC scanning
+                if (isNFCScanning) {
+                    stopNFCScanning();
                 }
                 
                 // Hide all sections - FORCE hide with inline styles
@@ -5253,6 +5346,123 @@
                 rect.left < window.innerWidth && 
                 rect.right > 0
             );
+        }
+
+        // NFC Support Functions
+        async function checkNFCSupport() {
+            if ('NDEFReader' in window) {
+                console.log('Web NFC is supported!');
+                return true;
+            }
+            console.log('Web NFC is not supported on this device');
+            return false;
+        }
+        
+        async function startNFCScanning() {
+            if (isNFCScanning) {
+                console.log('NFC scanning already active');
+                return;
+            }
+            
+            try {
+                nfcReader = new NDEFReader();
+                await nfcReader.scan();
+                isNFCScanning = true;
+                
+                console.log('NFC scanning started');
+                updateNFCStatus('📡 Ready - Hold NFC tag near phone', 'success');
+                
+                nfcReader.addEventListener("reading", async ({ message, serialNumber }) => {
+                    console.log(`NFC Tag read! Serial: ${serialNumber}`);
+                    
+                    let scanData = null;
+                    
+                    // Process NFC message records
+                    for (const record of message.records) {
+                        console.log(`Record type: ${record.recordType}`);
+                        
+                        if (record.recordType === "text") {
+                            const textDecoder = new TextDecoder(record.encoding || "utf-8");
+                            scanData = textDecoder.decode(record.data);
+                            console.log('Text record found:', scanData);
+                            break;
+                        }
+                        else if (record.recordType === "url") {
+                            const textDecoder = new TextDecoder();
+                            const url = textDecoder.decode(record.data);
+                            console.log('URL record found:', url);
+                            
+                            // Extract scan parameter from URL
+                            const urlMatch = url.match(/[?&]scan=([^&]+)/);
+                            if (urlMatch) {
+                                scanData = decodeURIComponent(urlMatch[1]);
+                                console.log('Extracted scan data:', scanData);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (scanData) {
+                        // Stop NFC scanning
+                        stopNFCScanning();
+                        
+                        // Process the scan using existing QR code handler
+                        onScanSuccess(scanData, null);
+                    } else {
+                        updateNFCStatus('❌ No valid data found on tag', 'error');
+                    }
+                });
+                
+                nfcReader.addEventListener("readingerror", () => {
+                    console.log("NFC read error");
+                    updateNFCStatus('❌ Error reading tag, try again', 'error');
+                });
+                
+            } catch (error) {
+                console.error("NFC Error:", error);
+                isNFCScanning = false;
+                
+                if (error.name === 'NotAllowedError') {
+                    updateNFCStatus('❌ NFC permission denied. Please allow and refresh.', 'error');
+                } else if (error.name === 'NotSupportedError') {
+                    updateNFCStatus('❌ NFC not supported on this device', 'error');
+                } else {
+                    updateNFCStatus('❌ ' + error.message, 'error');
+                }
+            }
+        }
+        
+        function stopNFCScanning() {
+            if (nfcReader && isNFCScanning) {
+                try {
+                    nfcReader.abortController?.abort();
+                    console.log('NFC scanning stopped');
+                } catch (error) {
+                    console.error('Error stopping NFC:', error);
+                }
+                nfcReader = null;
+                isNFCScanning = false;
+                updateNFCStatus('', '');
+            }
+        }
+        
+        function updateNFCStatus(message, type) {
+            const statusElement = document.getElementById('nfc-status');
+            if (statusElement) {
+                statusElement.textContent = message;
+                statusElement.className = type === 'error' ? 'status-error' : 
+                                         type === 'success' ? 'status-success' : '';
+            }
+        }
+
+        function toggleNFCScanning() {
+            if (isNFCScanning) {
+                stopNFCScanning();
+                document.getElementById('nfc-scan-btn').textContent = '📡 Scan NFC Tag';
+            } else {
+                startNFCScanning();
+                document.getElementById('nfc-scan-btn').textContent = '⏹️ Stop NFC';
+            }
         }
         
     </script>
