@@ -13,17 +13,9 @@
         }
     </script>
     <style>
-        /* TEMPORARY DEBUG STYLES - Remove after fixing */
         #search-section, #stats-section, #players-section, 
         #sessions-section, #bulk-section, #bgg-section, #settings-section {
-            border: 3px solid red !important;
-            min-height: 200px !important;
-            background: yellow !important;
-            display: block !important;
-        }
-        
-        .hidden {
-            display: none !important;
+            min-height: 100px;
         }
         
         * {
@@ -1317,7 +1309,7 @@
                 
                 // Check if settings are configured for modes that need them
                 const needsSettings = ['search', 'players', 'sessions', 'bulk', 'stats', 'play', 'checkout', 'checkin', 'history'];
-                if (needsSettings.includes(mode)) {
+                if (needsSettings.includes(mode) && mode !== 'settings') {  // Don't check settings for settings mode!
                     const spreadsheetId = localStorage.getItem('spreadsheetId');
                     const apiKey = localStorage.getItem('apiKey');
                     
@@ -1485,7 +1477,19 @@
                         showStatus('Unknown mode selected', 'error');
                 }
                 
+                // Scroll to top to ensure the section is visible
+                window.scrollTo(0, 0);
+                document.querySelector('main').scrollTo(0, 0);
+                
                 console.log('Mode change complete');
+                
+                // Debug: Check what's actually visible right now
+                const visibleSection = document.querySelector('main > div:not(.hidden):not(.mode-selector)');
+                if (visibleSection) {
+                    console.log('Visible section:', visibleSection.id);
+                } else {
+                    console.log('WARNING: No visible section found!');
+                }
                 
             } catch (error) {
                 console.error('Error in setMode:', error);
@@ -5276,6 +5280,28 @@
                     console.error(`Section ${id} not found!`);
                 } else {
                     console.log(`Section ${id} exists, hidden: ${elem.classList.contains('hidden')}`);
+                }
+            });
+        }
+
+        function debugSectionVisibility() {
+            const sections = ['scan-section', 'search-section', 'stats-section', 
+                             'players-section', 'sessions-section', 'bulk-section', 
+                             'bgg-section', 'settings-section'];
+            
+            sections.forEach(id => {
+                const elem = document.getElementById(id);
+                if (elem) {
+                    const rect = elem.getBoundingClientRect();
+                    const computed = window.getComputedStyle(elem);
+                    console.log(`${id}:`, {
+                        hidden: elem.classList.contains('hidden'),
+                        display: computed.display,
+                        visibility: computed.visibility,
+                        height: rect.height,
+                        top: rect.top,
+                        isInViewport: rect.top < window.innerHeight && rect.bottom > 0
+                    });
                 }
             });
         }
