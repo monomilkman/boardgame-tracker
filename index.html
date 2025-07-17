@@ -304,7 +304,7 @@
         }
         
         .hidden {
-            display: none;
+            display: none !important;
         }
         
         .tabs {
@@ -1299,123 +1299,184 @@
         
         // Mode management
         function setMode(mode) {
-            currentMode = mode;
-            document.querySelectorAll('.mode-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Find the button that was clicked and make it active
-            document.querySelectorAll('.mode-btn').forEach(btn => {
-                if (btn.querySelector('span:last-child').textContent === 
-                    (mode === 'view' ? 'View Bin' :
-                     mode === 'history' ? 'Game History' :
-                     mode === 'search' ? 'Search' :
-                     mode === 'play' ? 'Log Play' :
-                     mode === 'checkout' ? 'Check Out' :
-                     mode === 'checkin' ? 'Check In' :
-                     mode === 'stats' ? 'Stats' :
-                     mode === 'players' ? 'Players' :
-                     mode === 'sessions' ? 'Sessions' :
-                     mode === 'bulk' ? 'Bulk Ops' :
-                     mode === 'bgg' ? 'BGG Import' :
-                     mode === 'settings' ? 'Settings' : '')) {
-                    btn.classList.add('active');
+            try {
+                console.log('Setting mode to:', mode);
+                
+                // Check if settings are configured for modes that need them
+                const needsSettings = ['search', 'players', 'sessions', 'bulk', 'stats', 'play', 'checkout', 'checkin', 'history'];
+                if (needsSettings.includes(mode)) {
+                    const spreadsheetId = localStorage.getItem('spreadsheetId');
+                    const apiKey = localStorage.getItem('apiKey');
+                    
+                    if (!spreadsheetId || !apiKey) {
+                        showStatus('Please configure Google Sheets settings first!', 'error');
+                        setMode('settings');  // Redirect to settings
+                        return;
+                    }
                 }
-            });
-            
-            // Reset workflow state
-            checkoutWorkflow = { gameId: null, gameTitle: null, binId: null, step: 'game' };
-            hideWorkflowState();
-            hideStatus();
-            hideResults();
-            
-            // Stop any active scanning
-            if (html5QrcodeScanner) {
-                stopScanning();
-            }
-            
-            // Hide all sections
-            document.getElementById('scan-section').classList.add('hidden');
-            document.getElementById('play-log-section').classList.add('hidden');
-            document.getElementById('search-section').classList.add('hidden');
-            document.getElementById('stats-section').classList.add('hidden');
-            document.getElementById('players-section').classList.add('hidden');
-            document.getElementById('sessions-section').classList.add('hidden');
-            document.getElementById('bulk-section').classList.add('hidden');
-            document.getElementById('bgg-section').classList.add('hidden');
-            document.getElementById('settings-section').classList.add('hidden');
-            
-            // Preload game data for modes that need it
-            if (['play', 'checkout', 'checkin', 'search', 'bulk', 'history'].includes(mode)) {
-                loadAllGames().catch(err => console.log('Preload error:', err));
-            }
-            
-            // Show relevant sections
-            switch(mode) {
-                case 'view':
-                    document.getElementById('scan-section').classList.remove('hidden');
-                    updateUIForMode();
-                    break;
-                case 'history':
-                    document.getElementById('scan-section').classList.remove('hidden');
-                    updateUIForMode();
-                    break;
-                case 'play':
-                    document.getElementById('scan-section').classList.remove('hidden');
-                    updateUIForMode();
-                    break;
-               case 'search':
-                    document.getElementById('search-section').classList.remove('hidden');
-                    searchTab = 'all'; // Ensure we start with 'all' tab
-                    
-                    // Set the "All Games" tab as active
-                    document.querySelectorAll('#search-section .tab').forEach(t => {
-                        t.classList.remove('active');
-                        if (t.textContent === 'All Games') {
-                            t.classList.add('active');
-                        }
-                    });
-                    
-                    // Load and display all games
-                    loadAllGames().then(() => {
-                        performSearch(); // This will display all games
-                    });
-                    break;
-                case 'stats':
-                    document.getElementById('stats-section').classList.remove('hidden');
-                    loadStatistics();
-                    break;
-                case 'players':
-                    document.getElementById('players-section').classList.remove('hidden');
-                    loadPlayerStats();
-                    break;
-                case 'sessions':
-                    document.getElementById('sessions-section').classList.remove('hidden');
-                    loadSessionTemplates().catch(error => {
-                        console.error('Error loading session templates:', error);
-                    });
-                    break;
-                case 'bulk':
-                    document.getElementById('bulk-section').classList.remove('hidden');
-                    loadBulkOperations();
-                    break;
-                case 'bgg':
-                    document.getElementById('bgg-section').classList.remove('hidden');
-                    // Clear any previous results
-                    document.getElementById('bgg-results').classList.add('hidden');
-                    break;
-                case 'settings':
-                    document.getElementById('settings-section').classList.remove('hidden');
-                    // Make sure all sections are visible
-                    document.querySelectorAll('#settings-section .setup-section').forEach(section => {
-                        section.style.display = 'block';
-                    });
-                    break;
-                case 'checkout':
-                case 'checkin':
-                    document.getElementById('scan-section').classList.remove('hidden');
-                    updateUIForMode();
-                    break;
+                
+                currentMode = mode;
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                // Find the button that was clicked and make it active
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    if (btn.querySelector('span:last-child').textContent === 
+                        (mode === 'view' ? 'View Bin' :
+                         mode === 'history' ? 'Game History' :
+                         mode === 'search' ? 'Search' :
+                         mode === 'play' ? 'Log Play' :
+                         mode === 'checkout' ? 'Check Out' :
+                         mode === 'checkin' ? 'Check In' :
+                         mode === 'stats' ? 'Stats' :
+                         mode === 'players' ? 'Players' :
+                         mode === 'sessions' ? 'Sessions' :
+                         mode === 'bulk' ? 'Bulk Ops' :
+                         mode === 'bgg' ? 'BGG Import' :
+                         mode === 'settings' ? 'Settings' : '')) {
+                        btn.classList.add('active');
+                    }
+                });
+                
+                // Reset workflow state
+                checkoutWorkflow = { gameId: null, gameTitle: null, binId: null, step: 'game' };
+                hideWorkflowState();
+                hideStatus();
+                hideResults();
+                
+                // Stop any active scanning
+                if (html5QrcodeScanner) {
+                    stopScanning();
+                }
+                
+                // Hide all sections
+                console.log('Hiding all sections...');
+                document.getElementById('scan-section').classList.add('hidden');
+                document.getElementById('play-log-section').classList.add('hidden');
+                document.getElementById('search-section').classList.add('hidden');
+                document.getElementById('stats-section').classList.add('hidden');
+                document.getElementById('players-section').classList.add('hidden');
+                document.getElementById('sessions-section').classList.add('hidden');
+                document.getElementById('bulk-section').classList.add('hidden');
+                document.getElementById('bgg-section').classList.add('hidden');
+                document.getElementById('settings-section').classList.add('hidden');
+                
+                // Preload game data for modes that need it
+                if (['play', 'checkout', 'checkin', 'search', 'bulk', 'history'].includes(mode)) {
+                    console.log('Preloading game data for mode:', mode);
+                    loadAllGames().catch(err => console.log('Preload error:', err));
+                }
+                
+                // Show relevant sections
+                console.log('Showing section for mode:', mode);
+                switch(mode) {
+                    case 'view':
+                        document.getElementById('scan-section').classList.remove('hidden');
+                        updateUIForMode();
+                        break;
+                        
+                    case 'history':
+                        document.getElementById('scan-section').classList.remove('hidden');
+                        updateUIForMode();
+                        break;
+                        
+                    case 'play':
+                        document.getElementById('scan-section').classList.remove('hidden');
+                        updateUIForMode();
+                        break;
+                        
+                    case 'search':
+                        console.log('Showing search section');
+                        document.getElementById('search-section').classList.remove('hidden');
+                        searchTab = 'all'; // Ensure we start with 'all' tab
+                        
+                        // Set the "All Games" tab as active
+                        document.querySelectorAll('#search-section .tab').forEach(t => {
+                            t.classList.remove('active');
+                            if (t.textContent === 'All Games') {
+                                t.classList.add('active');
+                            }
+                        });
+                        
+                        // Load and display all games
+                        loadAllGames().then(() => {
+                            console.log('Games loaded, performing search');
+                            performSearch(); // This will display all games
+                        }).catch(err => {
+                            console.error('Error loading games for search:', err);
+                            showStatus('Error loading games: ' + err.message, 'error');
+                        });
+                        break;
+                        
+                    case 'stats':
+                        console.log('Showing stats section');
+                        document.getElementById('stats-section').classList.remove('hidden');
+                        loadStatistics().catch(err => {
+                            console.error('Error loading statistics:', err);
+                            showStatus('Error loading statistics: ' + err.message, 'error');
+                        });
+                        break;
+                        
+                    case 'players':
+                        console.log('Showing players section');
+                        document.getElementById('players-section').classList.remove('hidden');
+                        loadPlayerStats().catch(err => {
+                            console.error('Error loading player stats:', err);
+                            showStatus('Error loading players: ' + err.message, 'error');
+                        });
+                        break;
+                        
+                    case 'sessions':
+                        console.log('Showing sessions section');
+                        document.getElementById('sessions-section').classList.remove('hidden');
+                        loadSessionTemplates().catch(error => {
+                            console.error('Error loading session templates:', error);
+                            showStatus('Error loading sessions: ' + error.message, 'error');
+                        });
+                        break;
+                        
+                    case 'bulk':
+                        console.log('Showing bulk section');
+                        document.getElementById('bulk-section').classList.remove('hidden');
+                        loadBulkOperations().catch(err => {
+                            console.error('Error loading bulk operations:', err);
+                            showStatus('Error loading bulk operations: ' + err.message, 'error');
+                        });
+                        break;
+                        
+                    case 'bgg':
+                        console.log('Showing BGG section');
+                        document.getElementById('bgg-section').classList.remove('hidden');
+                        // Clear any previous results
+                        document.getElementById('bgg-results').classList.add('hidden');
+                        break;
+                        
+                    case 'settings':
+                        console.log('Showing settings section');
+                        document.getElementById('settings-section').classList.remove('hidden');
+                        // Make sure all sections are visible
+                        document.querySelectorAll('#settings-section .setup-section').forEach(section => {
+                            section.style.display = 'block';
+                        });
+                        break;
+                        
+                    case 'checkout':
+                    case 'checkin':
+                        document.getElementById('scan-section').classList.remove('hidden');
+                        updateUIForMode();
+                        break;
+                        
+                    default:
+                        console.error('Unknown mode:', mode);
+                        showStatus('Unknown mode selected', 'error');
+                }
+                
+                console.log('Mode change complete');
+                
+            } catch (error) {
+                console.error('Error in setMode:', error);
+                showStatus('Error switching modes: ' + error.message, 'error');
             }
         }
         
@@ -5078,8 +5139,20 @@
         // Update the stats tab handler
         function setStatsTab(tab) {
             statsTab = tab;
+            
+            // Remove active class from all tabs
             document.querySelectorAll('#stats-section .tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            
+            // Add active class to the selected tab
+            document.querySelectorAll('#stats-section .tab').forEach(t => {
+                if ((tab === 'overview' && t.textContent === 'Overview') ||
+                    (tab === 'trends' && t.textContent === 'Play Trends') ||
+                    (tab === 'ratings' && t.textContent === 'Ratings') ||
+                    (tab === 'sessions' && t.textContent === 'Session Analysis') ||
+                    (tab === 'value' && t.textContent === 'Collection Value')) {
+                    t.classList.add('active');
+                }
+            });
             
             // Hide all stats content
             document.querySelectorAll('.stats-content').forEach(content => {
@@ -5105,7 +5178,7 @@
                     break;
                 case 'value':
                     document.getElementById('stats-value').classList.remove('hidden');
-                    loadGeekGroupUsername(); // Load saved username
+                    loadGeekGroupUsername();
                     break;
             }
         }
@@ -5178,6 +5251,20 @@
             });
             
             console.log('=== End Debug ===');
+        }
+
+        function testSections() {
+            const sections = ['search-section', 'players-section', 'sessions-section', 
+                             'bulk-section', 'bgg-section', 'settings-section'];
+            
+            sections.forEach(id => {
+                const elem = document.getElementById(id);
+                if (!elem) {
+                    console.error(`Section ${id} not found!`);
+                } else {
+                    console.log(`Section ${id} exists, hidden: ${elem.classList.contains('hidden')}`);
+                }
+            });
         }
         
     </script>
