@@ -5209,6 +5209,45 @@
             console.log(`${sectionId} computed display:`, window.getComputedStyle(section).display);
             console.log(`${sectionId} has content:`, section.innerHTML.substring(0, 100));
         }
+
+        function diagnoseSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const rect = section.getBoundingClientRect();
+            const computed = window.getComputedStyle(section);
+            const parent = section.parentElement;
+            const parentRect = parent.getBoundingClientRect();
+            
+            console.log(`=== ${sectionId} Diagnosis ===`);
+            console.log('Position:', {
+                top: rect.top,
+                left: rect.left,
+                width: rect.width,
+                height: rect.height,
+                right: rect.right,
+                bottom: rect.bottom
+            });
+            console.log('Computed styles:', {
+                display: computed.display,
+                visibility: computed.visibility,
+                opacity: computed.opacity,
+                position: computed.position,
+                zIndex: computed.zIndex,
+                overflow: computed.overflow
+            });
+            console.log('Parent element:', parent.tagName, parent.id || parent.className);
+            console.log('Parent position:', {
+                top: parentRect.top,
+                left: parentRect.left,
+                width: parentRect.width,
+                height: parentRect.height
+            });
+            console.log('Is visible in viewport:', 
+                rect.top < window.innerHeight && 
+                rect.bottom > 0 && 
+                rect.left < window.innerWidth && 
+                rect.right > 0
+            );
+        }
         
     </script>
 </body>
